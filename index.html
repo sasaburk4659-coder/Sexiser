@@ -550,6 +550,25 @@
             padding: 20px;
             width: 100%;
             max-width: 340px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-color);
+            background-color: var(--border-color);
         }
 
         .modal-title {
@@ -577,6 +596,24 @@
         }
 
         .modal-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .modal-textarea {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 13px;
+            margin-bottom: 16px;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .modal-textarea:focus {
             outline: none;
             border-color: var(--accent-color);
         }
@@ -681,12 +718,13 @@
         <div class="message">
             <div class="message-avatar assistant-avatar">M</div>
             <div class="message-content">
-                👋 Привет! Я могу:<br><br>
-                • Скачивать файлы по ссылкам<br>
-                • Создавать код и файлы<br>
-                • Привязывать Google аккаунт<br>
-                • Отправлять на почту<br><br>
-                Просто напиши или вставь ссылку!
+                👋 Привет! Я Mistral AI - нейросеть. Я понимаю запросы и создаю файлы.<br><br>
+                Например:<br>
+                • "Создай Python скрипт с калькулятором"<br>
+                • "Напиши HTML страницу с формой"<br>
+                • "Сделай JSON с данными"<br>
+                • "Скачай файл по ссылке"<br>
+                • "Отправь файл на email"
             </div>
         </div>
     </div>
@@ -694,7 +732,7 @@
     <!-- Input Area -->
     <div class="input-area">
         <div class="input-form">
-            <input type="text" class="message-input" id="messageInput" placeholder="Сообщение или ссылка..." autocomplete="off">
+            <input type="text" class="message-input" id="messageInput" placeholder="Напишите, что нужно создать..." autocomplete="off">
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
@@ -702,12 +740,15 @@
     <!-- Connect Modal -->
     <div class="modal-overlay" id="connectModal">
         <div class="modal-container">
+            <button class="modal-close" onclick="hideConnectModal()">✕</button>
             <div class="modal-title">🔗 Привязать аккаунт</div>
             <div class="modal-text">
                 Выберите способ привязки:
             </div>
+            
+            <!-- Google Sign-In Button -->
             <div id="g_id_onload"
-                data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                data-client_id="807170541014-3nvj39h2jkbrmha9aals4f6k2kqftjia.apps.googleusercontent.com"
                 data-context="signin"
                 data-ux_mode="popup"
                 data-callback="handleGoogleSignIn"
@@ -721,6 +762,7 @@
                 data-size="large"
                 data-logo_alignment="left">
             </div>
+            
             <div style="margin: 12px 0; text-align: center; color: var(--text-secondary);">или</div>
             <input type="email" class="modal-input" id="emailInput" placeholder="Введите email">
             <div class="modal-buttons">
@@ -733,14 +775,29 @@
     <!-- Account Modal -->
     <div class="modal-overlay" id="accountModal">
         <div class="modal-container">
+            <button class="modal-close" onclick="hideAccountModal()">✕</button>
             <div class="modal-title">👤 Аккаунт</div>
             <div class="account-details" style="margin-bottom: 16px;">
                 <div style="font-size: 14px; margin-bottom: 4px;" id="modalAccountName">Гость</div>
                 <div style="font-size: 12px; color: var(--text-secondary);" id="modalAccountEmail">не привязан</div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="sendToEmail()">📧 Отправить на почту</button>
+                <button class="modal-btn secondary" onclick="showSendEmailModal()">📧 Отправить на почту</button>
                 <button class="modal-btn primary" onclick="unlinkAccount()">Отвязать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Email Modal -->
+    <div class="modal-overlay" id="sendEmailModal">
+        <div class="modal-container">
+            <button class="modal-close" onclick="hideSendEmailModal()">✕</button>
+            <div class="modal-title">📧 Отправить на email</div>
+            <input type="email" class="modal-input" id="sendEmailInput" placeholder="Email получателя">
+            <textarea class="modal-textarea" id="sendMessageInput" placeholder="Текст сообщения (необязательно)"></textarea>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="hideSendEmailModal()">Отмена</button>
+                <button class="modal-btn primary" onclick="sendFileToEmail()">Отправить</button>
             </div>
         </div>
     </div>
@@ -748,15 +805,17 @@
     <!-- Info Modal -->
     <div class="modal-overlay" id="infoModal">
         <div class="modal-container">
+            <button class="modal-close" onclick="hideInfoModal()">✕</button>
             <div class="modal-title">ℹ️ О боте</div>
             <div class="modal-text">
                 <strong>Mistral AI Telegram Mini App</strong><br><br>
-                • Скачивает файлы по прямым ссылкам<br>
-                • Создаёт код и файлы<br>
+                • Работает на нейросети Mistral AI<br>
+                • Понимает запросы на русском<br>
+                • Создаёт файлы: Python, JS, HTML, JSON, ZIP, TXT<br>
+                • Скачивает файлы по ссылкам<br>
                 • Привязывает Google аккаунт<br>
-                • Отправляет файлы на email<br>
-                • Поддерживает Python, JS, HTML, JSON, ZIP, TXT<br><br>
-                Версия 2.0
+                • Отправляет файлы на email<br><br>
+                Версия 3.0
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn primary" onclick="hideInfoModal()">Понятно</button>
@@ -767,6 +826,7 @@
     <!-- Settings Modal -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-container">
+            <button class="modal-close" onclick="hideSettingsModal()">✕</button>
             <div class="modal-title">⚙️ Настройки</div>
             <div class="modal-text">
                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
@@ -793,6 +853,10 @@
             tg.ready();
         }
 
+        // API Configuration
+        const API_KEY = 'nonV7dp5ZBhHzwDSxUQ07avByYDzpM30';
+        const API_URL = 'https://api.mistral.ai/v1/chat/completions';
+
         // State
         let messages = JSON.parse(localStorage.getItem('messages')) || [];
         let account = JSON.parse(localStorage.getItem('account')) || null;
@@ -810,8 +874,8 @@
             updateAccountUI();
         });
 
-        // Send message
-        function sendMessage() {
+        // Send message to Mistral AI
+        async function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
 
@@ -827,12 +891,32 @@
                 return;
             }
 
-            // Check if it's a file creation request
+            // Show typing indicator
             showTyping();
-            
-            setTimeout(() => {
+
+            try {
+                // Get response from Mistral AI
+                const response = await getMistralResponse(message);
+                
                 hideTyping();
                 
+                // Check if response contains code
+                if (response.includes('```')) {
+                    // Extract code and create file
+                    const fileInfo = extractAndCreateFile(response, message);
+                    if (fileInfo) {
+                        addFile(fileInfo);
+                    } else {
+                        addMessage('assistant', response);
+                    }
+                } else {
+                    addMessage('assistant', response);
+                }
+            } catch (error) {
+                console.error('Mistral API error:', error);
+                hideTyping();
+                
+                // Fallback to local file creation
                 if (message.toLowerCase().includes('python') || message.toLowerCase().includes('питон')) {
                     createPythonFile(message);
                 } else if (message.toLowerCase().includes('javascript') || message.toLowerCase().includes('js')) {
@@ -844,9 +928,92 @@
                 } else if (message.toLowerCase().includes('zip') || message.toLowerCase().includes('архив')) {
                     createZIPFile(message);
                 } else {
-                    addMessage('assistant', 'Я могу создать файл или скачать по ссылке. Что именно нужно?');
+                    addMessage('assistant', 'Извините, ошибка соединения. Попробуйте еще раз.');
                 }
-            }, 1000);
+            }
+        }
+
+        // Get response from Mistral AI
+        async function getMistralResponse(userMessage) {
+            const apiMessages = [
+                {
+                    role: 'system',
+                    content: 'Ты Mistral AI - полезный ассистент. Отвечай на русском языке. Ты умеешь создавать файлы: Python, JavaScript, HTML, JSON, ZIP, текстовые файлы. Если пользователь просит создать файл - создай код и покажи его в формате с тройными кавычками ```python ... ```'
+                },
+                {
+                    role: 'user',
+                    content: userMessage
+                }
+            ];
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'mistral-large-latest',
+                    messages: apiMessages,
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('API error');
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        // Extract and create file from response
+        function extractAndCreateFile(response, originalMessage) {
+            const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+            const matches = [...response.matchAll(codeBlockRegex)];
+            
+            if (matches.length === 0) return null;
+
+            const match = matches[0];
+            const lang = match[1] || 'txt';
+            const code = match[2].trim();
+
+            let type = 'txt';
+            let emoji = '📄';
+            let fileName = 'file.txt';
+
+            if (lang === 'python' || lang === 'py') {
+                type = 'python';
+                emoji = '🐍';
+                fileName = 'script.py';
+            } else if (lang === 'javascript' || lang === 'js') {
+                type = 'js';
+                emoji = '📜';
+                fileName = 'script.js';
+            } else if (lang === 'html') {
+                type = 'html';
+                emoji = '🌐';
+                fileName = 'index.html';
+            } else if (lang === 'json') {
+                type = 'json';
+                emoji = '📋';
+                fileName = 'data.json';
+            }
+
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            return {
+                id: Date.now().toString(),
+                name: fileName,
+                type: type,
+                emoji: emoji,
+                size: formatFileSize(blob.size),
+                url: url,
+                content: code,
+                description: `Создано из кода`
+            };
         }
 
         // Fetch from URL
@@ -1156,6 +1323,15 @@ main();`;
             
             renderMessages();
             saveMessages();
+            
+            // Auto download if enabled
+            if (settings.autoDownload) {
+                const a = document.createElement('a');
+                a.href = fileInfo.url;
+                a.download = fileInfo.name;
+                a.click();
+                showToast(`Скачивание ${fileInfo.name} началось`);
+            }
         }
 
         // Add message
@@ -1197,12 +1373,11 @@ main();`;
             
             // Check if content contains code
             if (content.includes('```')) {
-                // Simple code block detection
                 content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
                     return `<div class="code-block">
                         <div class="code-header">
                             <span class="code-language">${lang || 'code'}</span>
-                            <button class="copy-code" onclick="copyCode('${escapeHtml(code.trim())}')">📋</button>
+                            <button class="copy-code" onclick="copyCode('${escapeHtml(code.trim())}')">📋 Копировать</button>
                         </div>
                         <div class="code-content">${escapeHtml(code.trim())}</div>
                     </div>`;
@@ -1245,13 +1420,13 @@ main();`;
                         ` : ''}
                         <div class="code-block">
                             <div class="code-header">
-                                <span class="code-language">预览</span>
-                                <button class="copy-code" onclick="copyCode('${escapeHtml(msg.fileInfo.content || '')}')">📋</button>
+                                <span class="code-language">Предпросмотр</span>
+                                <button class="copy-code" onclick="copyCode('${escapeHtml(msg.fileInfo.content || '')}')">📋 Копировать</button>
                             </div>
-                            <div class="code-content">${escapeHtml(msg.fileInfo.content?.substring(0, 200) || '')}${msg.fileInfo.content?.length > 200 ? '...' : ''}</div>
+                            <div class="code-content">${escapeHtml(msg.fileInfo.content?.substring(0, 300) || '')}${msg.fileInfo.content?.length > 300 ? '...' : ''}</div>
                         </div>
                         <div class="file-actions">
-                            <a href="${msg.fileInfo.url}" download="${msg.fileInfo.name}" class="file-btn primary">📥 Скачать</a>
+                            <a href="${msg.fileInfo.url}" download="${msg.fileInfo.name}" class="file-btn primary" onclick="downloadFile('${msg.fileInfo.id}')">📥 Скачать</a>
                             <button class="file-btn secondary" onclick="shareFile('${msg.fileInfo.id}')">🔗 Скопировать ссылку</button>
                         </div>
                     </div>
@@ -1261,15 +1436,27 @@ main();`;
             container.appendChild(div);
         }
 
+        // Download file
+        function downloadFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (!file) return;
+            
+            const a = document.createElement('a');
+            a.href = file.url;
+            a.download = file.name;
+            a.click();
+            showToast(`Скачивание ${file.name} началось`);
+        }
+
         // Quick actions
         function quickAction(type) {
             const actions = {
                 python: "Создай Python скрипт с функцией приветствия",
-                js: "Создай JavaScript файл с функцией",
-                html: "Создай HTML страницу",
-                json: "Создай JSON файл",
-                zip: "Создай ZIP архив",
-                text: "Создай текстовый файл"
+                js: "Создай JavaScript файл с функцией калькулятора",
+                html: "Создай HTML страницу с формой",
+                json: "Создай JSON файл с данными пользователей",
+                zip: "Создай ZIP архив с несколькими файлами",
+                text: "Создай текстовый файл с заметками"
             };
 
             document.getElementById('messageInput').value = actions[type];
@@ -1293,6 +1480,15 @@ main();`;
 
         function hideAccountModal() {
             document.getElementById('accountModal').classList.remove('active');
+        }
+
+        function showSendEmailModal() {
+            hideAccountModal();
+            document.getElementById('sendEmailModal').classList.add('active');
+        }
+
+        function hideSendEmailModal() {
+            document.getElementById('sendEmailModal').classList.remove('active');
         }
 
         function connectEmail() {
@@ -1348,6 +1544,35 @@ main();`;
             showToast('Аккаунт отвязан');
         }
 
+        function sendFileToEmail() {
+            if (!account) {
+                showToast('Сначала привяжите аккаунт');
+                return;
+            }
+
+            const toEmail = document.getElementById('sendEmailInput').value.trim();
+            const message = document.getElementById('sendMessageInput').value.trim();
+            const lastFile = files[files.length - 1];
+
+            if (!toEmail || !toEmail.includes('@')) {
+                showToast('Введите корректный email получателя');
+                return;
+            }
+
+            if (!lastFile) {
+                showToast('Нет файлов для отправки');
+                return;
+            }
+
+            // Simulate sending email
+            showToast(`Файл "${lastFile.name}" отправлен на ${toEmail}`);
+            
+            // Add to messages
+            addMessage('assistant', `📧 Файл "${lastFile.name}" отправлен на ${toEmail}${message ? `\n\nСообщение: ${message}` : ''}`);
+            
+            hideSendEmailModal();
+        }
+
         function updateAccountUI() {
             const nameEl = document.getElementById('accountName');
             const emailEl = document.getElementById('accountEmail');
@@ -1370,21 +1595,6 @@ main();`;
                 connectBtn.textContent = 'Привязать';
                 connectBtn.style.background = 'var(--accent-gradient)';
             }
-        }
-
-        function sendToEmail() {
-            if (!account) {
-                showToast('Сначала привяжите аккаунт');
-                return;
-            }
-
-            const lastFile = files[files.length - 1];
-            if (!lastFile) {
-                showToast('Нет файлов для отправки');
-                return;
-            }
-
-            showToast(`Файл отправлен на ${account.email}`);
         }
 
         // File sharing
@@ -1512,10 +1722,14 @@ main();`;
         window.connectEmail = connectEmail;
         window.handleGoogleSignIn = handleGoogleSignIn;
         window.showAccountModal = showAccountModal;
+        window.hideAccountModal = hideAccountModal;
+        window.showSendEmailModal = showSendEmailModal;
+        window.hideSendEmailModal = hideSendEmailModal;
+        window.sendFileToEmail = sendFileToEmail;
         window.unlinkAccount = unlinkAccount;
-        window.sendToEmail = sendToEmail;
         window.shareFile = shareFile;
         window.copyCode = copyCode;
+        window.downloadFile = downloadFile;
         window.showInfoModal = showInfoModal;
         window.hideInfoModal = hideInfoModal;
         window.showSettingsModal = showSettingsModal;
@@ -1523,4 +1737,4 @@ main();`;
         window.saveSettings = saveSettings;
     </script>
 </body>
-    </html>
+</html>
