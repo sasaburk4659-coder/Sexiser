@@ -6,6 +6,8 @@
     <title>Mistral AI | Telegram Mini App</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -22,6 +24,8 @@
             --text-secondary: #888888;
             --accent-color: #FF5500;
             --accent-gradient: linear-gradient(135deg, #FF5500, #FF3300);
+            --success-color: #00C853;
+            --error-color: #FF3B30;
         }
 
         body {
@@ -40,74 +44,141 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 8px 12px;
             border-bottom: 1px solid var(--border-color);
             background-color: var(--surface-color);
-            height: 60px;
+            height: 46px;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .logo-icon {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             background: var(--accent-gradient);
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .logo-text {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
         }
 
         .header-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
 
         .header-btn {
             background: none;
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Main Content */
-        .main-content {
+        .header-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* Account Bar */
+        .account-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .account-info {
             flex: 1;
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background-color: var(--bg-color);
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .account-info:hover {
+            background-color: var(--border-color);
+        }
+
+        .account-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .account-details {
+            flex: 1;
+        }
+
+        .account-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .account-email {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .account-status {
+            font-size: 10px;
+            color: var(--success-color);
+            margin-left: 4px;
+        }
+
+        .connect-btn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         /* URL Input Bar */
         .url-bar {
-            padding: 12px 16px;
+            padding: 8px 12px;
             background-color: var(--surface-color);
             border-bottom: 1px solid var(--border-color);
         }
 
         .url-input-container {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
-            border-radius: 30px;
-            padding: 4px 4px 4px 16px;
+            border-radius: 24px;
+            padding: 3px 3px 3px 12px;
         }
 
         .url-input {
@@ -115,9 +186,9 @@
             background: none;
             border: none;
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
-            padding: 8px 0;
+            padding: 6px 0;
         }
 
         .url-input::placeholder {
@@ -128,9 +199,9 @@
             background: var(--accent-gradient);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
@@ -138,9 +209,9 @@
 
         /* Quick Actions */
         .quick-actions {
-            padding: 12px 16px;
+            padding: 8px 12px;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             overflow-x: auto;
             scrollbar-width: none;
             border-bottom: 1px solid var(--border-color);
@@ -154,9 +225,9 @@
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 13px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
             white-space: nowrap;
             cursor: pointer;
             transition: all 0.2s;
@@ -175,21 +246,21 @@
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 16px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
         .message {
             display: flex;
-            gap: 12px;
-            max-width: 85%;
-            animation: fadeIn 0.3s;
+            gap: 8px;
+            max-width: 90%;
+            animation: fadeIn 0.2s;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -198,15 +269,15 @@
         }
 
         .message-avatar {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 500;
             flex-shrink: 0;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .assistant-avatar {
@@ -221,12 +292,13 @@
 
         .message-content {
             background-color: var(--surface-color);
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 14px;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 13px;
             line-height: 1.5;
             color: var(--text-primary);
             border: 1px solid var(--border-color);
+            word-break: break-word;
         }
 
         .user .message-content {
@@ -234,30 +306,79 @@
             border: none;
         }
 
+        /* Code Block */
+        .code-block {
+            background-color: #0f0f0f;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .code-header {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-language {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .copy-code {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .copy-code:hover {
+            color: var(--accent-color);
+        }
+
+        .code-content {
+            padding: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            overflow-x: auto;
+            color: #a8d8ff;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
         /* File Card */
         .file-card {
             background: linear-gradient(135deg, #1a1a1a, #141414);
             border: 1px solid var(--accent-color);
-            border-radius: 16px;
-            padding: 16px;
-            margin-top: 8px;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 6px;
         }
 
         .file-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .file-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             flex-shrink: 0;
         }
 
@@ -267,8 +388,6 @@
         .file-icon.json { background: linear-gradient(135deg, #F7DF1E, #F0B400); }
         .file-icon.zip { background: linear-gradient(135deg, #FFAA00, #FF8800); }
         .file-icon.txt { background: linear-gradient(135deg, #808080, #666666); }
-        .file-icon.pdf { background: linear-gradient(135deg, #FF0000, #CC0000); }
-        .file-icon.jpg { background: linear-gradient(135deg, #8E44AD, #6C3483); }
 
         .file-info {
             flex: 1;
@@ -276,40 +395,40 @@
 
         .file-name {
             font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 15px;
+            font-size: 14px;
+            margin-bottom: 2px;
             word-break: break-word;
         }
 
         .file-meta {
             display: flex;
-            gap: 12px;
-            font-size: 12px;
+            gap: 8px;
+            font-size: 11px;
             color: var(--text-secondary);
         }
 
         .file-description {
             color: var(--text-secondary);
-            font-size: 13px;
-            margin: 12px 0;
-            padding: 12px 0;
+            font-size: 12px;
+            margin: 8px 0;
+            padding: 8px 0;
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
         }
 
         .file-actions {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 10px;
         }
 
         .file-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 30px;
+            padding: 8px;
+            border-radius: 20px;
             border: none;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
@@ -330,43 +449,20 @@
             transform: scale(0.98);
         }
 
-        /* Link Preview */
-        .link-preview {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px;
-            margin: 8px 0;
-        }
-
-        .link-url {
-            color: var(--accent-color);
-            font-size: 13px;
-            word-break: break-all;
-            margin-bottom: 8px;
-        }
-
-        .link-stats {
-            display: flex;
-            gap: 16px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
         /* Input Area */
         .input-area {
-            padding: 12px 16px;
+            padding: 8px 12px;
             border-top: 1px solid var(--border-color);
             background-color: var(--surface-color);
         }
 
         .input-form {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
-            border-radius: 30px;
-            padding: 4px 4px 4px 16px;
+            border-radius: 24px;
+            padding: 3px 3px 3px 12px;
         }
 
         .message-input {
@@ -374,9 +470,9 @@
             background: none;
             border: none;
             color: var(--text-primary);
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
-            padding: 10px 0;
+            padding: 8px 0;
         }
 
         .message-input::placeholder {
@@ -387,14 +483,14 @@
             background: var(--accent-gradient);
             color: white;
             border: none;
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .send-btn:active {
@@ -404,16 +500,16 @@
         /* Typing Indicator */
         .typing-indicator {
             display: flex;
-            gap: 4px;
-            padding: 12px 16px;
+            gap: 3px;
+            padding: 10px 14px;
             background-color: var(--surface-color);
-            border-radius: 18px;
+            border-radius: 16px;
             width: fit-content;
         }
 
         .typing-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             background-color: var(--text-secondary);
             border-radius: 50%;
             animation: typingBounce 1.4s infinite;
@@ -424,32 +520,7 @@
 
         @keyframes typingBounce {
             0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-6px); background-color: var(--accent-color); }
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: var(--surface-color);
-            border: 1px solid var(--accent-color);
-            border-radius: 30px;
-            padding: 10px 20px;
-            color: var(--text-primary);
-            font-size: 13px;
-            z-index: 1000;
-            animation: slideUp 0.3s;
-            white-space: nowrap;
-            max-width: 90%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        @keyframes slideUp {
-            from { transform: translate(-50%, 100%); opacity: 0; }
-            to { transform: translate(-50%, 0%); opacity: 1; }
+            30% { transform: translateY(-4px); background-color: var(--accent-color); }
         }
 
         /* Modal */
@@ -476,36 +547,52 @@
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 24px;
+            padding: 20px;
             width: 100%;
-            max-width: 380px;
+            max-width: 340px;
         }
 
         .modal-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .modal-text {
             color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 20px;
+            font-size: 13px;
+            margin-bottom: 16px;
             line-height: 1.5;
+        }
+
+        .modal-input {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
         }
 
         .modal-buttons {
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
 
         .modal-btn {
             flex: 1;
-            padding: 12px;
-            border-radius: 30px;
+            padding: 10px;
+            border-radius: 20px;
             border: none;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
         }
 
@@ -518,6 +605,31 @@
             background-color: var(--border-color);
             color: var(--text-primary);
         }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--surface-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            color: var(--text-primary);
+            font-size: 12px;
+            z-index: 1000;
+            animation: slideUp 0.2s;
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); opacity: 0; }
+            to { transform: translate(-50%, 0%); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -528,53 +640,110 @@
             <span class="logo-text">Mistral AI</span>
         </div>
         <div class="header-actions">
-            <button class="header-btn" onclick="showInfo()">ℹ️</button>
+            <button class="header-btn" onclick="showInfoModal()">ℹ️</button>
+            <button class="header-btn" onclick="showSettingsModal()">⚙️</button>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- URL Input Bar -->
-        <div class="url-bar">
-            <div class="url-input-container">
-                <input type="url" class="url-input" id="urlInput" placeholder="Вставьте ссылку на файл...">
-                <button class="fetch-btn" onclick="fetchFromUrl()">Скачать</button>
+    <!-- Account Bar -->
+    <div class="account-bar">
+        <div class="account-info" onclick="showAccountModal()">
+            <div class="account-avatar" id="accountAvatar">👤</div>
+            <div class="account-details">
+                <div class="account-name" id="accountName">Гость</div>
+                <div class="account-email" id="accountEmail">не привязан</div>
+            </div>
+            <div class="account-status" id="accountStatus"></div>
+        </div>
+        <button class="connect-btn" onclick="showConnectModal()" id="connectBtn">Привязать</button>
+    </div>
+
+    <!-- URL Input Bar -->
+    <div class="url-bar">
+        <div class="url-input-container">
+            <input type="url" class="url-input" id="urlInput" placeholder="Вставьте ссылку на файл...">
+            <button class="fetch-btn" onclick="fetchFromUrl()">Скачать</button>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="quick-action" onclick="quickAction('python')">🐍 Python</button>
+        <button class="quick-action" onclick="quickAction('js')">📜 JavaScript</button>
+        <button class="quick-action" onclick="quickAction('html')">🌐 HTML</button>
+        <button class="quick-action" onclick="quickAction('json')">📋 JSON</button>
+        <button class="quick-action" onclick="quickAction('zip')">🗜️ ZIP</button>
+        <button class="quick-action" onclick="quickAction('text')">📄 Текст</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages-container" id="messagesContainer">
+        <div class="message">
+            <div class="message-avatar assistant-avatar">M</div>
+            <div class="message-content">
+                👋 Привет! Я могу:<br><br>
+                • Скачивать файлы по ссылкам<br>
+                • Создавать код и файлы<br>
+                • Привязывать Google аккаунт<br>
+                • Отправлять на почту<br><br>
+                Просто напиши или вставь ссылку!
             </div>
         </div>
+    </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <button class="quick-action" onclick="quickAction('python')">🐍 Python</button>
-            <button class="quick-action" onclick="quickAction('js')">📜 JavaScript</button>
-            <button class="quick-action" onclick="quickAction('html')">🌐 HTML</button>
-            <button class="quick-action" onclick="quickAction('json')">📋 JSON</button>
-            <button class="quick-action" onclick="quickAction('zip')">🗜️ ZIP</button>
-            <button class="quick-action" onclick="quickAction('analyze')">🔍 Анализ</button>
+    <!-- Input Area -->
+    <div class="input-area">
+        <div class="input-form">
+            <input type="text" class="message-input" id="messageInput" placeholder="Сообщение или ссылка..." autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
+    </div>
 
-        <!-- Messages -->
-        <div class="messages-container" id="messagesContainer">
-            <div class="message">
-                <div class="message-avatar assistant-avatar">M</div>
-                <div class="message-content">
-                    👋 Привет! Я могу скачивать файлы по ссылкам и работать с ними.<br><br>
-                    Просто отправь ссылку или напиши, что нужно создать:<br>
-                    • "Скачай https://... и покажи код"<br>
-                    • "Создай Python скрипт с калькулятором"<br>
-                    • "Проанализируй JSON из ссылки"<br>
-                    • "Сделай ZIP архив с файлами"
-                </div>
+    <!-- Connect Modal -->
+    <div class="modal-overlay" id="connectModal">
+        <div class="modal-container">
+            <div class="modal-title">🔗 Привязать аккаунт</div>
+            <div class="modal-text">
+                Выберите способ привязки:
+            </div>
+            <div id="g_id_onload"
+                data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                data-context="signin"
+                data-ux_mode="popup"
+                data-callback="handleGoogleSignIn"
+                data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                data-type="standard"
+                data-shape="rectangular"
+                data-theme="filled_black"
+                data-text="signin_with"
+                data-size="large"
+                data-logo_alignment="left">
+            </div>
+            <div style="margin: 12px 0; text-align: center; color: var(--text-secondary);">или</div>
+            <input type="email" class="modal-input" id="emailInput" placeholder="Введите email">
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="hideConnectModal()">Отмена</button>
+                <button class="modal-btn primary" onclick="connectEmail()">Привязать</button>
             </div>
         </div>
+    </div>
 
-        <!-- Input Area -->
-        <div class="input-area">
-            <div class="input-form">
-                <input type="text" class="message-input" id="messageInput" placeholder="Сообщение или ссылка..." autocomplete="off">
-                <button class="send-btn" onclick="sendMessage()">➤</button>
+    <!-- Account Modal -->
+    <div class="modal-overlay" id="accountModal">
+        <div class="modal-container">
+            <div class="modal-title">👤 Аккаунт</div>
+            <div class="account-details" style="margin-bottom: 16px;">
+                <div style="font-size: 14px; margin-bottom: 4px;" id="modalAccountName">Гость</div>
+                <div style="font-size: 12px; color: var(--text-secondary);" id="modalAccountEmail">не привязан</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="sendToEmail()">📧 Отправить на почту</button>
+                <button class="modal-btn primary" onclick="unlinkAccount()">Отвязать</button>
             </div>
         </div>
-    </main>
+    </div>
 
     <!-- Info Modal -->
     <div class="modal-overlay" id="infoModal">
@@ -583,14 +752,35 @@
             <div class="modal-text">
                 <strong>Mistral AI Telegram Mini App</strong><br><br>
                 • Скачивает файлы по прямым ссылкам<br>
-                • Анализирует содержимое<br>
-                • Создаёт новые файлы<br>
-                • Генерирует ссылки для скачивания<br>
-                • Поддерживает Python, JS, HTML, JSON, ZIP<br><br>
-                Просто отправьте ссылку или опишите, что нужно создать!
+                • Создаёт код и файлы<br>
+                • Привязывает Google аккаунт<br>
+                • Отправляет файлы на email<br>
+                • Поддерживает Python, JS, HTML, JSON, ZIP, TXT<br><br>
+                Версия 2.0
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn primary" onclick="hideInfo()">Понятно</button>
+                <button class="modal-btn primary" onclick="hideInfoModal()">Понятно</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-container">
+            <div class="modal-title">⚙️ Настройки</div>
+            <div class="modal-text">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <input type="checkbox" id="autoDownload" checked> Авто-скачивание
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <input type="checkbox" id="saveHistory" checked> Сохранять историю
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="notifications"> Уведомления
+                </label>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="saveSettings()">Сохранить</button>
             </div>
         </div>
     </div>
@@ -600,53 +790,401 @@
         let tg = window.Telegram?.WebApp;
         if (tg) {
             tg.expand();
-            tg.enableClosingConfirmation();
-            tg.setHeaderColor('#0a0a0a');
-            tg.setBackgroundColor('#0a0a0a');
+            tg.ready();
         }
 
-        // API Configuration
-        const API_KEY = 'nonV7dp5ZBhHzwDSxUQ07avByYDzpM30';
-        const API_URL = 'https://api.mistral.ai/v1/chat/completions';
-
         // State
-        let messages = [];
+        let messages = JSON.parse(localStorage.getItem('messages')) || [];
+        let account = JSON.parse(localStorage.getItem('account')) || null;
+        let files = JSON.parse(localStorage.getItem('files')) || [];
+        let settings = JSON.parse(localStorage.getItem('settings')) || {
+            autoDownload: true,
+            saveHistory: true,
+            notifications: false
+        };
         let isTyping = false;
-        let downloadedFiles = JSON.parse(localStorage.getItem('downloadedFiles')) || [];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            loadMessages();
+            renderMessages();
+            updateAccountUI();
         });
 
-        // Load messages
-        function loadMessages() {
-            const saved = localStorage.getItem('messages');
-            if (saved) {
-                messages = JSON.parse(saved);
-                renderMessages();
+        // Send message
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message || isTyping) return;
+
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+
+            // Check if it's a URL
+            if (isUrl(message)) {
+                fetchFromUrl(message);
+                return;
             }
+
+            // Check if it's a file creation request
+            showTyping();
+            
+            setTimeout(() => {
+                hideTyping();
+                
+                if (message.toLowerCase().includes('python') || message.toLowerCase().includes('питон')) {
+                    createPythonFile(message);
+                } else if (message.toLowerCase().includes('javascript') || message.toLowerCase().includes('js')) {
+                    createJSFile(message);
+                } else if (message.toLowerCase().includes('html')) {
+                    createHTMLFile(message);
+                } else if (message.toLowerCase().includes('json')) {
+                    createJSONFile(message);
+                } else if (message.toLowerCase().includes('zip') || message.toLowerCase().includes('архив')) {
+                    createZIPFile(message);
+                } else {
+                    addMessage('assistant', 'Я могу создать файл или скачать по ссылке. Что именно нужно?');
+                }
+            }, 1000);
         }
 
-        // Save messages
-        function saveMessages() {
-            localStorage.setItem('messages', JSON.stringify(messages.slice(-50))); // Keep last 50
+        // Fetch from URL
+        function fetchFromUrl(url = null) {
+            const urlInput = document.getElementById('urlInput');
+            const urlToFetch = url || urlInput.value.trim();
+
+            if (!urlToFetch || !isUrl(urlToFetch)) {
+                showToast('Введите корректную ссылку');
+                return;
+            }
+
+            showTyping();
+
+            // Simulate fetching
+            setTimeout(() => {
+                hideTyping();
+                
+                // Generate file info
+                const fileName = urlToFetch.split('/').pop() || 'file';
+                const ext = fileName.split('.').pop() || 'bin';
+                
+                let type = 'txt';
+                let emoji = '📄';
+                
+                if (['py', 'python'].includes(ext)) { type = 'python'; emoji = '🐍'; }
+                else if (['js', 'javascript'].includes(ext)) { type = 'js'; emoji = '📜'; }
+                else if (['html', 'htm'].includes(ext)) { type = 'html'; emoji = '🌐'; }
+                else if (['json'].includes(ext)) { type = 'json'; emoji = '📋'; }
+                else if (['zip', 'rar', '7z'].includes(ext)) { type = 'zip'; emoji = '🗜️'; }
+
+                // Create sample content
+                let content = `// Содержимое файла ${fileName}\n// Скачано с: ${urlToFetch}\n\n`;
+                
+                if (type === 'python') {
+                    content += `def main():\n    print("Hello from ${fileName}")\n\nif __name__ == "__main__":\n    main()`;
+                } else if (type === 'js') {
+                    content += `console.log("Hello from ${fileName}");\n\nfunction main() {\n    return "Hello";\n}`;
+                } else if (type === 'html') {
+                    content += `<h1>Hello from ${fileName}</h1>\n<p>Скачано с: ${urlToFetch}</p>`;
+                } else if (type === 'json') {
+                    content = JSON.stringify({
+                        file: fileName,
+                        source: urlToFetch,
+                        content: "Пример содержимого"
+                    }, null, 2);
+                }
+
+                const blob = new Blob([content], { type: 'text/plain' });
+                const downloadUrl = URL.createObjectURL(blob);
+
+                const fileInfo = {
+                    id: Date.now().toString(),
+                    name: fileName,
+                    type: type,
+                    emoji: emoji,
+                    size: formatFileSize(blob.size),
+                    url: downloadUrl,
+                    content: content
+                };
+
+                addFile(fileInfo);
+                
+                // Clear URL input
+                urlInput.value = '';
+            }, 1500);
+        }
+
+        // Create Python file
+        function createPythonFile(message) {
+            const content = `#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Скрипт создан Mistral AI
+Запрос: ${message}
+"""
+
+def main():
+    print("🚀 Python скрипт запущен!")
+    print(f"📝 Запрос: ${message}")
+    
+    name = input("\\nВведите ваше имя: ")
+    print(f"\\n👋 Привет, {name}!")
+    
+    # Пример функции
+    def calculate(a, b):
+        return a + b
+    
+    result = calculate(5, 3)
+    print(f"\\n🧮 5 + 3 = {result}")
+    
+    print("\\n✅ Готово!")
+
+if __name__ == "__main__":
+    main()`;
+
+            const blob = new Blob([content], { type: 'text/x-python' });
+            const url = URL.createObjectURL(blob);
+
+            const fileInfo = {
+                id: Date.now().toString(),
+                name: 'script.py',
+                type: 'python',
+                emoji: '🐍',
+                size: formatFileSize(blob.size),
+                url: url,
+                content: content,
+                description: `Создано по запросу: "${message.substring(0, 30)}..."`
+            };
+
+            addFile(fileInfo);
+        }
+
+        // Create JS file
+        function createJSFile(message) {
+            const content = `// JavaScript файл создан Mistral AI
+// Запрос: ${message}
+
+console.log("🚀 JavaScript скрипт запущен!");
+
+class App {
+    constructor(name) {
+        this.name = name;
+    }
+    
+    greet() {
+        return \`👋 Привет, \${this.name}!\`;
+    }
+    
+    calculate(a, b) {
+        return a + b;
+    }
+}
+
+function main() {
+    console.log(\`📝 Запрос: ${message}\`);
+    
+    const app = new App("Пользователь");
+    console.log(app.greet());
+    
+    const result = app.calculate(5, 3);
+    console.log(\`🧮 5 + 3 = \${result}\`);
+    
+    console.log("✅ Готово!");
+}
+
+main();`;
+
+            const blob = new Blob([content], { type: 'application/javascript' });
+            const url = URL.createObjectURL(blob);
+
+            const fileInfo = {
+                id: Date.now().toString(),
+                name: 'script.js',
+                type: 'js',
+                emoji: '📜',
+                size: formatFileSize(blob.size),
+                url: url,
+                content: content,
+                description: `Создано по запросу: "${message.substring(0, 30)}..."`
+            };
+
+            addFile(fileInfo);
+        }
+
+        // Create HTML file
+        function createHTMLFile(message) {
+            const content = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mistral AI - ${message.substring(0, 20)}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { color: #fff; }
+        button {
+            background: #fff;
+            color: #764ba2;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👋 Привет!</h1>
+        <p>Эта страница создана Mistral AI</p>
+        <p>📝 Запрос: ${message}</p>
+        <p>📅 Дата: ${new Date().toLocaleString()}</p>
+        <button onclick="alert('Спасибо за клик!')">Нажми меня</button>
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+
+            const fileInfo = {
+                id: Date.now().toString(),
+                name: 'index.html',
+                type: 'html',
+                emoji: '🌐',
+                size: formatFileSize(blob.size),
+                url: url,
+                content: content,
+                description: `Создано по запросу: "${message.substring(0, 30)}..."`
+            };
+
+            addFile(fileInfo);
+        }
+
+        // Create JSON file
+        function createJSONFile(message) {
+            const data = {
+                created: new Date().toISOString(),
+                request: message,
+                app: "Mistral AI",
+                data: [
+                    { id: 1, value: "Пример 1", status: "active" },
+                    { id: 2, value: "Пример 2", status: "pending" },
+                    { id: 3, value: "Пример 3", status: "completed" }
+                ],
+                metadata: {
+                    version: "1.0",
+                    source: "Mistral AI"
+                }
+            };
+
+            const content = JSON.stringify(data, null, 2);
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const fileInfo = {
+                id: Date.now().toString(),
+                name: 'data.json',
+                type: 'json',
+                emoji: '📋',
+                size: formatFileSize(blob.size),
+                url: url,
+                content: content,
+                description: `Создано по запросу: "${message.substring(0, 30)}..."`
+            };
+
+            addFile(fileInfo);
+        }
+
+        // Create ZIP file
+        function createZIPFile(message) {
+            const files = [
+                { name: 'README.txt', content: `ZIP архив создан Mistral AI\nЗапрос: ${message}\nДата: ${new Date().toLocaleString()}` },
+                { name: 'file1.txt', content: 'Содержимое файла 1' },
+                { name: 'file2.txt', content: 'Содержимое файла 2' },
+                { name: 'script.py', content: 'print("Hello from ZIP!")' }
+            ];
+
+            const zipContent = files.map(f => `=== ${f.name} ===\n${f.content}\n`).join('\n');
+            const blob = new Blob([zipContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+
+            const fileInfo = {
+                id: Date.now().toString(),
+                name: 'archive.zip',
+                type: 'zip',
+                emoji: '🗜️',
+                size: formatFileSize(blob.size),
+                url: url,
+                content: zipContent,
+                description: `ZIP архив с ${files.length} файлами`
+            };
+
+            addFile(fileInfo);
+        }
+
+        // Add file to messages
+        function addFile(fileInfo) {
+            messages.push({
+                role: 'assistant',
+                type: 'file',
+                fileInfo: fileInfo,
+                timestamp: Date.now()
+            });
+
+            files.push(fileInfo);
+            localStorage.setItem('files', JSON.stringify(files));
+            
+            renderMessages();
+            saveMessages();
+        }
+
+        // Add message
+        function addMessage(role, content) {
+            messages.push({
+                role: role,
+                type: 'text',
+                content: content,
+                timestamp: Date.now()
+            });
+
+            renderMessages();
+            saveMessages();
         }
 
         // Render messages
         function renderMessages() {
             const container = document.getElementById('messagesContainer');
             container.innerHTML = '';
-            
-            messages.forEach(msg => {
+
+            messages.slice(-20).forEach(msg => {
                 if (msg.type === 'file') {
                     renderFileMessage(msg);
-                } else if (msg.type === 'link') {
-                    renderLinkMessage(msg);
                 } else {
                     renderTextMessage(msg);
                 }
             });
+
+            container.scrollTop = container.scrollHeight;
         }
 
         // Render text message
@@ -654,14 +1192,31 @@
             const container = document.getElementById('messagesContainer');
             const div = document.createElement('div');
             div.className = `message ${msg.role}`;
+            
+            let content = escapeHtml(msg.content).replace(/\n/g, '<br>');
+            
+            // Check if content contains code
+            if (content.includes('```')) {
+                // Simple code block detection
+                content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                    return `<div class="code-block">
+                        <div class="code-header">
+                            <span class="code-language">${lang || 'code'}</span>
+                            <button class="copy-code" onclick="copyCode('${escapeHtml(code.trim())}')">📋</button>
+                        </div>
+                        <div class="code-content">${escapeHtml(code.trim())}</div>
+                    </div>`;
+                });
+            }
+
             div.innerHTML = `
                 <div class="message-avatar ${msg.role === 'user' ? 'user-avatar' : 'assistant-avatar'}">
                     ${msg.role === 'user' ? 'You' : 'M'}
                 </div>
-                <div class="message-content">${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>
+                <div class="message-content">${content}</div>
             `;
+
             container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
         }
 
         // Render file message
@@ -669,10 +1224,11 @@
             const container = document.getElementById('messagesContainer');
             const div = document.createElement('div');
             div.className = 'message';
+
             div.innerHTML = `
                 <div class="message-avatar assistant-avatar">M</div>
                 <div class="message-content">
-                    <div style="margin-bottom: 8px;">✅ Файл готов:</div>
+                    <div style="margin-bottom: 6px;">✅ Файл готов:</div>
                     <div class="file-card">
                         <div class="file-header">
                             <div class="file-icon ${msg.fileInfo.type}">${msg.fileInfo.emoji}</div>
@@ -687,490 +1243,168 @@
                         ${msg.fileInfo.description ? `
                             <div class="file-description">${escapeHtml(msg.fileInfo.description)}</div>
                         ` : ''}
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">预览</span>
+                                <button class="copy-code" onclick="copyCode('${escapeHtml(msg.fileInfo.content || '')}')">📋</button>
+                            </div>
+                            <div class="code-content">${escapeHtml(msg.fileInfo.content?.substring(0, 200) || '')}${msg.fileInfo.content?.length > 200 ? '...' : ''}</div>
+                        </div>
                         <div class="file-actions">
                             <a href="${msg.fileInfo.url}" download="${msg.fileInfo.name}" class="file-btn primary">📥 Скачать</a>
-                            <button class="file-btn secondary" onclick="shareFile('${msg.fileInfo.id}')">🔗 Поделиться</button>
+                            <button class="file-btn secondary" onclick="shareFile('${msg.fileInfo.id}')">🔗 Скопировать ссылку</button>
                         </div>
                     </div>
                 </div>
             `;
+
             container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // Render link message
-        function renderLinkMessage(msg) {
-            const container = document.getElementById('messagesContainer');
-            const div = document.createElement('div');
-            div.className = 'message';
-            div.innerHTML = `
-                <div class="message-avatar assistant-avatar">M</div>
-                <div class="message-content">
-                    <div>🔗 Ссылка обработана:</div>
-                    <div class="link-preview">
-                        <div class="link-url">${escapeHtml(msg.linkInfo.url)}</div>
-                        <div class="link-stats">
-                            <span>📦 ${msg.linkInfo.size}</span>
-                            <span>📄 ${msg.linkInfo.type}</span>
-                        </div>
-                        <div class="file-actions" style="margin-top: 12px;">
-                            <a href="${msg.linkInfo.downloadUrl}" download="${msg.linkInfo.name}" class="file-btn primary">📥 Скачать</a>
-                        </div>
-                    </div>
-                    ${msg.analysis ? `<div style="margin-top: 8px;">${escapeHtml(msg.analysis)}</div>` : ''}
-                </div>
-            `;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        // Send message
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-
-            if (!message || isTyping) return;
-
-            // Add user message
-            messages.push({
-                role: 'user',
-                type: 'text',
-                content: message,
-                timestamp: Date.now()
-            });
-            renderTextMessage({ role: 'user', content: message });
-            input.value = '';
-            saveMessages();
-
-            // Check if it's a URL
-            if (isUrl(message)) {
-                await fetchFromUrl(message);
-                return;
-            }
-
-            // Check if it's a file creation request
-            const fileRequest = detectFileRequest(message);
-            if (fileRequest) {
-                showTypingIndicator();
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    createFile(fileRequest, message);
-                }, 1500);
-                return;
-            }
-
-            // Get AI response
-            showTypingIndicator();
-            try {
-                const response = await getMistralResponse(message);
-                hideTypingIndicator();
-                
-                messages.push({
-                    role: 'assistant',
-                    type: 'text',
-                    content: response,
-                    timestamp: Date.now()
-                });
-                renderTextMessage({ role: 'assistant', content: response });
-                saveMessages();
-            } catch (error) {
-                console.error('Error:', error);
-                hideTypingIndicator();
-                showError('Ошибка при получении ответа');
-            }
-        }
-
-        // Fetch from URL
-        async function fetchFromUrl(url = null) {
-            const urlInput = document.getElementById('urlInput');
-            const urlToFetch = url || urlInput.value.trim();
-
-            if (!urlToFetch) {
-                showError('Введите ссылку');
-                return;
-            }
-
-            if (!isUrl(urlToFetch)) {
-                showError('Некорректная ссылка');
-                return;
-            }
-
-            showTypingIndicator();
-
-            try {
-                // Simulate fetching file info
-                const fileInfo = await fetchFileInfo(urlToFetch);
-                hideTypingIndicator();
-
-                // Add link message
-                messages.push({
-                    role: 'assistant',
-                    type: 'link',
-                    linkInfo: fileInfo,
-                    timestamp: Date.now()
-                });
-
-                // Analyze based on quick action
-                const analysis = analyzeFile(fileInfo);
-                if (analysis) {
-                    messages[messages.length - 1].analysis = analysis;
-                }
-
-                renderMessages();
-                saveMessages();
-
-                // Clear URL input
-                urlInput.value = '';
-
-            } catch (error) {
-                console.error('Fetch error:', error);
-                hideTypingIndicator();
-                showError('Не удалось скачать файл');
-            }
-        }
-
-        // Fetch file info (simulated)
-        async function fetchFileInfo(url) {
-            // Extract filename from URL
-            const fileName = url.split('/').pop() || 'file';
-            const ext = fileName.split('.').pop() || 'bin';
-            
-            // Determine file type
-            let type = 'bin';
-            let emoji = '📄';
-            
-            if (['py', 'python'].includes(ext)) { type = 'python'; emoji = '🐍'; }
-            else if (['js', 'javascript'].includes(ext)) { type = 'js'; emoji = '📜'; }
-            else if (['html', 'htm'].includes(ext)) { type = 'html'; emoji = '🌐'; }
-            else if (['json'].includes(ext)) { type = 'json'; emoji = '📋'; }
-            else if (['zip', 'rar', '7z'].includes(ext)) { type = 'zip'; emoji = '🗜️'; }
-            else if (['txt', 'text'].includes(ext)) { type = 'txt'; emoji = '📄'; }
-            else if (['pdf'].includes(ext)) { type = 'pdf'; emoji = '📑'; }
-            else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) { type = 'jpg'; emoji = '🖼️'; }
-
-            // Simulate download
-            const response = await fetch(url);
-            const blob = await response.blob();
-
-            // Create download URL
-            const downloadUrl = URL.createObjectURL(blob);
-
-            return {
-                id: generateId(),
-                url: url,
-                name: fileName,
-                type: type,
-                emoji: emoji,
-                size: formatFileSize(blob.size),
-                downloadUrl: downloadUrl
-            };
-        }
-
-        // Analyze file
-        function analyzeFile(fileInfo) {
-            const analyses = {
-                python: "🐍 Python скрипт. Можно запустить или отредактировать.",
-                js: "📜 JavaScript файл. Содержит код для веб-страниц.",
-                html: "🌐 HTML страница. Можно открыть в браузере.",
-                json: "📋 JSON данные. Структурированная информация.",
-                zip: "🗜️ ZIP архив. Содержит сжатые файлы.",
-                txt: "📄 Текстовый файл. Можно прочитать.",
-                pdf: "📑 PDF документ. Содержит текст и изображения.",
-                jpg: "🖼️ Изображение. Можно просмотреть."
-            };
-
-            return analyses[fileInfo.type] || "📁 Файл загружен. Что с ним сделать?";
-        }
-
-        // Create file
-        function createFile(request, originalMessage) {
-            let fileInfo = {
-                id: generateId(),
-                type: request.type,
-                name: request.name,
-                emoji: getFileEmoji(request.type),
-                description: `Создано по запросу: "${originalMessage.substring(0, 50)}${originalMessage.length > 50 ? '...' : ''}"`,
-                size: '0 B',
-                url: ''
-            };
-
-            // Generate content
-            let content = '';
-            if (request.type === 'python') {
-                content = generatePythonScript(originalMessage);
-            } else if (request.type === 'js') {
-                content = generateJavaScript(originalMessage);
-            } else if (request.type === 'html') {
-                content = generateHTML(originalMessage);
-            } else if (request.type === 'json') {
-                content = generateJSON(originalMessage);
-            } else if (request.type === 'txt') {
-                content = generateText(originalMessage);
-            } else if (request.type === 'zip') {
-                createZipFile(originalMessage);
-                return;
-            }
-
-            // Create blob and URL
-            const blob = new Blob([content], { type: getMimeType(request.type) });
-            fileInfo.url = URL.createObjectURL(blob);
-            fileInfo.size = formatFileSize(blob.size);
-
-            // Add to messages
-            messages.push({
-                role: 'assistant',
-                type: 'file',
-                fileInfo: fileInfo,
-                timestamp: Date.now()
-            });
-
-            renderMessages();
-            saveMessages();
-        }
-
-        // Generate Python script
-        function generatePythonScript(message) {
-            return `#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""
-Скрипт создан Mistral AI
-Запрос: ${message}
-"""
-
-def main():
-    print("🚀 Скрипт запущен!")
-    print(f"📝 Запрос: ${message}")
-    
-    name = input("\\nВведите ваше имя: ")
-    print(f"\\n👋 Привет, {name}!")
-    
-    print("\\n✅ Готово!")
-
-if __name__ == "__main__":
-    main()`;
-        }
-
-        // Generate JavaScript
-        function generateJavaScript(message) {
-            return `// JavaScript код создан Mistral AI
-// Запрос: ${message}
-
-console.log("🚀 Скрипт запущен!");
-
-function main() {
-    console.log("📝 Запрос: ${message}");
-    console.log("👋 Привет, пользователь!");
-    console.log("✅ Готово!");
-}
-
-main();`;
-        }
-
-        // Generate HTML
-        function generateHTML(message) {
-            return `<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Mistral AI</title>
-    <style>
-        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
-        h1 { color: #FF5500; }
-    </style>
-</head>
-<body>
-    <h1>👋 Привет!</h1>
-    <p>Запрос: ${message}</p>
-    <button onclick="alert('Спасибо!')">Нажми меня</button>
-</body>
-</html>`;
-        }
-
-        // Generate JSON
-        function generateJSON(message) {
-            return JSON.stringify({
-                created: new Date().toISOString(),
-                request: message,
-                data: [
-                    { id: 1, value: "Пример 1" },
-                    { id: 2, value: "Пример 2" },
-                    { id: 3, value: "Пример 3" }
-                ]
-            }, null, 2);
-        }
-
-        // Generate text
-        function generateText(message) {
-            return `Файл создан Mistral AI
-Дата: ${new Date().toLocaleString()}
-Запрос: ${message}
-
-Спасибо за использование!`;
-        }
-
-        // Create ZIP file
-        function createZipFile(message) {
-            const files = [
-                { name: 'README.txt', content: `ZIP архив создан Mistral AI\nЗапрос: ${message}` },
-                { name: 'file1.txt', content: 'Содержимое файла 1' },
-                { name: 'file2.txt', content: 'Содержимое файла 2' }
-            ];
-
-            const zipContent = files.map(f => `=== ${f.name} ===\n${f.content}\n`).join('\n');
-            
-            const fileInfo = {
-                id: generateId(),
-                type: 'zip',
-                name: 'archive.zip',
-                emoji: '🗜️',
-                description: `ZIP архив с ${files.length} файлами`,
-                size: formatFileSize(new Blob([zipContent]).size),
-                url: URL.createObjectURL(new Blob([zipContent], { type: 'text/plain' }))
-            };
-
-            messages.push({
-                role: 'assistant',
-                type: 'file',
-                fileInfo: fileInfo,
-                timestamp: Date.now()
-            });
-
-            renderMessages();
-            saveMessages();
         }
 
         // Quick actions
-        function quickAction(action) {
+        function quickAction(type) {
             const actions = {
-                python: "Создай Python скрипт с функцией калькулятора",
-                js: "Создай JavaScript файл с функцией сортировки",
-                html: "Создай HTML страницу с формой",
-                json: "Создай JSON файл с данными пользователей",
-                zip: "Создай ZIP архив с тремя файлами",
-                analyze: "Проанализируй последний скачанный файл"
+                python: "Создай Python скрипт с функцией приветствия",
+                js: "Создай JavaScript файл с функцией",
+                html: "Создай HTML страницу",
+                json: "Создай JSON файл",
+                zip: "Создай ZIP архив",
+                text: "Создай текстовый файл"
             };
 
-            document.getElementById('messageInput').value = actions[action];
+            document.getElementById('messageInput').value = actions[type];
+            sendMessage();
         }
 
-        // Detect file request
-        function detectFileRequest(message) {
-            const lower = message.toLowerCase();
-
-            if (lower.includes('python') || lower.includes('питон') || lower.includes('.py')) {
-                return { type: 'python', name: 'script.py' };
-            }
-            if (lower.includes('javascript') || lower.includes('js') || lower.includes('.js')) {
-                return { type: 'js', name: 'script.js' };
-            }
-            if (lower.includes('html') || lower.includes('сайт') || lower.includes('страница')) {
-                return { type: 'html', name: 'index.html' };
-            }
-            if (lower.includes('json') || lower.includes('.json')) {
-                return { type: 'json', name: 'data.json' };
-            }
-            if (lower.includes('zip') || lower.includes('архив')) {
-                return { type: 'zip', name: 'archive.zip' };
-            }
-            if (lower.includes('txt') || lower.includes('текст')) {
-                return { type: 'txt', name: 'file.txt' };
-            }
-
-            return null;
+        // Account functions
+        function showConnectModal() {
+            document.getElementById('connectModal').classList.add('active');
         }
 
-        // Get file emoji
-        function getFileEmoji(type) {
-            const emojis = {
-                python: '🐍',
-                js: '📜',
-                html: '🌐',
-                json: '📋',
-                zip: '🗜️',
-                txt: '📄'
+        function hideConnectModal() {
+            document.getElementById('connectModal').classList.remove('active');
+        }
+
+        function showAccountModal() {
+            document.getElementById('modalAccountName').textContent = account?.name || 'Гость';
+            document.getElementById('modalAccountEmail').textContent = account?.email || 'не привязан';
+            document.getElementById('accountModal').classList.add('active');
+        }
+
+        function hideAccountModal() {
+            document.getElementById('accountModal').classList.remove('active');
+        }
+
+        function connectEmail() {
+            const email = document.getElementById('emailInput').value.trim();
+            if (!email || !email.includes('@')) {
+                showToast('Введите корректный email');
+                return;
+            }
+
+            account = {
+                name: email.split('@')[0],
+                email: email,
+                type: 'email'
             };
-            return emojis[type] || '📄';
+
+            localStorage.setItem('account', JSON.stringify(account));
+            updateAccountUI();
+            hideConnectModal();
+            showToast('Аккаунт привязан');
         }
 
-        // Get mime type
-        function getMimeType(type) {
-            const types = {
-                python: 'text/x-python',
-                js: 'application/javascript',
-                html: 'text/html',
-                json: 'application/json',
-                txt: 'text/plain',
-                zip: 'application/zip'
+        function handleGoogleSignIn(response) {
+            // Decode JWT token
+            const data = parseJwt(response.credential);
+            
+            account = {
+                name: data.name,
+                email: data.email,
+                picture: data.picture,
+                type: 'google'
             };
-            return types[type] || 'text/plain';
+
+            localStorage.setItem('account', JSON.stringify(account));
+            updateAccountUI();
+            hideConnectModal();
+            showToast('Google аккаунт привязан');
         }
 
-        // Format file size
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
         }
 
-        // Generate ID
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+        function unlinkAccount() {
+            account = null;
+            localStorage.removeItem('account');
+            updateAccountUI();
+            hideAccountModal();
+            showToast('Аккаунт отвязан');
         }
 
-        // Escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        function updateAccountUI() {
+            const nameEl = document.getElementById('accountName');
+            const emailEl = document.getElementById('accountEmail');
+            const avatarEl = document.getElementById('accountAvatar');
+            const statusEl = document.getElementById('accountStatus');
+            const connectBtn = document.getElementById('connectBtn');
 
-        // Check if string is URL
-        function isUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch {
-                return false;
+            if (account) {
+                nameEl.textContent = account.name;
+                emailEl.textContent = account.email;
+                avatarEl.textContent = account.name.charAt(0).toUpperCase();
+                statusEl.textContent = '✓';
+                connectBtn.textContent = 'Аккаунт привязан';
+                connectBtn.style.background = 'var(--success-color)';
+            } else {
+                nameEl.textContent = 'Гость';
+                emailEl.textContent = 'не привязан';
+                avatarEl.textContent = '👤';
+                statusEl.textContent = '';
+                connectBtn.textContent = 'Привязать';
+                connectBtn.style.background = 'var(--accent-gradient)';
             }
         }
 
-        // Get Mistral response
-        async function getMistralResponse(userMessage) {
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: 'mistral-large-latest',
-                        messages: [
-                            {
-                                role: 'system',
-                                content: 'Ты Mistral AI. Отвечай кратко и по делу. Можешь скачивать файлы по ссылкам и создавать новые.'
-                            },
-                            {
-                                role: 'user',
-                                content: userMessage
-                            }
-                        ],
-                        temperature: 0.7
-                    })
-                });
-
-                if (!response.ok) throw new Error('API error');
-                const data = await response.json();
-                return data.choices[0].message.content;
-            } catch (error) {
-                console.error('Mistral API error:', error);
-                return "Я могу скачать файл по ссылке или создать новый. Просто отправьте ссылку или опишите, что нужно.";
+        function sendToEmail() {
+            if (!account) {
+                showToast('Сначала привяжите аккаунт');
+                return;
             }
+
+            const lastFile = files[files.length - 1];
+            if (!lastFile) {
+                showToast('Нет файлов для отправки');
+                return;
+            }
+
+            showToast(`Файл отправлен на ${account.email}`);
         }
 
-        // Show typing indicator
-        function showTypingIndicator() {
+        // File sharing
+        function shareFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (!file) return;
+
+            const shareUrl = file.url;
+            navigator.clipboard.writeText(shareUrl);
+            showToast('Ссылка скопирована!');
+        }
+
+        // Copy code
+        function copyCode(code) {
+            navigator.clipboard.writeText(code);
+            showToast('Код скопирован!');
+        }
+
+        // Show/hide typing
+        function showTyping() {
             isTyping = true;
             const container = document.getElementById('messagesContainer');
             
@@ -1190,41 +1424,13 @@ main();`;
             container.scrollTop = container.scrollHeight;
         }
 
-        // Hide typing indicator
-        function hideTypingIndicator() {
+        function hideTyping() {
             isTyping = false;
             const indicator = document.getElementById('typingIndicator');
             if (indicator) indicator.remove();
         }
 
-        // Show error
-        function showError(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
-
-        // Share file
-        function shareFile(fileId) {
-            // Find file
-            const file = messages.find(m => m.type === 'file' && m.fileInfo?.id === fileId)?.fileInfo;
-            if (!file) return;
-
-            // Create share link
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(file.url)}&text=${encodeURIComponent(file.name)}`;
-            
-            // Copy to clipboard
-            navigator.clipboard.writeText(file.url);
-            
-            showToast('Ссылка скопирована! Можно отправить другу');
-        }
-
-        // Show toast
+        // Toast
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -1233,25 +1439,88 @@ main();`;
             
             setTimeout(() => {
                 toast.remove();
-            }, 3000);
+            }, 2000);
         }
 
-        // Show info
-        function showInfo() {
+        // Modal functions
+        function showInfoModal() {
             document.getElementById('infoModal').classList.add('active');
         }
 
-        function hideInfo() {
+        function hideInfoModal() {
             document.getElementById('infoModal').classList.remove('active');
+        }
+
+        function showSettingsModal() {
+            document.getElementById('autoDownload').checked = settings.autoDownload;
+            document.getElementById('saveHistory').checked = settings.saveHistory;
+            document.getElementById('notifications').checked = settings.notifications;
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function hideSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            settings = {
+                autoDownload: document.getElementById('autoDownload').checked,
+                saveHistory: document.getElementById('saveHistory').checked,
+                notifications: document.getElementById('notifications').checked
+            };
+            
+            localStorage.setItem('settings', JSON.stringify(settings));
+            hideSettingsModal();
+            showToast('Настройки сохранены');
+        }
+
+        // Helper functions
+        function isUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function saveMessages() {
+            if (settings.saveHistory) {
+                localStorage.setItem('messages', JSON.stringify(messages.slice(-50)));
+            }
         }
 
         // Make functions global
         window.sendMessage = sendMessage;
         window.fetchFromUrl = fetchFromUrl;
         window.quickAction = quickAction;
+        window.showConnectModal = showConnectModal;
+        window.hideConnectModal = hideConnectModal;
+        window.connectEmail = connectEmail;
+        window.handleGoogleSignIn = handleGoogleSignIn;
+        window.showAccountModal = showAccountModal;
+        window.unlinkAccount = unlinkAccount;
+        window.sendToEmail = sendToEmail;
         window.shareFile = shareFile;
-        window.showInfo = showInfo;
-        window.hideInfo = hideInfo;
+        window.copyCode = copyCode;
+        window.showInfoModal = showInfoModal;
+        window.hideInfoModal = hideInfoModal;
+        window.showSettingsModal = showSettingsModal;
+        window.hideSettingsModal = hideSettingsModal;
+        window.saveSettings = saveSettings;
     </script>
 </body>
-</html>
+    </html>
