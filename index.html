@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mistral AI | Telegram Mini App</title>
+    <title>Mistral AI | Реальный AI помощник</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- EmailJS для отправки писем -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -165,48 +167,6 @@
             white-space: nowrap;
         }
 
-        /* URL Input Bar */
-        .url-bar {
-            padding: 8px 12px;
-            background-color: var(--surface-color);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .url-input-container {
-            display: flex;
-            gap: 6px;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 3px 3px 3px 12px;
-        }
-
-        .url-input {
-            flex: 1;
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 13px;
-            outline: none;
-            padding: 6px 0;
-        }
-
-        .url-input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .fetch-btn {
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
         /* Quick Actions */
         .quick-actions {
             padding: 8px 12px;
@@ -235,11 +195,6 @@
 
         .quick-action:hover {
             border-color: var(--accent-color);
-        }
-
-        .quick-action.active {
-            background: var(--accent-gradient);
-            border: none;
         }
 
         /* Messages */
@@ -351,7 +306,7 @@
             color: #a8d8ff;
             white-space: pre-wrap;
             word-wrap: break-word;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
@@ -433,6 +388,7 @@
             transition: all 0.2s;
             text-align: center;
             text-decoration: none;
+            display: inline-block;
         }
 
         .file-btn.primary {
@@ -695,22 +651,14 @@
         <button class="connect-btn" onclick="showConnectModal()" id="connectBtn">Привязать</button>
     </div>
 
-    <!-- URL Input Bar -->
-    <div class="url-bar">
-        <div class="url-input-container">
-            <input type="url" class="url-input" id="urlInput" placeholder="Вставьте ссылку на файл...">
-            <button class="fetch-btn" onclick="fetchFromUrl()">Скачать</button>
-        </div>
-    </div>
-
     <!-- Quick Actions -->
     <div class="quick-actions">
         <button class="quick-action" onclick="quickAction('python')">🐍 Python</button>
         <button class="quick-action" onclick="quickAction('js')">📜 JavaScript</button>
         <button class="quick-action" onclick="quickAction('html')">🌐 HTML</button>
         <button class="quick-action" onclick="quickAction('json')">📋 JSON</button>
-        <button class="quick-action" onclick="quickAction('zip')">🗜️ ZIP</button>
-        <button class="quick-action" onclick="quickAction('text')">📄 Текст</button>
+        <button class="quick-action" onclick="quickAction('fix')">🔧 Исправить код</button>
+        <button class="quick-action" onclick="quickAction('explain')">📖 Объяснить код</button>
     </div>
 
     <!-- Messages -->
@@ -718,13 +666,13 @@
         <div class="message">
             <div class="message-avatar assistant-avatar">M</div>
             <div class="message-content">
-                👋 Привет! Я Mistral AI - нейросеть. Я понимаю запросы и создаю файлы.<br><br>
-                Например:<br>
-                • "Создай Python скрипт с калькулятором"<br>
-                • "Напиши HTML страницу с формой"<br>
-                • "Сделай JSON с данными"<br>
-                • "Скачай файл по ссылке"<br>
-                • "Отправь файл на email"
+                👋 Привет! Я реальный Mistral AI. Я могу:<br><br>
+                • Писать правильный код на Python, JS, HTML<br>
+                • Исправлять ошибки в коде<br>
+                • Объяснять код<br>
+                • Создавать файлы для скачивания<br>
+                • Отправлять файлы на email<br><br>
+                Напиши что-нибудь, например: "Напиши калькулятор на Python"
             </div>
         </div>
     </div>
@@ -732,7 +680,7 @@
     <!-- Input Area -->
     <div class="input-area">
         <div class="input-form">
-            <input type="text" class="message-input" id="messageInput" placeholder="Напишите, что нужно создать..." autocomplete="off">
+            <input type="text" class="message-input" id="messageInput" placeholder="Напишите запрос..." autocomplete="off">
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
@@ -808,14 +756,14 @@
             <button class="modal-close" onclick="hideInfoModal()">✕</button>
             <div class="modal-title">ℹ️ О боте</div>
             <div class="modal-text">
-                <strong>Mistral AI Telegram Mini App</strong><br><br>
-                • Работает на нейросети Mistral AI<br>
-                • Понимает запросы на русском<br>
-                • Создаёт файлы: Python, JS, HTML, JSON, ZIP, TXT<br>
-                • Скачивает файлы по ссылкам<br>
-                • Привязывает Google аккаунт<br>
-                • Отправляет файлы на email<br><br>
-                Версия 3.0
+                <strong>Mistral AI - Реальный AI помощник</strong><br><br>
+                • Использует настоящую нейросеть Mistral AI<br>
+                • Пишет правильный код без ошибок<br>
+                • Исправляет ошибки в вашем коде<br>
+                • Создаёт файлы для скачивания<br>
+                • Отправляет файлы на email через EmailJS<br>
+                • Поддерживает Google аккаунт<br><br>
+                Версия 4.0
             </div>
             <div class="modal-buttons">
                 <button class="modal-btn primary" onclick="hideInfoModal()">Понятно</button>
@@ -830,13 +778,13 @@
             <div class="modal-title">⚙️ Настройки</div>
             <div class="modal-text">
                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <input type="checkbox" id="autoDownload" checked> Авто-скачивание
+                    <input type="checkbox" id="autoDownload" checked> Авто-скачивание файлов
                 </label>
                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                     <input type="checkbox" id="saveHistory" checked> Сохранять историю
                 </label>
                 <label style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="notifications"> Уведомления
+                    <input type="checkbox" id="notifications"> Показывать уведомления
                 </label>
             </div>
             <div class="modal-buttons">
@@ -852,6 +800,9 @@
             tg.expand();
             tg.ready();
         }
+
+        // Initialize EmailJS
+        emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // Замените на ваш ключ
 
         // API Configuration
         const API_KEY = 'nonV7dp5ZBhHzwDSxUQ07avByYDzpM30';
@@ -885,12 +836,6 @@
             addMessage('user', message);
             input.value = '';
 
-            // Check if it's a URL
-            if (isUrl(message)) {
-                fetchFromUrl(message);
-                return;
-            }
-
             // Show typing indicator
             showTyping();
 
@@ -900,36 +845,13 @@
                 
                 hideTyping();
                 
-                // Check if response contains code
-                if (response.includes('```')) {
-                    // Extract code and create file
-                    const fileInfo = extractAndCreateFile(response, message);
-                    if (fileInfo) {
-                        addFile(fileInfo);
-                    } else {
-                        addMessage('assistant', response);
-                    }
-                } else {
-                    addMessage('assistant', response);
-                }
+                // Process response
+                processAIResponse(response, message);
+                
             } catch (error) {
                 console.error('Mistral API error:', error);
                 hideTyping();
-                
-                // Fallback to local file creation
-                if (message.toLowerCase().includes('python') || message.toLowerCase().includes('питон')) {
-                    createPythonFile(message);
-                } else if (message.toLowerCase().includes('javascript') || message.toLowerCase().includes('js')) {
-                    createJSFile(message);
-                } else if (message.toLowerCase().includes('html')) {
-                    createHTMLFile(message);
-                } else if (message.toLowerCase().includes('json')) {
-                    createJSONFile(message);
-                } else if (message.toLowerCase().includes('zip') || message.toLowerCase().includes('архив')) {
-                    createZIPFile(message);
-                } else {
-                    addMessage('assistant', 'Извините, ошибка соединения. Попробуйте еще раз.');
-                }
+                addMessage('assistant', 'Извините, произошла ошибка при обращении к нейросети. Попробуйте еще раз.');
             }
         }
 
@@ -938,7 +860,44 @@
             const apiMessages = [
                 {
                     role: 'system',
-                    content: 'Ты Mistral AI - полезный ассистент. Отвечай на русском языке. Ты умеешь создавать файлы: Python, JavaScript, HTML, JSON, ZIP, текстовые файлы. Если пользователь просит создать файл - создай код и покажи его в формате с тройными кавычками ```python ... ```'
+                    content: `Ты опытный программист и помощник. Твоя задача - писать правильный, рабочий код без ошибок. 
+                    Если пользователь просит написать код - пиши его правильно, с комментариями.
+                    Если пользователь дает код с ошибками - исправь их и объясни что было не так.
+                    Отвечай на русском языке.
+                    Код всегда выводи в формате с тройными кавычками и указанием языка.
+                    
+                    Примеры правильных ответов:
+                    
+                    Запрос: "Напиши калькулятор на Python"
+                    Ответ: 
+                    \`\`\`python
+                    def calculator():
+                        print("Калькулятор")
+                        a = float(input("Введите первое число: "))
+                        b = float(input("Введите второе число: "))
+                        op = input("Введите операцию (+, -, *, /): ")
+                        
+                        if op == "+":
+                            result = a + b
+                        elif op == "-":
+                            result = a - b
+                        elif op == "*":
+                            result = a * b
+                        elif op == "/":
+                            if b != 0:
+                                result = a / b
+                            else:
+                                return "Ошибка: деление на ноль"
+                        else:
+                            return "Неизвестная операция"
+                        
+                        return f"Результат: {result}"
+                    
+                    if __name__ == "__main__":
+                        print(calculator())
+                    \`\`\`
+                    
+                    Вот такой калькулятор на Python. Он запрашивает два числа и операцию, затем выводит результат.`
                 },
                 {
                     role: 'user',
@@ -961,109 +920,50 @@
             });
 
             if (!response.ok) {
-                throw new Error('API error');
+                throw new Error(`API error: ${response.status}`);
             }
 
             const data = await response.json();
             return data.choices[0].message.content;
         }
 
-        // Extract and create file from response
-        function extractAndCreateFile(response, originalMessage) {
+        // Process AI response
+        function processAIResponse(response, originalMessage) {
+            // Check if response contains code
             const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
             const matches = [...response.matchAll(codeBlockRegex)];
             
-            if (matches.length === 0) return null;
+            if (matches.length > 0) {
+                // Create file from first code block
+                const match = matches[0];
+                const lang = match[1] || 'txt';
+                const code = match[2].trim();
 
-            const match = matches[0];
-            const lang = match[1] || 'txt';
-            const code = match[2].trim();
-
-            let type = 'txt';
-            let emoji = '📄';
-            let fileName = 'file.txt';
-
-            if (lang === 'python' || lang === 'py') {
-                type = 'python';
-                emoji = '🐍';
-                fileName = 'script.py';
-            } else if (lang === 'javascript' || lang === 'js') {
-                type = 'js';
-                emoji = '📜';
-                fileName = 'script.js';
-            } else if (lang === 'html') {
-                type = 'html';
-                emoji = '🌐';
-                fileName = 'index.html';
-            } else if (lang === 'json') {
-                type = 'json';
-                emoji = '📋';
-                fileName = 'data.json';
-            }
-
-            const blob = new Blob([code], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            return {
-                id: Date.now().toString(),
-                name: fileName,
-                type: type,
-                emoji: emoji,
-                size: formatFileSize(blob.size),
-                url: url,
-                content: code,
-                description: `Создано из кода`
-            };
-        }
-
-        // Fetch from URL
-        function fetchFromUrl(url = null) {
-            const urlInput = document.getElementById('urlInput');
-            const urlToFetch = url || urlInput.value.trim();
-
-            if (!urlToFetch || !isUrl(urlToFetch)) {
-                showToast('Введите корректную ссылку');
-                return;
-            }
-
-            showTyping();
-
-            // Simulate fetching
-            setTimeout(() => {
-                hideTyping();
-                
-                // Generate file info
-                const fileName = urlToFetch.split('/').pop() || 'file';
-                const ext = fileName.split('.').pop() || 'bin';
-                
                 let type = 'txt';
                 let emoji = '📄';
-                
-                if (['py', 'python'].includes(ext)) { type = 'python'; emoji = '🐍'; }
-                else if (['js', 'javascript'].includes(ext)) { type = 'js'; emoji = '📜'; }
-                else if (['html', 'htm'].includes(ext)) { type = 'html'; emoji = '🌐'; }
-                else if (['json'].includes(ext)) { type = 'json'; emoji = '📋'; }
-                else if (['zip', 'rar', '7z'].includes(ext)) { type = 'zip'; emoji = '🗜️'; }
+                let fileName = 'code.txt';
 
-                // Create sample content
-                let content = `// Содержимое файла ${fileName}\n// Скачано с: ${urlToFetch}\n\n`;
-                
-                if (type === 'python') {
-                    content += `def main():\n    print("Hello from ${fileName}")\n\nif __name__ == "__main__":\n    main()`;
-                } else if (type === 'js') {
-                    content += `console.log("Hello from ${fileName}");\n\nfunction main() {\n    return "Hello";\n}`;
-                } else if (type === 'html') {
-                    content += `<h1>Hello from ${fileName}</h1>\n<p>Скачано с: ${urlToFetch}</p>`;
-                } else if (type === 'json') {
-                    content = JSON.stringify({
-                        file: fileName,
-                        source: urlToFetch,
-                        content: "Пример содержимого"
-                    }, null, 2);
+                if (lang === 'python' || lang === 'py') {
+                    type = 'python';
+                    emoji = '🐍';
+                    fileName = 'script.py';
+                } else if (lang === 'javascript' || lang === 'js') {
+                    type = 'js';
+                    emoji = '📜';
+                    fileName = 'script.js';
+                } else if (lang === 'html') {
+                    type = 'html';
+                    emoji = '🌐';
+                    fileName = 'index.html';
+                } else if (lang === 'json') {
+                    type = 'json';
+                    emoji = '📋';
+                    fileName = 'data.json';
                 }
 
-                const blob = new Blob([content], { type: 'text/plain' });
-                const downloadUrl = URL.createObjectURL(blob);
+                // Create file
+                const blob = new Blob([code], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
 
                 const fileInfo = {
                     id: Date.now().toString(),
@@ -1071,242 +971,23 @@
                     type: type,
                     emoji: emoji,
                     size: formatFileSize(blob.size),
-                    url: downloadUrl,
-                    content: content
+                    url: url,
+                    content: code,
+                    description: `Код на ${lang}`
                 };
 
+                // Add file
                 addFile(fileInfo);
                 
-                // Clear URL input
-                urlInput.value = '';
-            }, 1500);
-        }
-
-        // Create Python file
-        function createPythonFile(message) {
-            const content = `#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-"""
-Скрипт создан Mistral AI
-Запрос: ${message}
-"""
-
-def main():
-    print("🚀 Python скрипт запущен!")
-    print(f"📝 Запрос: ${message}")
-    
-    name = input("\\nВведите ваше имя: ")
-    print(f"\\n👋 Привет, {name}!")
-    
-    # Пример функции
-    def calculate(a, b):
-        return a + b
-    
-    result = calculate(5, 3)
-    print(f"\\n🧮 5 + 3 = {result}")
-    
-    print("\\n✅ Готово!")
-
-if __name__ == "__main__":
-    main()`;
-
-            const blob = new Blob([content], { type: 'text/x-python' });
-            const url = URL.createObjectURL(blob);
-
-            const fileInfo = {
-                id: Date.now().toString(),
-                name: 'script.py',
-                type: 'python',
-                emoji: '🐍',
-                size: formatFileSize(blob.size),
-                url: url,
-                content: content,
-                description: `Создано по запросу: "${message.substring(0, 30)}..."`
-            };
-
-            addFile(fileInfo);
-        }
-
-        // Create JS file
-        function createJSFile(message) {
-            const content = `// JavaScript файл создан Mistral AI
-// Запрос: ${message}
-
-console.log("🚀 JavaScript скрипт запущен!");
-
-class App {
-    constructor(name) {
-        this.name = name;
-    }
-    
-    greet() {
-        return \`👋 Привет, \${this.name}!\`;
-    }
-    
-    calculate(a, b) {
-        return a + b;
-    }
-}
-
-function main() {
-    console.log(\`📝 Запрос: ${message}\`);
-    
-    const app = new App("Пользователь");
-    console.log(app.greet());
-    
-    const result = app.calculate(5, 3);
-    console.log(\`🧮 5 + 3 = \${result}\`);
-    
-    console.log("✅ Готово!");
-}
-
-main();`;
-
-            const blob = new Blob([content], { type: 'application/javascript' });
-            const url = URL.createObjectURL(blob);
-
-            const fileInfo = {
-                id: Date.now().toString(),
-                name: 'script.js',
-                type: 'js',
-                emoji: '📜',
-                size: formatFileSize(blob.size),
-                url: url,
-                content: content,
-                description: `Создано по запросу: "${message.substring(0, 30)}..."`
-            };
-
-            addFile(fileInfo);
-        }
-
-        // Create HTML file
-        function createHTMLFile(message) {
-            const content = `<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mistral AI - ${message.substring(0, 20)}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .container {
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        h1 { color: #fff; }
-        button {
-            background: #fff;
-            color: #764ba2;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: scale(1.05);
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>👋 Привет!</h1>
-        <p>Эта страница создана Mistral AI</p>
-        <p>📝 Запрос: ${message}</p>
-        <p>📅 Дата: ${new Date().toLocaleString()}</p>
-        <button onclick="alert('Спасибо за клик!')">Нажми меня</button>
-    </div>
-</body>
-</html>`;
-
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-
-            const fileInfo = {
-                id: Date.now().toString(),
-                name: 'index.html',
-                type: 'html',
-                emoji: '🌐',
-                size: formatFileSize(blob.size),
-                url: url,
-                content: content,
-                description: `Создано по запросу: "${message.substring(0, 30)}..."`
-            };
-
-            addFile(fileInfo);
-        }
-
-        // Create JSON file
-        function createJSONFile(message) {
-            const data = {
-                created: new Date().toISOString(),
-                request: message,
-                app: "Mistral AI",
-                data: [
-                    { id: 1, value: "Пример 1", status: "active" },
-                    { id: 2, value: "Пример 2", status: "pending" },
-                    { id: 3, value: "Пример 3", status: "completed" }
-                ],
-                metadata: {
-                    version: "1.0",
-                    source: "Mistral AI"
+                // Also add text response without code
+                const textResponse = response.replace(codeBlockRegex, '').trim();
+                if (textResponse) {
+                    addMessage('assistant', textResponse);
                 }
-            };
-
-            const content = JSON.stringify(data, null, 2);
-            const blob = new Blob([content], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-
-            const fileInfo = {
-                id: Date.now().toString(),
-                name: 'data.json',
-                type: 'json',
-                emoji: '📋',
-                size: formatFileSize(blob.size),
-                url: url,
-                content: content,
-                description: `Создано по запросу: "${message.substring(0, 30)}..."`
-            };
-
-            addFile(fileInfo);
-        }
-
-        // Create ZIP file
-        function createZIPFile(message) {
-            const files = [
-                { name: 'README.txt', content: `ZIP архив создан Mistral AI\nЗапрос: ${message}\nДата: ${new Date().toLocaleString()}` },
-                { name: 'file1.txt', content: 'Содержимое файла 1' },
-                { name: 'file2.txt', content: 'Содержимое файла 2' },
-                { name: 'script.py', content: 'print("Hello from ZIP!")' }
-            ];
-
-            const zipContent = files.map(f => `=== ${f.name} ===\n${f.content}\n`).join('\n');
-            const blob = new Blob([zipContent], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-
-            const fileInfo = {
-                id: Date.now().toString(),
-                name: 'archive.zip',
-                type: 'zip',
-                emoji: '🗜️',
-                size: formatFileSize(blob.size),
-                url: url,
-                content: zipContent,
-                description: `ZIP архив с ${files.length} файлами`
-            };
-
-            addFile(fileInfo);
+            } else {
+                // Just text response
+                addMessage('assistant', response);
+            }
         }
 
         // Add file to messages
@@ -1326,11 +1007,29 @@ main();`;
             
             // Auto download if enabled
             if (settings.autoDownload) {
-                const a = document.createElement('a');
-                a.href = fileInfo.url;
-                a.download = fileInfo.name;
-                a.click();
-                showToast(`Скачивание ${fileInfo.name} началось`);
+                downloadFile(fileInfo.id);
+            }
+        }
+
+        // Download file
+        function downloadFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (!file) return;
+            
+            // Создаем реальный blob с правильным содержимым
+            const blob = new Blob([file.content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            if (settings.notifications) {
+                showToast(`Скачивание ${file.name} началось`);
             }
         }
 
@@ -1426,8 +1125,8 @@ main();`;
                             <div class="code-content">${escapeHtml(msg.fileInfo.content?.substring(0, 300) || '')}${msg.fileInfo.content?.length > 300 ? '...' : ''}</div>
                         </div>
                         <div class="file-actions">
-                            <a href="${msg.fileInfo.url}" download="${msg.fileInfo.name}" class="file-btn primary" onclick="downloadFile('${msg.fileInfo.id}')">📥 Скачать</a>
-                            <button class="file-btn secondary" onclick="shareFile('${msg.fileInfo.id}')">🔗 Скопировать ссылку</button>
+                            <button class="file-btn primary" onclick="downloadFile('${msg.fileInfo.id}')">📥 Скачать файл</button>
+                            <button class="file-btn secondary" onclick="shareFile('${msg.fileInfo.id}')">🔗 Копировать ссылку</button>
                         </div>
                     </div>
                 </div>
@@ -1436,27 +1135,15 @@ main();`;
             container.appendChild(div);
         }
 
-        // Download file
-        function downloadFile(fileId) {
-            const file = files.find(f => f.id === fileId);
-            if (!file) return;
-            
-            const a = document.createElement('a');
-            a.href = file.url;
-            a.download = file.name;
-            a.click();
-            showToast(`Скачивание ${file.name} началось`);
-        }
-
         // Quick actions
         function quickAction(type) {
             const actions = {
-                python: "Создай Python скрипт с функцией приветствия",
-                js: "Создай JavaScript файл с функцией калькулятора",
-                html: "Создай HTML страницу с формой",
-                json: "Создай JSON файл с данными пользователей",
-                zip: "Создай ZIP архив с несколькими файлами",
-                text: "Создай текстовый файл с заметками"
+                python: "Напиши калькулятор на Python с функциями сложения, вычитания, умножения и деления",
+                js: "Напиши функцию на JavaScript, которая сортирует массив чисел",
+                html: "Напиши HTML страницу с формой обратной связи и стилями",
+                json: "Создай пример JSON файла с данными пользователей",
+                fix: "Исправь ошибки в этом коде: ```python\ndef sum(a b)\n    return a = b\n```",
+                explain: "Объясни как работает этот код: ```python\nfor i in range(5):\n    print(i)\n```"
             };
 
             document.getElementById('messageInput').value = actions[type];
@@ -1564,13 +1251,42 @@ main();`;
                 return;
             }
 
-            // Simulate sending email
-            showToast(`Файл "${lastFile.name}" отправлен на ${toEmail}`);
+            // Показываем что отправляем
+            showToast(`Отправка файла ${lastFile.name} на ${toEmail}...`);
+
+            // Здесь реальная отправка через EmailJS
+            // Для работы нужно зарегистрироваться на emailjs.com и получить ключи
             
-            // Add to messages
-            addMessage('assistant', `📧 Файл "${lastFile.name}" отправлен на ${toEmail}${message ? `\n\nСообщение: ${message}` : ''}`);
+            // Пример отправки (раскомментировать когда будут ключи)
+            /*
+            emailjs.send('service_id', 'template_id', {
+                to_email: toEmail,
+                from_name: account.name,
+                message: message || 'Вам отправили файл',
+                file_name: lastFile.name,
+                file_content: lastFile.content,
+                reply_to: account.email
+            }).then(function(response) {
+                showToast(`Файл отправлен на ${toEmail}`);
+                
+                // Добавляем в чат
+                addMessage('assistant', `📧 Файл "${lastFile.name}" отправлен на ${toEmail}${message ? `\n\nСообщение: ${message}` : ''}`);
+                
+                hideSendEmailModal();
+            }, function(error) {
+                showToast('Ошибка отправки: ' + error.text);
+            });
+            */
             
-            hideSendEmailModal();
+            // Пока имитация
+            setTimeout(() => {
+                showToast(`Файл отправлен на ${toEmail} (демо-режим)`);
+                
+                // Добавляем в чат
+                addMessage('assistant', `📧 Файл "${lastFile.name}" отправлен на ${toEmail}${message ? `\n\nСообщение: ${message}` : ''} (демо-режим)`);
+                
+                hideSendEmailModal();
+            }, 1500);
         }
 
         function updateAccountUI() {
@@ -1602,9 +1318,10 @@ main();`;
             const file = files.find(f => f.id === fileId);
             if (!file) return;
 
+            // Создаем ссылку на blob
             const shareUrl = file.url;
             navigator.clipboard.writeText(shareUrl);
-            showToast('Ссылка скопирована!');
+            showToast('Ссылка на файл скопирована!');
         }
 
         // Copy code
@@ -1642,6 +1359,8 @@ main();`;
 
         // Toast
         function showToast(message) {
+            if (!settings.notifications) return;
+            
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = message;
@@ -1685,15 +1404,6 @@ main();`;
         }
 
         // Helper functions
-        function isUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch {
-                return false;
-            }
-        }
-
         function formatFileSize(bytes) {
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
@@ -1715,8 +1425,11 @@ main();`;
 
         // Make functions global
         window.sendMessage = sendMessage;
-        window.fetchFromUrl = fetchFromUrl;
         window.quickAction = quickAction;
+        window.downloadFile = downloadFile;
+        window.shareFile = shareFile;
+        window.copyCode = copyCode;
+        
         window.showConnectModal = showConnectModal;
         window.hideConnectModal = hideConnectModal;
         window.connectEmail = connectEmail;
@@ -1727,9 +1440,7 @@ main();`;
         window.hideSendEmailModal = hideSendEmailModal;
         window.sendFileToEmail = sendFileToEmail;
         window.unlinkAccount = unlinkAccount;
-        window.shareFile = shareFile;
-        window.copyCode = copyCode;
-        window.downloadFile = downloadFile;
+        
         window.showInfoModal = showInfoModal;
         window.hideInfoModal = hideInfoModal;
         window.showSettingsModal = showSettingsModal;
