@@ -2,413 +2,452 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🇩🇪 YouTube через Германию (рабочий прокси)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Хостинг скриптов: публикация HTML</title>
+    <!-- CodeMirror -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #121826 0%, #1e2a3a 100%);
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .chat-container {
-            max-width: 900px;
-            width: 100%;
-            background: rgba(18, 26, 36, 0.95);
-            backdrop-filter: blur(8px);
-            border-radius: 32px 32px 24px 24px;
-            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 215, 0, 0.25);
-            border: 1px solid #ffd96655;
-            overflow: hidden;
-            padding: 25px 25px 20px 25px;
-        }
-        
-        .logo-preview-area {
-            min-height: 180px;
-            background: #0d1a24;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed #f0b823;
-            box-shadow: inset 0 2px 8px #00000080, 0 10px 15px -10px black;
-            transition: 0.2s;
-        }
-        
-        .placeholder-message {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            color: #9bb7d4;
-            font-size: 1.1rem;
-        }
-        
-        .youtube-badge {
-            background: #c00;
-            padding: 6px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            color: white;
-            letter-spacing: 0.7px;
-            border: 1px solid #ffa500;
-            box-shadow: 0 4px 0 #7f0000;
-        }
-        
-        .logo-image-link {
-            display: block;
-            border-radius: 20px;
-            overflow: hidden;
-            transition: 0.2s;
-            max-width: 100%;
-            cursor: pointer;
-            border: 4px solid #fecb2f;
-            box-shadow: 0 10px 0 #996515, 0 15px 25px -5px black;
-            background: black;
-        }
-        
-        .logo-image-link:hover {
-            transform: scale(0.97);
-            border-color: #ffe484;
-            box-shadow: 0 6px 0 #b87c1b, 0 18px 30px -5px black;
-        }
-        
-        .card {
-            background: #13212e;
-            border-radius: 28px;
-            padding: 20px 20px 15px;
-            border: 1px solid #3c637b;
-            box-shadow: 0 8px 0 #0a141c;
-        }
-        
-        .input-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .link-input {
-            flex: 3;
-            min-width: 240px;
-            background: #1d3140;
-            border: 2px solid #3a5f78;
-            border-radius: 60px;
-            padding: 16px 22px;
-            font-size: 1rem;
-            color: white;
-            outline: none;
-            transition: 0.2s;
-            box-shadow: inset 0 4px 6px #00000060;
-        }
-        
-        .link-input:focus {
-            border-color: #f3b33d;
-            background: #1f3647;
-            box-shadow: inset 0 4px 6px black, 0 0 0 3px #f3b33d40;
-        }
-        
-        .link-input::placeholder {
-            color: #7a99b0;
-            font-style: italic;
-        }
-        
-        .send-button {
-            flex: 1;
-            background: linear-gradient(145deg, #fbb829, #dc9000);
-            border: none;
-            border-radius: 60px;
-            padding: 16px 28px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #121212;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 0 8px 0 #8b5200, 0 6px 15px #00000070;
-            transition: 0.08s linear;
-            border: 1px solid #ffd966;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .send-button:active {
-            transform: translateY(5px);
-            box-shadow: 0 3px 0 #6f3f00, 0 6px 12px black;
-        }
-        
-        .german-flag {
-            font-size: 1.5rem;
-            filter: drop-shadow(2px 4px 4px black);
-        }
-        
-        .hint {
-            color: #cddbe9;
-            margin-top: 15px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #1b3445;
-            padding: 10px 18px;
-            border-radius: 40px;
-            border: 1px solid #3f7e9f;
-        }
-        
-        .proxy-status {
-            color: #b3ffaa;
-            font-weight: 500;
-            text-shadow: 0 2px 3px black;
-        }
-        
-        .error-msg {
-            color: #ffb0a0;
-            background: #4a1e1e;
-            border-radius: 40px;
-            padding: 8px 20px;
-            border: 1px solid #ff6f61;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-        
-        .small-note {
-            color: #99badd;
-            font-size: 0.85rem;
-            margin-top: 8px;
-            text-align: center;
-        }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2f; color: #eee; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        #topbar { background: #2a2a3a; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #ffaa00; z-index: 100; }
+        #logo { font-size: 20px; font-weight: bold; color: #ffaa00; }
+        #projectMenuContainer { position: relative; }
+        #menuButton { background: #3a3a4a; border: none; border-radius: 30px; padding: 10px 20px; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; gap: 10px; border: 1px solid #555; }
+        #projectDropdown { position: absolute; top: 50px; right: 0; background: #2a2a3a; border-radius: 10px; padding: 10px; min-width: 200px; display: none; flex-direction: column; gap: 5px; border: 1px solid #ffaa00; z-index: 200; max-height: 300px; overflow-y: auto; }
+        .project-item { padding: 10px; background: #3a3a4a; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .project-item:hover { background: #4a4a5a; }
+        .delete-project { color: #ff6666; font-size: 18px; padding: 0 5px; cursor: pointer; }
+        #newProjectBtn { background: #ffaa00; color: #1a1a1a; border: none; border-radius: 8px; padding: 10px; font-weight: bold; cursor: pointer; margin-bottom: 5px; }
+        #addButton { background: #ffaa00; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 30px; color: #1a1a1a; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 15px; }
+        #main { display: flex; flex: 1; overflow: hidden; flex-direction: column; }
+        #editorContainer { flex: 1; display: flex; flex-direction: column; }
+        #editorHeader { background: #2a2a3a; padding: 10px 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; border-bottom: 1px solid #444; }
+        #projectName { font-size: 18px; font-weight: bold; }
+        #projectType { background: #ffaa00; color: #1a1a1a; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+        #runButton { background: #4caf50; border: none; color: white; padding: 8px 15px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #2e7d32; }
+        #stopButton { background: #f44336; border: none; color: white; padding: 8px 15px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #d32f2f; display: none; }
+        #publishButton { background: #2196f3; border: none; color: white; padding: 8px 15px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #1976d2; display: none; }
+        #shareButton { background: #9c27b0; border: none; color: white; padding: 8px 15px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer; border: 1px solid #7b1fa2; }
+        #editor { flex: 1; overflow: auto; }
+        .CodeMirror { height: 100%; font-size: 16px; }
+        #outputContainer { height: 200px; display: flex; flex-direction: column; background: #1e1e2f; border-top: 1px solid #444; }
+        #outputHeader { background: #2a2a3a; padding: 10px 15px; border-bottom: 1px solid #444; font-weight: bold; display: flex; justify-content: space-between; }
+        #output { flex: 1; padding: 10px; overflow-y: auto; background: #1a1a2a; font-family: 'Courier New', monospace; white-space: pre-wrap; color: #0f0; font-size: 14px; }
+        #htmlPreview { width: 100%; height: 100%; border: none; background: white; display: none; }
+        #modalOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 300; }
+        #modal { background: #2a2a3a; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; border: 2px solid #ffaa00; }
+        #modal h2 { margin-top: 0; color: #ffaa00; font-size: 22px; }
+        #modal input, #modal select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; background: #3a3a4a; color: white; font-size: 16px; }
+        #modal button { background: #ffaa00; color: #1a1a1a; border: none; padding: 12px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        #modal .close { background: #666; margin-top: 5px; }
+        #fullscreenView { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; display: none; }
+        #fullscreenView iframe { width: 100%; height: 100%; border: none; }
+        #backButton { position: fixed; top: 10px; left: 10px; z-index: 1001; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 30px; padding: 10px 20px; font-size: 18px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <!-- Блок с логотипом / картинкой -->
-        <div class="logo-preview-area" id="logoPreview">
-            <div class="placeholder-message" id="placeholderMsg">
-                <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ffc107" stroke-width="1.2">
-                    <path d="M4 8v8a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V8a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4z" />
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M9 3v4m6-4v4" />
-                </svg>
-                <span class="youtube-badge">🇩🇪 ТОЛЬКО YOUTUBE</span>
-                <div>⬇️ Сюда появится картинка сайта (логотип) ⬇️</div>
-                <div style="font-size:0.9rem; opacity:0.8;">клик по картинке откроет YouTube через Германию</div>
+    <!-- Основной интерфейс -->
+    <div id="topbar">
+        <div id="logo">🚀 ScriptHost</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="projectMenuContainer">
+                <button id="menuButton">☰ <span>Проекты</span></button>
+                <div id="projectDropdown">
+                    <button id="newProjectBtn">➕ Новый проект</button>
+                    <div id="projectList"></div>
+                </div>
             </div>
-            <!-- Сюда будет вставлена картинка-ссылка -->
+            <button id="addButton" onclick="showNewProjectModal()">+</button>
         </div>
+    </div>
 
-        <!-- Сообщение об ошибке -->
-        <div id="errorMessage" class="error-msg" style="display: none;"></div>
+    <div id="main">
+        <!-- Редактор -->
+        <div id="editorContainer">
+            <div id="editorHeader">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                    <span id="projectName">Безымянный</span>
+                    <span id="projectType">Python</span>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <button id="runButton" onclick="runCode()">▶ Запустить</button>
+                    <button id="stopButton" onclick="stopCode()">⏹ Стоп</button>
+                    <button id="publishButton" onclick="publishHtml()">🔗 Опубликовать сайт</button>
+                    <button id="shareButton" onclick="copyShareLink()">🔗 Поделиться</button>
+                </div>
+            </div>
+            <div id="editor"></div>
+        </div>
+        <!-- Вывод -->
+        <div id="outputContainer">
+            <div id="outputHeader">
+                <span>📤 Вывод</span>
+                <span id="installMsg"></span>
+            </div>
+            <div id="output"></div>
+            <iframe id="htmlPreview"></iframe>
+        </div>
+    </div>
 
-        <!-- Поле ввода и кнопка как в чате -->
-        <div class="card">
-            <div class="input-row">
-                <input type="url" id="youtubeLink" class="link-input" 
-                       placeholder="Вставь ссылку YouTube (например, https://youtu.be/...)" 
-                       value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-                <button class="send-button" id="sendBtn">
-                    <span class="german-flag">🇩🇪</span> Отправить
-                </button>
-            </div>
-            
-            <div class="hint">
-                <span>📍 Твой выход через Германию</span>
-                <span class="proxy-status">⚡ прокси active</span>
-            </div>
-            <div class="small-note">
-                * Реальная смена геолокации через прокси-сервер (германский IP). Работает для YouTube.
-            </div>
+    <!-- Полноэкранный режим для опубликованного сайта -->
+    <div id="fullscreenView">
+        <button id="backButton" onclick="exitFullscreen()">← Назад</button>
+        <iframe id="fullscreenFrame"></iframe>
+    </div>
+
+    <!-- Модальное окно нового проекта -->
+    <div id="modalOverlay">
+        <div id="modal">
+            <h2>Новый проект</h2>
+            <input type="text" id="newProjectName" placeholder="Название проекта" value="Мой проект">
+            <select id="newProjectType">
+                <option value="python">Python</option>
+                <option value="java">Java</option>
+                <option value="html">HTML</option>
+            </select>
+            <button onclick="createProject()">Создать</button>
+            <button class="close" onclick="hideModal()">Отмена</button>
         </div>
     </div>
 
     <script>
-        (function() {
-            // Элементы DOM
-            const previewArea = document.getElementById('logoPreview');
-            const placeholderMsg = document.getElementById('placeholderMsg');
-            const errorDiv = document.getElementById('errorMessage');
-            const inputField = document.getElementById('youtubeLink');
-            const sendBtn = document.getElementById('sendBtn');
+        // ---------- Глобальные переменные ----------
+        let editor;
+        let projects = [];
+        let currentProjectId = null;
+        let pyWorker = null;
 
-            // Очистка предыдущей ошибки
-            function hideError() {
-                errorDiv.style.display = 'none';
-            }
-
-            function showError(text) {
-                errorDiv.innerText = '❌ ' + text;
-                errorDiv.style.display = 'block';
-            }
-
-            // Проверка, что ссылка содержит YouTube (простейшая)
-            function isYouTubeLink(url) {
-                if (!url) return false;
-                // Разрешаем youtu.be, youtube.com, с www и без
-                const patterns = [
-                    /youtube\.com\/watch\?v=/i,
-                    /youtu\.be\//i,
-                    /youtube\.com\/shorts\//i,
-                    /m\.youtube\.com/i,
-                    /youtube\.com\/embed/i
+        // Загрузка проектов
+        function loadProjects() {
+            const saved = localStorage.getItem('scriptHostProjects');
+            if (saved) {
+                projects = JSON.parse(saved);
+            } else {
+                projects = [
+                    { id: '1', name: 'Привет мир', type: 'python', code: 'print("Hello, World!")' },
+                    { id: '2', name: 'Тест Java', type: 'java', code: 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello Java");\n    }\n}' },
+                    { id: '3', name: 'Моя страница', type: 'html', code: '<h1>Привет!</h1>\n<p>Это HTML.</p>' }
                 ];
-                return patterns.some(pattern => pattern.test(url));
+                saveProjects();
             }
+            renderProjectList();
 
-            // Очистить превью (вернуть плейсхолдер)
-            function resetToPlaceholder() {
-                // Удаляем всё, кроме плейсхолдера
-                previewArea.innerHTML = '';
-                previewArea.appendChild(placeholderMsg);
-            }
-
-            // Функция получения домена/логотипа (не используется напрямую, всё делает прокси, но для картинки берем favicon)
-            function buildLogoImageElement(originalUrl) {
+            // Проверяем параметр view
+            const urlParams = new URLSearchParams(window.location.search);
+            const viewId = urlParams.get('view');
+            if (viewId) {
+                const project = projects.find(p => p.id === viewId && p.type === 'html');
+                if (project) {
+                    showFullscreenHtml(project.code);
+                } else {
+                    alert('Проект не найден или не является HTML');
+                }
+            } else if (window.location.hash) {
                 try {
-                    const urlObj = new URL(originalUrl);
-                    const domain = urlObj.hostname; // www.youtube.com или youtu.be
-                    
-                    // Пытаемся получить логотип через Google Favicon сервис (высокое разрешение)
-                    // или используем стандартный favicon.ico
-                    const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-                    
-                    // Создаём ссылку, которая будет открывать прокси-версию YouTube (через Германию)
-                    const proxyLink = document.createElement('a');
-                    
-                    // ГЛАВНАЯ МАГИЯ: используем CORS-прокси с германским IP (allorigins Win)
-                    // allorigins работает через сервера в Европе, есть немецкие узлы.
-                    // Также добавим параметр, который форсирует Германию (используем .de)
-                    const targetUrl = encodeURIComponent(originalUrl);
-                    
-                    // Прокси с германской локацией (sslproxies.org стиль) — многие бесплатные прокси дают Германию.
-                    // Используем AllOrigins (работает как прокси, европейские сервера, часто Германия)
-                    const proxyEndpoint = `https://api.allorigins.win/raw?url=${targetUrl}`;
-                    
-                    // Но чтобы открывался ИМЕННО оригинальный сайт через германский IP — используем прокси в href.
-                    // При клике откроется новая вкладка с запросом через европейский прокси.
-                    proxyLink.href = proxyEndpoint;
-                    proxyLink.target = '_blank'; // новая вкладка
-                    proxyLink.classList.add('logo-image-link');
-                    
-                    // Картинка логотипа
-                    const img = document.createElement('img');
-                    img.src = faviconUrl;
-                    img.alt = `YouTube Logo (${domain})`;
-                    img.style.width = '100%';
-                    img.style.maxHeight = '140px';
-                    img.style.objectFit = 'contain';
-                    img.style.background = '#0f1b24';
-                    img.style.padding = '15px';
-                    img.style.borderRadius = '16px';
-                    img.style.display = 'block';
-                    img.style.margin = '0 auto';
-                    
-                    // Дополнительно подпись про Германию
-                    const caption = document.createElement('div');
-                    caption.style.marginTop = '10px';
-                    caption.style.fontWeight = '600';
-                    caption.style.color = '#ffd966';
-                    caption.style.background = '#1f3649';
-                    caption.style.padding = '6px 15px';
-                    caption.style.borderRadius = '30px';
-                    caption.style.fontSize = '0.9rem';
-                    caption.style.border = '1px solid #f3b33d';
-                    caption.innerHTML = '🇩🇪 Открыть через Германию (клик по картинке)';
-                    
-                    // Обёртка для красоты
-                    const wrapper = document.createElement('div');
-                    wrapper.style.display = 'flex';
-                    wrapper.style.flexDirection = 'column';
-                    wrapper.style.alignItems = 'center';
-                    wrapper.style.gap = '8px';
-                    
-                    proxyLink.appendChild(img);
-                    wrapper.appendChild(proxyLink);
-                    wrapper.appendChild(caption);
-                    
-                    return wrapper;
-                } catch (e) {
-                    console.warn('Ошибка построения лого:', e);
-                    return null;
+                    const hashData = JSON.parse(atob(window.location.hash.slice(1)));
+                    if (hashData.name && hashData.type && hashData.code) {
+                        projects.push({
+                            id: 'share-' + Date.now(),
+                            name: hashData.name,
+                            type: hashData.type,
+                            code: hashData.code
+                        });
+                        saveProjects();
+                        renderProjectList();
+                        openProject(projects[projects.length-1].id);
+                    }
+                } catch (e) {}
+            } else if (projects.length > 0) {
+                openProject(projects[0].id);
+            }
+        }
+
+        function saveProjects() {
+            localStorage.setItem('scriptHostProjects', JSON.stringify(projects));
+        }
+
+        function renderProjectList() {
+            const listDiv = document.getElementById('projectList');
+            listDiv.innerHTML = '';
+            projects.forEach(proj => {
+                const item = document.createElement('div');
+                item.className = 'project-item';
+                item.innerHTML = `
+                    <span onclick="openProject('${proj.id}')">${proj.name} (${proj.type})</span>
+                    <span class="delete-project" onclick="deleteProject('${proj.id}')">🗑️</span>
+                `;
+                listDiv.appendChild(item);
+            });
+        }
+
+        function openProject(id) {
+            if (pyWorker) stopCode();
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+            currentProjectId = id;
+            document.getElementById('projectName').innerText = project.name;
+            document.getElementById('projectType').innerText = project.type === 'python' ? 'Python' : (project.type === 'java' ? 'Java' : 'HTML');
+            let mode = 'python';
+            if (project.type === 'java') mode = 'text/x-java';
+            else if (project.type === 'html') mode = 'htmlmixed';
+            editor.setOption('mode', mode);
+            editor.setValue(project.code);
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('htmlPreview').style.display = 'none';
+            document.getElementById('stopButton').style.display = 'none';
+            document.getElementById('runButton').style.display = 'inline-block';
+            // Показываем кнопку публикации только для HTML
+            if (project.type === 'html') {
+                document.getElementById('publishButton').style.display = 'inline-block';
+            } else {
+                document.getElementById('publishButton').style.display = 'none';
+            }
+            document.getElementById('shareButton').style.display = 'inline-block';
+            document.getElementById('projectDropdown').style.display = 'none';
+        }
+
+        function deleteProject(id) {
+            if (confirm('Удалить проект?')) {
+                projects = projects.filter(p => p.id !== id);
+                saveProjects();
+                renderProjectList();
+                if (projects.length > 0) openProject(projects[0].id);
+                else {
+                    currentProjectId = null;
+                    editor.setValue('');
+                    document.getElementById('projectName').innerText = 'Нет проекта';
                 }
             }
+        }
 
-            // Основная функция обработки отправки
-            function handleSend() {
-                hideError();
-                
-                let link = inputField.value.trim();
-                if (!link) {
-                    showError('Введи ссылку на YouTube');
-                    return;
-                }
+        function showNewProjectModal() {
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
 
-                // Добавляем https:// если нет протокола
-                if (!link.startsWith('http://') && !link.startsWith('https://')) {
-                    link = 'https://' + link;
-                }
+        function hideModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
 
-                // Проверка YouTube
-                if (!isYouTubeLink(link)) {
-                    showError('Ссылка должна быть на YouTube (youtube.com или youtu.be)');
-                    return;
-                }
+        function createProject() {
+            const name = document.getElementById('newProjectName').value.trim() || 'Новый проект';
+            const type = document.getElementById('newProjectType').value;
+            const id = Date.now().toString();
+            let code = '';
+            if (type === 'python') code = '# Напишите код на Python\nprint("Hello")';
+            else if (type === 'java') code = 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello Java");\n    }\n}';
+            else if (type === 'html') code = '<!DOCTYPE html>\n<html>\n<head>\n    <title>Моя страница</title>\n</head>\n<body>\n    <h1>Привет!</h1>\n</body>\n</html>';
+            projects.push({ id, name, type, code });
+            saveProjects();
+            renderProjectList();
+            openProject(id);
+            hideModal();
+        }
 
-                // Обновляем поле (для красоты)
-                inputField.value = link;
+        // ---------- Запуск кода (Python Worker) ----------
+        function runCode() {
+            if (!currentProjectId) return;
+            const project = projects.find(p => p.id === currentProjectId);
+            if (!project) return;
 
-                // Убираем плейсхолдер и строим превью логотипа
-                const logoWrapper = buildLogoImageElement(link);
-                if (!logoWrapper) {
-                    showError('Не удалось обработать ссылку');
-                    return;
-                }
-
-                // Заменяем содержимое previewArea на новый логотип
-                previewArea.innerHTML = '';
-                previewArea.appendChild(logoWrapper);
+            if (project.type === 'html') {
+                document.getElementById('output').style.display = 'none';
+                document.getElementById('htmlPreview').style.display = 'block';
+                const blob = new Blob([project.code], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                document.getElementById('htmlPreview').src = url;
+                return;
+            } else if (project.type === 'java') {
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('htmlPreview').style.display = 'none';
+                document.getElementById('output').innerText = '⚠️ Запуск Java пока не реализован.';
+                return;
             }
 
-            // Также по клику на кнопку мы отправляем
-            sendBtn.addEventListener('click', handleSend);
+            // Python
+            if (pyWorker) stopCode();
 
-            // Можно по Enter в поле
-            inputField.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSend();
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('htmlPreview').style.display = 'none';
+            document.getElementById('output').innerText = '⏳ Запуск Python в фоне...\n';
+            document.getElementById('runButton').style.display = 'none';
+            document.getElementById('stopButton').style.display = 'inline-block';
+
+            const workerCode = `
+                self.pyodide = null;
+                self.output = [];
+                self.installMsg = '';
+
+                async function init() {
+                    importScripts('https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js');
+                    self.pyodide = await loadPyodide();
+                    self.postMessage({ type: 'ready' });
+                }
+                init();
+
+                self.onmessage = async function(e) {
+                    if (e.data.type === 'run') {
+                        const code = e.data.code;
+                        const packages = e.data.packages || [];
+                        try {
+                            if (packages.length > 0) {
+                                self.installMsg = 'Установка модулей: ' + packages.join(', ');
+                                self.postMessage({ type: 'install', msg: self.installMsg });
+                                await self.pyodide.loadPackage('micropip');
+                                const micropip = self.pyodide.pyimport('micropip');
+                                for (let pkg of packages) {
+                                    await micropip.install(pkg);
+                                }
+                            }
+                            self.pyodide.runPython(\`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+                            \`);
+                            await self.pyodide.runPythonAsync(code);
+                            const result = self.pyodide.runPython('sys.stdout.getvalue()');
+                            self.postMessage({ type: 'output', data: result });
+                        } catch (err) {
+                            self.postMessage({ type: 'error', data: err.toString() });
+                        }
+                    } else if (e.data.type === 'stop') {
+                        self.close();
+                    }
+                };
+            `;
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const workerUrl = URL.createObjectURL(blob);
+            pyWorker = new Worker(workerUrl);
+
+            pyWorker.onmessage = (e) => {
+                if (e.data.type === 'ready') {
+                    const code = project.code;
+                    const packages = [];
+                    if (code.includes('import telegram') || code.includes('from telegram')) packages.push('python-telegram-bot');
+                    if (code.includes('import requests')) packages.push('requests');
+                    if (code.includes('import numpy')) packages.push('numpy');
+                    const uniquePackages = [...new Set(packages)];
+                    pyWorker.postMessage({ type: 'run', code: code, packages: uniquePackages });
+                } else if (e.data.type === 'output') {
+                    document.getElementById('output').innerText += e.data.data;
+                } else if (e.data.type === 'error') {
+                    document.getElementById('output').innerText += '\\n❌ ' + e.data.data;
+                } else if (e.data.type === 'install') {
+                    document.getElementById('installMsg').innerText = e.data.msg;
+                }
+            };
+
+            pyWorker.onerror = (err) => {
+                document.getElementById('output').innerText += '\\n❌ Worker error: ' + err.message;
+                stopCode();
+            };
+        }
+
+        function stopCode() {
+            if (pyWorker) {
+                pyWorker.terminate();
+                pyWorker = null;
+            }
+            document.getElementById('stopButton').style.display = 'none';
+            document.getElementById('runButton').style.display = 'inline-block';
+            document.getElementById('installMsg').innerText = '';
+        }
+
+        // ---------- Публикация HTML (отдельная ссылка) ----------
+        function publishHtml() {
+            if (!currentProjectId) return;
+            const project = projects.find(p => p.id === currentProjectId);
+            if (!project || project.type !== 'html') return;
+
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', project.id);
+            url.hash = ''; // убираем хэш
+            const publishUrl = url.toString();
+
+            navigator.clipboard.writeText(publishUrl).then(() => {
+                alert('Ссылка на опубликованный сайт скопирована!');
+            });
+        }
+
+        // Показать HTML в полноэкранном режиме
+        function showFullscreenHtml(htmlCode) {
+            const fullDiv = document.getElementById('fullscreenView');
+            const frame = document.getElementById('fullscreenFrame');
+            const blob = new Blob([htmlCode], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            frame.src = url;
+            fullDiv.style.display = 'block';
+        }
+
+        function exitFullscreen() {
+            document.getElementById('fullscreenView').style.display = 'none';
+            document.getElementById('fullscreenFrame').src = '';
+        }
+
+        // ---------- Поделиться ссылкой на проект (для Python/Java/HTML) ----------
+        function copyShareLink() {
+            if (!currentProjectId) return;
+            const project = projects.find(p => p.id === currentProjectId);
+            if (!project) return;
+            const data = {
+                name: project.name,
+                type: project.type,
+                code: project.code
+            };
+            const encoded = btoa(JSON.stringify(data));
+            const url = window.location.href.split('#')[0] + '#' + encoded;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Ссылка на проект скопирована!');
+            });
+        }
+
+        // ---------- Инициализация редактора ----------
+        function initEditor() {
+            const editorDiv = document.getElementById('editor');
+            editor = CodeMirror(editorDiv, {
+                lineNumbers: true,
+                theme: 'dracula',
+                indentUnit: 4,
+                tabSize: 4,
+                lineWrapping: true,
+                autoCloseBrackets: true,
+                matchBrackets: true
+            });
+            editor.setSize('100%', '100%');
+            editor.on('change', () => {
+                if (currentProjectId) {
+                    const project = projects.find(p => p.id === currentProjectId);
+                    if (project) {
+                        project.code = editor.getValue();
+                        saveProjects();
+                    }
                 }
             });
+        }
 
-            // Начальный сброс (на случай если placeholder исчез)
-            resetToPlaceholder();
+        // Меню проектов
+        document.getElementById('menuButton').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById('projectDropdown');
+            dropdown.style.display = dropdown.style.display === 'flex' ? 'none' : 'flex';
+        });
 
-            // Пример автоматической загрузки при старте (чтобы сразу был пример с Германией)
-            // Раскомментировать, если нужно демо сразу:
-            setTimeout(() => {
-                // Заполним примером, но только если поле не пустое
-                if (inputField.value.trim() !== '') {
-                    handleSend(); // показывает логотип для примера
-                }
-            }, 300);
-        })();
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('projectDropdown');
+            if (!dropdown.contains(e.target) && e.target.id !== 'menuButton') {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        window.onload = () => {
+            initEditor();
+            loadProjects();
+        };
     </script>
-
-    <!-- Дополнительное объяснение: Прокси-сервер allorigins находится в Европе (часто германские IP) 
-    Это обеспечивает обход региональных блокировок. При клике на логотип откроется YouTube через германский IP. 
-    Также для favicon используем Google сервис. -->
 </body>
 </html>
