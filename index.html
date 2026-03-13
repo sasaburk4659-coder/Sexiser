@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Mistral AI · Компакт</title>
+    <title>Mistral AI · Полный функционал</title>
     <!-- JSZip -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <!-- Font Awesome -->
@@ -12,71 +12,73 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-        body { background:#0a0a0a; color:#fff; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-        .header { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#111; border-bottom:1px solid #2a2a2a; height:56px; }
-        .logo { display:flex; align-items:center; gap:6px; font-size:18px; font-weight:600; color:#ff5500; }
-        .stars { background:#1e1e1e; border:1px solid #2a2a2a; border-radius:30px; padding:4px 12px; display:flex; align-items:center; gap:6px; cursor:pointer; font-size:14px; }
-        .stars i { color:#ffb400; }
-        .avatar { width:36px; height:36px; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-        .main { display:flex; flex:1; overflow:hidden; }
-        .sidebar { width:260px; background:#111; border-right:1px solid #2a2a2a; display:flex; flex-direction:column; transition:transform .3s; }
-        .sidebar-header { padding:16px; border-bottom:1px solid #2a2a2a; display:flex; justify-content:space-between; }
-        .sidebar-header h3 { color:#aaa; font-size:14px; }
-        .new-chat { background:none; border:1px solid #2a2a2a; color:#fff; width:32px; height:32px; border-radius:8px; cursor:pointer; }
-        .chat-list { flex:1; overflow-y:auto; padding:12px; }
-        .chat-item { display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; margin-bottom:4px; cursor:pointer; border:1px solid transparent; }
-        .chat-item:hover { background:#1e1e1e; border-color:#2a2a2a; }
-        .chat-item.active { background:#1e1e1e; border-left:3px solid #ff5500; }
-        .chat-info { flex:1; min-width:0; }
-        .chat-name { font-weight:500; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .chat-preview { font-size:12px; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .delete-chat { opacity:0; background:none; border:none; color:#888; cursor:pointer; padding:4px; }
-        .chat-item:hover .delete-chat { opacity:1; }
-        .chat-area { flex:1; display:flex; flex-direction:column; background:#0a0a0a; min-width:0; }
-        .chat-header { padding:12px 16px; border-bottom:1px solid #2a2a2a; display:flex; align-items:center; gap:8px; background:#111; flex-wrap:wrap; }
-        .menu-toggle { display:none; background:none; border:1px solid #2a2a2a; color:#fff; width:36px; height:36px; border-radius:8px; cursor:pointer; }
-        .current-chat { font-size:16px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
-        .tools { display:flex; gap:6px; }
-        .tool-btn { background:none; border:1px solid #2a2a2a; color:#aaa; width:36px; height:36px; border-radius:8px; cursor:pointer; }
-        .messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:16px; }
-        .msg { display:flex; gap:10px; max-width:95%; word-break:break-word; }
-        .msg.user { margin-left:auto; flex-direction:row-reverse; }
-        .msg-avatar { width:36px; height:36px; border-radius:50%; background:#2a2a2a; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
-        .assistant .msg-avatar { background:linear-gradient(135deg,#ff5500,#ff3300); color:white; }
-        .user .msg-avatar { background:#333; color:#ff5500; }
-        .bubble { background:#1a1a1a; padding:10px 14px; border-radius:16px; border:1px solid #2a2a2a; font-size:14px; line-height:1.5; }
-        .user .bubble { background:linear-gradient(135deg,#ff5500,#ff3300); border:none; color:white; }
-        pre { margin:8px 0; border-radius:10px; background:#0f0f0f; border:1px solid #2a2a2a; max-width:100%; overflow-x:auto; white-space:pre-wrap; }
-        .input-panel { padding:12px 16px; border-top:1px solid #2a2a2a; background:#111; }
-        .input-row { display:flex; gap:8px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:30px; padding:4px 4px 4px 16px; }
-        .input-row input { flex:1; background:none; border:none; color:#fff; font-size:14px; padding:8px 0; outline:none; }
-        .send-btn { background:linear-gradient(135deg,#ff5500,#ff3300); color:#fff; width:42px; height:42px; border-radius:50%; border:none; cursor:pointer; }
-        .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px; z-index:1000; }
-        .modal.active { display:flex; }
-        .modal-content { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:20px; padding:20px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; position:relative; }
-        .modal-close { position:absolute; top:12px; right:12px; background:none; border:none; color:#888; font-size:20px; cursor:pointer; }
-        .modal-title { font-size:18px; font-weight:600; margin-bottom:16px; padding-right:30px; }
-        .modal-input { width:100%; background:#0a0a0a; border:1px solid #2a2a2a; border-radius:10px; padding:10px 12px; color:#fff; margin-bottom:12px; }
-        .modal-btn { background:#ff5500; color:#fff; border:none; padding:8px 16px; border-radius:30px; font-weight:600; cursor:pointer; }
-        .modal-btn.secondary { background:#2a2a2a; }
-        .profile-menu { position:absolute; top:60px; right:12px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:8px; display:none; flex-direction:column; min-width:160px; z-index:200; }
-        .profile-menu.active { display:flex; }
-        .profile-item { padding:8px 12px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:8px; font-size:14px; }
-        .profile-item:hover { background:#2a2a2a; }
-        .progress-bar { width:100%; height:4px; background:#2a2a2a; border-radius:2px; overflow:hidden; margin:10px 0; }
-        .progress-fill { height:100%; background:#ff5500; width:0%; }
-        .game-frame { width:100%; height:300px; border:1px solid #2a2a2a; border-radius:12px; background:#fff; margin-top:10px; }
-        @media (max-width:768px) {
-            .sidebar { position:fixed; left:0; top:56px; bottom:0; transform:translateX(-100%); width:85%; max-width:300px; }
-            .sidebar.open { transform:translateX(0); }
-            .menu-toggle { display:block; }
-            .logo-text { display:none; }
-            .msg { max-width:98%; }
+        /* ========== СТИЛИ (ПОЛНОСТЬЮ СОХРАНЕНЫ) ========== */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+        body{background:#0a0a0a;color:#fff;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+        .header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#111;border-bottom:1px solid #2a2a2a;height:56px;}
+        .logo{display:flex;align-items:center;gap:6px;font-size:18px;font-weight:600;color:#ff5500;}
+        .stars{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:30px;padding:4px 12px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;white-space:nowrap;}
+        .stars i{color:#ffb400;}
+        .avatar{width:36px;height:36px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+        .main{display:flex;flex:1;overflow:hidden;}
+        .sidebar{width:260px;background:#111;border-right:1px solid #2a2a2a;display:flex;flex-direction:column;transition:transform .3s;}
+        .sidebar-header{padding:16px;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;}
+        .sidebar-header h3{color:#aaa;font-size:14px;}
+        .new-chat{background:none;border:1px solid #2a2a2a;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;}
+        .chat-list{flex:1;overflow-y:auto;padding:12px;}
+        .chat-item{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;margin-bottom:4px;cursor:pointer;border:1px solid transparent;}
+        .chat-item:hover{background:#1e1e1e;border-color:#2a2a2a;}
+        .chat-item.active{background:#1e1e1e;border-left:3px solid #ff5500;}
+        .chat-info{flex:1;min-width:0;}
+        .chat-name{font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .chat-preview{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .delete-chat{opacity:0;background:none;border:none;color:#888;cursor:pointer;padding:4px;}
+        .chat-item:hover .delete-chat{opacity:1;}
+        .chat-area{flex:1;display:flex;flex-direction:column;background:#0a0a0a;min-width:0;}
+        .chat-header{padding:12px 16px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:8px;background:#111;flex-wrap:wrap;}
+        .menu-toggle{display:none;background:none;border:1px solid #2a2a2a;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;}
+        .current-chat{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+        .tools{display:flex;gap:6px;}
+        .tool-btn{background:none;border:1px solid #2a2a2a;color:#aaa;width:36px;height:36px;border-radius:8px;cursor:pointer;}
+        .messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px;}
+        .msg{display:flex;gap:10px;max-width:95%;word-break:break-word;}
+        .msg.user{margin-left:auto;flex-direction:row-reverse;}
+        .msg-avatar{width:36px;height:36px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+        .assistant .msg-avatar{background:linear-gradient(135deg,#ff5500,#ff3300);color:white;}
+        .user .msg-avatar{background:#333;color:#ff5500;}
+        .bubble{background:#1a1a1a;padding:10px 14px;border-radius:16px;border:1px solid #2a2a2a;font-size:14px;line-height:1.5;word-break:break-word;}
+        .user .bubble{background:linear-gradient(135deg,#ff5500,#ff3300);border:none;color:white;}
+        pre{margin:8px 0;border-radius:10px;background:#0f0f0f;border:1px solid #2a2a2a;max-width:100%;overflow-x:auto;white-space:pre-wrap;}
+        .input-panel{padding:12px 16px;border-top:1px solid #2a2a2a;background:#111;}
+        .input-row{display:flex;gap:8px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:30px;padding:4px 4px 4px 16px;}
+        .input-row input{flex:1;background:none;border:none;color:#fff;font-size:14px;padding:8px 0;outline:none;}
+        .send-btn{background:linear-gradient(135deg,#ff5500,#ff3300);color:#fff;width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;}
+        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px;z-index:1000;}
+        .modal.active{display:flex;}
+        .modal-content{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:20px;padding:20px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative;}
+        .modal-close{position:absolute;top:12px;right:12px;background:none;border:none;color:#888;font-size:20px;cursor:pointer;}
+        .modal-title{font-size:18px;font-weight:600;margin-bottom:16px;padding-right:30px;}
+        .modal-input{width:100%;background:#0a0a0a;border:1px solid #2a2a2a;border-radius:10px;padding:10px 12px;color:#fff;margin-bottom:12px;}
+        .modal-btn{background:#ff5500;color:#fff;border:none;padding:8px 16px;border-radius:30px;font-weight:600;cursor:pointer;}
+        .modal-btn.secondary{background:#2a2a2a;}
+        .profile-menu{position:absolute;top:60px;right:12px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:8px;display:none;flex-direction:column;min-width:160px;z-index:200;}
+        .profile-menu.active{display:flex;}
+        .profile-item{padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:14px;}
+        .profile-item:hover{background:#2a2a2a;}
+        .progress-bar{width:100%;height:4px;background:#2a2a2a;border-radius:2px;overflow:hidden;margin:10px 0;}
+        .progress-fill{height:100%;background:#ff5500;width:0%;}
+        .game-frame{width:100%;height:300px;border:1px solid #2a2a2a;border-radius:12px;background:#fff;margin-top:10px;}
+        @media (max-width:768px){
+            .sidebar{position:fixed;left:0;top:56px;bottom:0;transform:translateX(-100%);width:85%;max-width:300px;}
+            .sidebar.open{transform:translateX(0);}
+            .menu-toggle{display:block;}
+            .logo-text{display:none;}
+            .msg{max-width:98%;}
         }
     </style>
 </head>
 <body>
+    <!-- Шапка -->
     <div class="header">
         <div class="logo"><i class="fas fa-bolt"></i><span class="logo-text">Mistral AI</span></div>
         <div style="display:flex; gap:10px;">
@@ -95,6 +97,7 @@
     </div>
 
     <div class="main">
+        <!-- Боковая панель -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3><i class="far fa-comment-dots"></i> Чаты</h3>
@@ -106,6 +109,7 @@
             </div>
         </aside>
 
+        <!-- Чат -->
         <main class="chat-area">
             <div class="chat-header">
                 <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -115,7 +119,12 @@
                     <button class="tool-btn" onclick="quickAudio()"><i class="fas fa-music"></i></button>
                 </div>
             </div>
-            <div class="messages" id="messages"></div>
+            <div class="messages" id="messages">
+                <div class="msg assistant">
+                    <div class="msg-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="bubble">Добро пожаловать! Войдите или зарегистрируйтесь, чтобы начать.</div>
+                </div>
+            </div>
             <div class="input-panel">
                 <div class="input-row">
                     <input type="text" id="messageInput" placeholder="Сообщение..." disabled>
@@ -125,7 +134,7 @@
         </main>
     </div>
 
-    <!-- Модальные окна -->
+    <!-- Модальные окна (все сохранены) -->
     <div class="modal active" id="authModal">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="hideModal('authModal')">✕</button>
@@ -163,7 +172,7 @@
             <div><strong>Username:</strong> <span id="profileUser"></span></div>
             <div><strong>Тариф:</strong> <span id="profileTariff"></span></div>
             <div><strong>Звёзд:</strong> <span id="profileStars"></span></div>
-            <button class="modal-btn secondary" onclick="changeUsername()">Изменить username</button>
+            <button class="modal-btn secondary" onclick="changeUsername()" style="margin-top:16px;">Изменить username</button>
         </div>
     </div>
 
@@ -213,12 +222,12 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <input class="modal-input" id="newPromoCode" placeholder="Код" style="flex:1;">
                 <input class="modal-input" type="number" id="newPromoStars" placeholder="Звёзд" style="flex:1;">
-                <input class="modal-input" type="number" id="newPromoUses" placeholder="Макс. использований" style="flex:1;">
+                <input class="modal-input" type="number" id="newPromoUses" placeholder="Макс. исп." style="flex:1;">
                 <input class="modal-input" type="date" id="newPromoExpire" style="flex:1;">
                 <select class="modal-input" id="newPromoTariff" style="flex:1;"><option value="none">Без тарифа</option><option value="premium">Премиум</option></select>
                 <button class="modal-btn" onclick="adminCreatePromo()">Создать</button>
             </div>
-            <div class="promo-list" id="promoList"></div>
+            <div id="promoList" style="margin-top:16px; max-height:200px; overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -252,8 +261,28 @@
 
     <script>
         // ==================== НАСТРОЙКИ ====================
-        const OPENROUTER_KEY = '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';
-        const MODELS = ['meta-llama/llama-3.1-8b-instruct','google/gemma-2-9b-it','qwen/qwen2.5-coder-7b-instruct','mistralai/mistral-7b-instruct-v0.3','deepseek/deepseek-coder-6.7b-instruct'];
+        // === Извлечение ключа из URL ===
+        (function() {
+            const path = window.location.pathname;
+            const match = path.match(/\/API\/([^\/]+)$/);
+            if (match) {
+                const key = match[1];
+                localStorage.setItem('openrouter_key', key);
+                console.log('API key loaded from URL');
+            }
+        })();
+
+        // Ключ OpenRouter из localStorage (пустая строка, если нет)
+        const OPENROUTER_KEY = localStorage.getItem('openrouter_key') || '';
+
+        // Модели (список)
+        const MODELS = [
+            'meta-llama/llama-3.1-8b-instruct',
+            'google/gemma-2-9b-it',
+            'qwen/qwen2.5-coder-7b-instruct',
+            'mistralai/mistral-7b-instruct-v0.3',
+            'deepseek/deepseek-coder-6.7b-instruct'
+        ];
 
         // ==================== ДАННЫЕ ====================
         let users = JSON.parse(localStorage.getItem('users')) || {};
@@ -282,198 +311,132 @@
         // ==================== АВТОРИЗАЦИЯ ====================
         function showRegisterForm() { hideModal('authModal'); showModal('registerModal'); }
         function register() {
-            let email = document.getElementById('regEmail').value.trim();
-            let username = document.getElementById('regUser').value.trim();
-            let pass = document.getElementById('regPass').value.trim();
-            let msg = document.getElementById('regMsg');
-            if (!email || !username || !pass) { msg.innerText = 'Заполните все поля'; return; }
-            if (users[email]) { msg.innerText = 'Email уже есть'; return; }
-            if (Object.values(users).some(u => u.username === username)) { msg.innerText = 'Username занят'; return; }
-            users[email] = { email, username, pass, stars: 2000, tariff: 'free', lastBonus: new Date().toDateString() };
+            let e = document.getElementById('regEmail').value.trim(), u = document.getElementById('regUser').value.trim(), p = document.getElementById('regPass').value.trim(), m = document.getElementById('regMsg');
+            if (!e || !u || !p) { m.innerText = 'Заполните все поля'; return; }
+            if (users[e]) { m.innerText = 'Email уже есть'; return; }
+            if (Object.values(users).some(x => x.username === u)) { m.innerText = 'Username занят'; return; }
+            users[e] = { email: e, username: u, pass: p, stars: 2000, tariff: 'free', lastBonus: new Date().toDateString() };
             localStorage.setItem('users', JSON.stringify(users));
-            msg.innerText = 'Регистрация успешна! Войдите.';
+            m.innerText = 'Регистрация успешна! Войдите.';
             setTimeout(() => { hideModal('registerModal'); showModal('authModal'); }, 1500);
         }
         function login() {
-            let email = document.getElementById('authEmail').value.trim();
-            let pass = document.getElementById('authPass').value.trim();
-            let msg = document.getElementById('authMsg');
-            if (!email || !pass) { msg.innerText = 'Введите данные'; return; }
-            let user = users[email];
-            if (!user || user.pass !== pass) { msg.innerText = 'Неверный email или пароль'; return; }
-            current = user;
-            localStorage.setItem('currentUser', email);
-            dailyBonus();
-            hideModal('authModal');
-            updateUI();
+            let e = document.getElementById('authEmail').value.trim(), p = document.getElementById('authPass').value.trim(), m = document.getElementById('authMsg');
+            if (!e || !p) { m.innerText = 'Введите данные'; return; }
+            let user = users[e];
+            if (!user || user.pass !== p) { m.innerText = 'Неверный email/пароль'; return; }
+            current = user; localStorage.setItem('currentUser', e); dailyBonus(); hideModal('authModal'); updateUI();
         }
-        function logout() {
-            current = null;
-            localStorage.removeItem('currentUser');
-            updateUI();
-            toggleProfileMenu(false);
-            showModal('authModal');
-        }
+        function logout() { current = null; localStorage.removeItem('currentUser'); updateUI(); toggleProfileMenu(false); showModal('authModal'); }
 
-        // ==================== ЕЖЕДНЕВНЫЙ БОНУС ====================
+        // ==================== БОНУС ====================
         function dailyBonus() {
             if (!current) return;
             let today = new Date().toDateString();
             if (current.lastBonus !== today) {
                 let bonus = current.tariff === 'premium' ? 650 : 300;
-                current.stars += bonus;
-                current.lastBonus = today;
-                localStorage.setItem('users', JSON.stringify(users));
-                alert(`✨ +${bonus} звёзд за новый день!`);
-                updateUI();
+                current.stars += bonus; current.lastBonus = today; saveUsers(); alert(`✨ +${bonus} звёзд!`); updateUI();
             }
         }
 
         // ==================== ЧАТЫ ====================
-        function newChat() {
-            let id = Date.now().toString();
-            chats.push({ id, name: 'Новый чат', messages: [] });
-            localStorage.setItem('chats', JSON.stringify(chats));
-            renderChats();
-            switchChat(id);
-        }
-        function deleteChat(id, e) {
-            e.stopPropagation();
-            if (chats.length === 1) { alert('Нельзя удалить последний чат'); return; }
-            chats = chats.filter(c => c.id !== id);
-            localStorage.setItem('chats', JSON.stringify(chats));
-            if (currentChatId === id) currentChatId = chats[0].id;
-            renderChats();
-            loadChat(currentChatId);
-        }
-        function switchChat(id) {
-            currentChatId = id;
-            localStorage.setItem('currentChatId', id);
-            renderChats();
-            loadChat(id);
-            if (window.innerWidth <= 768) toggleSidebar();
-        }
+        function newChat() { let id = Date.now().toString(); chats.push({ id, name: 'Новый чат', messages: [] }); saveChats(); renderChats(); switchChat(id); }
+        function deleteChat(id, e) { e.stopPropagation(); if (chats.length === 1) { alert('Нельзя удалить последний чат'); return; } chats = chats.filter(c => c.id !== id); if (currentChatId === id) currentChatId = chats[0].id; saveChats(); renderChats(); loadChat(currentChatId); }
+        function switchChat(id) { currentChatId = id; localStorage.setItem('currentChatId', id); renderChats(); loadChat(id); if (window.innerWidth <= 768) toggleSidebar(); }
         function loadChat(id) {
-            let chat = chats.find(c => c.id === id);
-            if (!chat) return;
+            let chat = chats.find(c => c.id === id); if (!chat) return;
             document.getElementById('currentChat').innerText = chat.name;
-            let cont = document.getElementById('messages');
-            cont.innerHTML = '';
+            let cont = document.getElementById('messages'); cont.innerHTML = '';
             chat.messages.forEach(m => displayMessage(m.role, m.content, m.type, m.data));
             hljs.highlightAll();
         }
         function renderChats() {
             let html = '';
             chats.forEach(c => {
-                let preview = c.messages.length ? (c.messages[c.messages.length-1].content.substring(0,20) + '…') : 'Нет сообщений';
-                html += `<div class="chat-item ${c.id===currentChatId?'active':''}" onclick="switchChat('${c.id}')">
-                    <div class="chat-info"><div class="chat-name">${escape(c.name)}</div><div class="chat-preview">${escape(preview)}</div></div>
-                    <button class="delete-chat" onclick="deleteChat('${c.id}',event)"><i class="fas fa-times"></i></button>
-                </div>`;
+                let prev = c.messages.length ? c.messages[c.messages.length - 1].content.substring(0, 20) + '…' : 'Нет сообщений';
+                html += `<div class="chat-item ${c.id === currentChatId ? 'active' : ''}" onclick="switchChat('${c.id}')"><div class="chat-info"><div class="chat-name">${escape(c.name)}</div><div class="chat-preview">${escape(prev)}</div></div><button class="delete-chat" onclick="deleteChat('${c.id}',event)"><i class="fas fa-times"></i></button></div>`;
             });
             document.getElementById('chatList').innerHTML = html;
         }
+        function saveChats() { localStorage.setItem('chats', JSON.stringify(chats)); }
 
         // ==================== ОТПРАВКА СООБЩЕНИЙ ====================
         async function sendMessage() {
             if (!current) { showModal('authModal'); return; }
-            let inp = document.getElementById('messageInput');
-            let text = inp.value.trim();
-            if (!text) return;
-            let chat = chats.find(c => c.id === currentChatId);
-            if (!chat) return;
-
-            chat.messages.push({ role: 'user', content: text, type: 'text' });
-            displayMessage('user', text);
-            inp.value = '';
-            saveChats();
+            let inp = document.getElementById('messageInput'), text = inp.value.trim(); if (!text) return;
+            let chat = chats.find(c => c.id === currentChatId); if (!chat) return;
+            chat.messages.push({ role: 'user', content: text, type: 'text' }); displayMessage('user', text); inp.value = ''; saveChats();
 
             let isImg = text.startsWith('нарисуй') || text.startsWith('/image');
             let isAud = text.startsWith('аудио') || text.startsWith('/audio');
             let isCode = !isImg && !isAud && (text.includes('код') || text.includes('функц') || text.includes('script'));
 
-            let cost = isImg || isAud ? 100 : isCode ? 50 : 0;
-            if (cost > 0 && current.stars < cost) {
-                displayMessage('assistant', `❌ Нужно ${cost} ⭐`);
-                return;
-            }
+            let cost = (isImg || isAud) ? 100 : isCode ? 50 : 0;
+            if (cost > 0 && current.stars < cost) { displayMessage('assistant', `❌ Нужно ${cost} ⭐`); return; }
             if (cost > 0) { current.stars -= cost; updateUI(); saveUsers(); }
 
             showTyping();
             try {
-                if (isImg) await generateImage(text.replace(/нарисуй|\/image/i,'').trim()||'пейзаж', chat);
-                else if (isAud) await generateAudio(text.replace(/аудио|\/audio/i,'').trim()||'музыка', chat);
-                else if (isCode) await generateCode(text, chat);
-                else await generateText(text, chat);
+                if (isImg) {
+                    let prompt = text.replace(/нарисуй|\/image/i, '').trim() || 'пейзаж';
+                    let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+                    chat.messages.push({ role: 'assistant', content: url, type: 'image' }); displayMessage('assistant', url, 'image'); saveChats();
+                } else if (isAud) {
+                    let prompt = text.replace(/аудио|\/audio/i, '').trim() || 'музыка';
+                    await generateAudio(prompt, chat);
+                } else if (isCode) {
+                    await generateCode(text, chat);
+                } else {
+                    let res = await callModel(MODELS[0], text);
+                    let content = res.choices[0].message.content;
+                    chat.messages.push({ role: 'assistant', content, type: 'text' }); displayMessage('assistant', content); saveChats();
+                }
             } catch (e) {
                 if (cost > 0) { current.stars += cost; updateUI(); saveUsers(); }
-                displayMessage('assistant', '⚠️ Ошибка: ' + e.message + (cost?' (звёзды возвращены)':''));
+                displayMessage('assistant', '⚠️ Ошибка: ' + e.message + (cost ? ' (звёзды возвращены)' : ''));
             } finally { hideTyping(); }
         }
 
-        async function generateText(prompt, chat) {
-            let res = await callModel(MODELS[0], prompt);
-            let content = res.choices[0].message.content;
-            chat.messages.push({ role: 'assistant', content, type: 'text' });
-            displayMessage('assistant', content);
-            saveChats();
-        }
-
         async function generateCode(prompt, chat) {
-            let promises = MODELS.map(m => callModel(m, prompt).catch(()=>null));
+            let promises = MODELS.map(m => callModel(m, prompt).catch(() => null));
             let results = await Promise.allSettled(promises);
             let codes = [];
-            for (let r of results) {
-                if (r.status === 'fulfilled' && r.value) {
-                    let txt = r.value.choices[0].message.content;
-                    let code = extractCode(txt);
-                    if (code) codes.push(code);
-                }
+            for (let r of results) if (r.status === 'fulfilled' && r.value) {
+                let txt = r.value.choices[0].message.content;
+                let code = extractCode(txt);
+                if (code) codes.push(code);
             }
             if (!codes.length) throw new Error('Ни одна модель не вернула код');
-            let best = codes.reduce((a,b) => a.length > b.length ? a : b);
+            let best = codes.reduce((a, b) => a.length > b.length ? a : b);
             let ext = 'txt', fname = 'code.txt';
-            if (prompt.includes('python')) { ext='py'; fname='script.py'; }
-            else if (prompt.includes('javascript')||prompt.includes('js')) { ext='js'; fname='script.js'; }
-            else if (prompt.includes('html')) { ext='html'; fname='index.html'; }
-            else if (prompt.includes('json')) { ext='json'; fname='data.json'; }
+            if (prompt.includes('python')) { ext = 'py'; fname = 'script.py'; }
+            else if (prompt.includes('javascript') || prompt.includes('js')) { ext = 'js'; fname = 'script.js'; }
+            else if (prompt.includes('html')) { ext = 'html'; fname = 'index.html'; }
+            else if (prompt.includes('json')) { ext = 'json'; fname = 'data.json'; }
             let m = prompt.match(/назови файл\s+(\S+)/i) || prompt.match(/имя файла\s+(\S+)/i);
-            if (m) { fname = m[1]; if (!fname.includes('.')) fname += '.'+ext; }
-            let blob = new Blob([best], {type:'text/plain'});
-            let url = URL.createObjectURL(blob);
-            let file = { name: fname, url, content: best, size: (blob.size/1024).toFixed(1)+' KB' };
-            displayFile(file);
-            chat.messages.push({ role: 'assistant', type: 'file', data: file });
-            saveChats();
+            if (m) { fname = m[1]; if (!fname.includes('.')) fname += '.' + ext; }
+            let blob = new Blob([best], { type: 'text/plain' }), url = URL.createObjectURL(blob);
+            let file = { name: fname, url, content: best, size: (blob.size / 1024).toFixed(1) + ' KB' };
+            displayFile(file); chat.messages.push({ role: 'assistant', type: 'file', data: file }); saveChats();
         }
 
-        function extractCode(t) {
-            let m = t.match(/```(?:\w+)?\n([\s\S]*?)```/);
-            return m ? m[1].trim() : null;
-        }
+        function extractCode(t) { let m = t.match(/```(?:\w+)?\n([\s\S]*?)```/); return m ? m[1].trim() : null; }
 
-        async function generateImage(p, chat) {
-            let url = `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=1024&height=1024&nologo=true`;
-            chat.messages.push({ role: 'assistant', content: url, type: 'image' });
-            displayMessage('assistant', url, 'image');
-            saveChats();
-        }
-
-        async function generateAudio(p, chat) {
+        async function generateAudio(prompt, chat) {
             let res = await fetch("https://api-inference.huggingface.co/models/facebook/musicgen-small", {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ inputs: p })
+                body: JSON.stringify({ inputs: prompt })
             });
             if (!res.ok) throw new Error('Ошибка генерации аудио');
             let blob = await res.blob();
             let url = URL.createObjectURL(blob);
             let html = `<audio controls src="${url}"></audio><br><a href="${url}" download="audio.mp3">Скачать</a>`;
             chat.messages.push({ role: 'assistant', content: html, type: 'html' });
-            displayMessage('assistant', html, 'html');
-            saveChats();
+            displayMessage('assistant', html, 'html'); saveChats();
         }
 
         async function callModel(model, prompt) {
+            if (!OPENROUTER_KEY) throw new Error('API ключ не задан. Перейдите по ссылке с ключом в формате .../API/ваш_ключ');
             let r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${OPENROUTER_KEY}`, 'Content-Type': 'application/json' },
@@ -484,93 +447,55 @@
         }
 
         // ==================== ОТОБРАЖЕНИЕ ====================
-        function displayMessage(role, content, type='text', file=null) {
-            let cont = document.getElementById('messages');
-            let d = document.createElement('div'); d.className = `msg ${role}`;
-            let av = document.createElement('div'); av.className = 'msg-avatar'; av.innerHTML = role==='user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+        function displayMessage(role, content, type = 'text', file = null) {
+            let cont = document.getElementById('messages'), d = document.createElement('div'); d.className = `msg ${role}`;
+            let av = document.createElement('div'); av.className = 'msg-avatar'; av.innerHTML = role === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
             let b = document.createElement('div'); b.className = 'bubble';
-            if (type === 'image') b.innerHTML = `<img src="${content}" style="max-width:100%; border-radius:12px;">`;
+            if (type === 'image') b.innerHTML = `<img src="${content}" style="max-width:100%; border-radius:12px;" onerror="this.src='https://via.placeholder.com/400?text=Ошибка';">`;
             else if (type === 'html') b.innerHTML = content;
-            else if (type === 'file' && file) {
-                b.innerHTML = `<div>✅ ${escape(file.name)} (${file.size})</div><pre>${escape(file.content.substring(0,200))}${file.content.length>200?'…':''}</pre>
-                <div style="display:flex; gap:8px; margin-top:8px;"><button class="modal-btn secondary" onclick="copy('${escape(file.content)}')">📋 Копировать</button><a href="${file.url}" download="${file.name}" class="modal-btn">📥 Скачать</a></div>`;
-            } else b.innerText = content;
+            else if (type === 'file' && file) b.innerHTML = `<div>✅ ${escape(file.name)} (${file.size})</div><pre>${escape(file.content.substring(0, 200))}${file.content.length > 200 ? '…' : ''}</pre><div style="display:flex; gap:8px; margin-top:8px;"><button class="modal-btn secondary" onclick="copy('${escape(file.content)}')">📋 Копировать</button><a href="${file.url}" download="${file.name}" class="modal-btn">📥 Скачать</a></div>`;
+            else b.innerText = content;
             d.appendChild(av); d.appendChild(b); cont.appendChild(d); cont.scrollTop = cont.scrollHeight;
             hljs.highlightAll();
         }
         function displayFile(f) { displayMessage('assistant', '', 'file', f); }
-        function copy(t) { navigator.clipboard.writeText(t).then(()=>alert('Скопировано!')); }
-        function showTyping() {
-            let d = document.createElement('div'); d.id='typing'; d.className='msg assistant';
-            d.innerHTML = '<div class="msg-avatar"><i class="fas fa-robot"></i></div><div class="bubble"><i>печатает...</i></div>';
-            document.getElementById('messages').appendChild(d);
-        }
-        function hideTyping() { let e=document.getElementById('typing'); if(e) e.remove(); }
+        function copy(t) { navigator.clipboard.writeText(t).then(() => alert('Скопировано!')); }
+        function showTyping() { let d = document.createElement('div'); d.id = 'typing'; d.className = 'msg assistant'; d.innerHTML = '<div class="msg-avatar"><i class="fas fa-robot"></i></div><div class="bubble"><i>печатает...</i></div>'; document.getElementById('messages').appendChild(d); }
+        function hideTyping() { let e = document.getElementById('typing'); if (e) e.remove(); }
 
         // ==================== БЛОКНОТ ====================
-        function showNotebook() {
-            if (!current) { showModal('authModal'); return; }
-            document.getElementById('notebookCode').value = localStorage.getItem('nbCode') || 'print("Hello, World!")';
-            document.getElementById('notebookName').value = localStorage.getItem('nbName') || 'script.py';
-            showModal('notebookModal');
-            if (window.innerWidth<=768) toggleSidebar();
-        }
-        function hideNotebook() {
-            localStorage.setItem('nbCode', document.getElementById('notebookCode').value);
-            localStorage.setItem('nbName', document.getElementById('notebookName').value);
-            hideModal('notebookModal');
-        }
-        function downloadFile() {
-            let c = document.getElementById('notebookCode').value;
-            let n = document.getElementById('notebookName').value.trim() || 'code.txt';
-            let b = new Blob([c], {type:'text/plain'}), u = URL.createObjectURL(b);
-            let a = document.createElement('a'); a.href = u; a.download = n; a.click();
-        }
-        function downloadZip() {
-            let c = document.getElementById('notebookCode').value;
-            let n = document.getElementById('notebookName').value.trim() || 'code.txt';
-            let zip = new JSZip(); zip.file(n, c);
-            zip.generateAsync({type:'blob'}).then(b => {
-                let u = URL.createObjectURL(b), a = document.createElement('a');
-                a.href = u; a.download = n.replace(/\.[^/.]+$/,'') + '.zip'; a.click();
-            });
-        }
+        function showNotebook() { if (!current) { showModal('authModal'); return; } document.getElementById('notebookCode').value = localStorage.getItem('nbCode') || 'print("Hello, World!")'; document.getElementById('notebookName').value = localStorage.getItem('nbName') || 'script.py'; showModal('notebookModal'); if (window.innerWidth <= 768) toggleSidebar(); }
+        function hideNotebook() { localStorage.setItem('nbCode', document.getElementById('notebookCode').value); localStorage.setItem('nbName', document.getElementById('notebookName').value); hideModal('notebookModal'); }
+        function downloadFile() { let c = document.getElementById('notebookCode').value, n = document.getElementById('notebookName').value.trim() || 'code.txt'; let b = new Blob([c], { type: 'text/plain' }), u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = n; a.click(); }
+        function downloadZip() { let c = document.getElementById('notebookCode').value, n = document.getElementById('notebookName').value.trim() || 'code.txt'; let zip = new JSZip(); zip.file(n, c); zip.generateAsync({ type: 'blob' }).then(b => { let u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = n.replace(/\.[^/.]+$/, '') + '.zip'; a.click(); }); }
         async function generateNotebookCode() {
-            let p = document.getElementById('notebookPrompt').value.trim();
-            if (!p) { alert('Введите запрос'); return; }
+            let p = document.getElementById('notebookPrompt').value.trim(); if (!p) { alert('Введите запрос'); return; }
             if (current.stars < 50) { alert('Нужно 50 ⭐'); return; }
             current.stars -= 50; updateUI(); saveUsers();
-            let btn = document.getElementById('notebookPrompt'); btn.disabled = true;
-            let old = btn.value; btn.value = '⏳';
+            let btn = document.getElementById('notebookPrompt'); btn.disabled = true; let old = btn.value; btn.value = '⏳';
             try {
                 let res = await callModel(MODELS[0], p);
                 document.getElementById('notebookCode').value = res.choices[0].message.content;
                 localStorage.setItem('nbCode', document.getElementById('notebookCode').value);
-                let ext = 'txt';
-                if (p.includes('python')) ext='py'; else if (p.includes('javascript')) ext='js'; else if (p.includes('html')) ext='html'; else if (p.includes('json')) ext='json';
+                let ext = 'txt'; if (p.includes('python')) ext = 'py'; else if (p.includes('javascript')) ext = 'js'; else if (p.includes('html')) ext = 'html'; else if (p.includes('json')) ext = 'json';
                 let cur = document.getElementById('notebookName').value;
-                if (!cur.includes('.')) document.getElementById('notebookName').value = 'script.'+ext;
-            } catch(e) { alert('Ошибка'); current.stars += 50; updateUI(); saveUsers(); }
+                if (!cur.includes('.')) document.getElementById('notebookName').value = 'script.' + ext;
+            } catch (e) { alert('Ошибка'); current.stars += 50; updateUI(); saveUsers(); }
             finally { btn.disabled = false; btn.value = old; }
         }
 
-        // ==================== ИГРЫ (ПРЕМИУМ) ====================
-        function createGame() {
-            if (!current) { showModal('authModal'); return; }
-            if (current.tariff !== 'premium') { alert('Только для премиум'); return; }
-            showModal('gameModal');
-        }
+        // ==================== ИГРЫ ====================
+        function createGame() { if (!current) { showModal('authModal'); return; } if (current.tariff !== 'premium') { alert('Только для премиум'); return; } showModal('gameModal'); }
         async function generateGame() {
-            let p = document.getElementById('gamePrompt').value.trim();
-            if (!p) { document.getElementById('gameMsg').innerText = 'Введите описание'; return; }
+            let p = document.getElementById('gamePrompt').value.trim(); if (!p) { document.getElementById('gameMsg').innerText = 'Введите описание'; return; }
             if (current.stars < 150) { alert('Нужно 150 ⭐'); return; }
             current.stars -= 150; updateUI(); saveUsers();
             let pb = document.getElementById('gameProgress'), pf = document.getElementById('gameProgressFill');
             pb.style.display = 'block'; pf.style.width = '0%';
             document.getElementById('gameMsg').innerText = 'Генерация...';
-            let promises = MODELS.map(m => callModel(m, p + '. Создай HTML игру. Верни только код в HTML.').catch(()=>null));
+            let promises = MODELS.map(m => callModel(m, p + '. Создай HTML игру. Верни только код в HTML.').catch(() => null));
             let completed = 0;
-            promises.forEach(pr => pr.then(() => { completed++; pf.style.width = (completed/MODELS.length*100)+'%'; }));
+            promises.forEach(pr => pr.then(() => { completed++; pf.style.width = (completed / MODELS.length * 100) + '%'; }));
             let results = await Promise.allSettled(promises);
             let codes = [];
             for (let r of results) {
@@ -580,21 +505,12 @@
                     if (code) codes.push(code);
                 }
             }
-            if (!codes.length) {
-                current.stars += 150; updateUI(); saveUsers();
-                document.getElementById('gameMsg').innerText = 'Ошибка (звёзды возвращены)';
-                pb.style.display = 'none'; return;
-            }
-            let best = codes.reduce((a,b) => a.length>b.length ? a : b);
-            let chat = chats.find(c => c.id === currentChatId);
-            if (!chat) return;
-            let blob = new Blob([best], {type:'text/html'}), url = URL.createObjectURL(blob);
-            let iframe = `<div>🎮 Игра готова:</div><iframe srcdoc="${escape(best)}" class="game-frame" sandbox="allow-scripts allow-same-origin"></iframe>
-                <div style="margin-top:8px; display:flex; gap:8px;"><button class="modal-btn secondary" onclick="copy('${escape(best)}')">📋 Копировать</button><a href="${url}" download="game.html" class="modal-btn">📥 Скачать</a></div>`;
-            chat.messages.push({ role: 'assistant', content: iframe, type: 'html' });
-            displayMessage('assistant', iframe, 'html');
-            saveChats();
-            hideModal('gameModal');
+            if (!codes.length) { current.stars += 150; updateUI(); saveUsers(); document.getElementById('gameMsg').innerText = 'Ошибка (звёзды возвращены)'; pb.style.display = 'none'; return; }
+            let best = codes.reduce((a, b) => a.length > b.length ? a : b);
+            let chat = chats.find(c => c.id === currentChatId); if (!chat) return;
+            let blob = new Blob([best], { type: 'text/html' }), url = URL.createObjectURL(blob);
+            let iframe = `<div>🎮 Игра готова:</div><iframe srcdoc="${escape(best)}" class="game-frame" sandbox="allow-scripts allow-same-origin"></iframe><div style="margin-top:8px; display:flex; gap:8px;"><button class="modal-btn secondary" onclick="copy('${escape(best)}')">📋 Копировать</button><a href="${url}" download="game.html" class="modal-btn">📥 Скачать</a></div>`;
+            chat.messages.push({ role: 'assistant', content: iframe, type: 'html' }); displayMessage('assistant', iframe, 'html'); saveChats(); hideModal('gameModal');
         }
         function extractHtml(t) {
             let m = t.match(/```(?:html)?\n([\s\S]*?)```/i);
@@ -603,25 +519,9 @@
             return null;
         }
 
-        // ==================== ПРОФИЛЬ, ПРОМОКОДЫ, АДМИН ====================
-        function showProfile() {
-            toggleProfileMenu(false);
-            document.getElementById('profileEmail').innerText = current.email;
-            document.getElementById('profileUser').innerText = current.username;
-            document.getElementById('profileTariff').innerText = current.tariff === 'premium' ? 'Премиум' : 'Бесплатный';
-            document.getElementById('profileStars').innerText = current.stars;
-            showModal('profileModal');
-        }
-        function changeUsername() {
-            let n = prompt('Новый username:', current.username);
-            if (n && n.trim()) {
-                if (Object.values(users).some(u => u.username === n.trim() && u.email !== current.email)) { alert('Занято'); return; }
-                current.username = n.trim();
-                saveUsers();
-                hideModal('profileModal');
-                alert('Изменено');
-            }
-        }
+        // ==================== ПРОФИЛЬ, ПРОМОКОДЫ, АДМИНКА ====================
+        function showProfile() { toggleProfileMenu(false); document.getElementById('profileEmail').innerText = current.email; document.getElementById('profileUser').innerText = current.username; document.getElementById('profileTariff').innerText = current.tariff === 'premium' ? 'Премиум' : 'Бесплатный'; document.getElementById('profileStars').innerText = current.stars; showModal('profileModal'); }
+        function changeUsername() { let n = prompt('Новый username:', current.username); if (n && n.trim()) { if (Object.values(users).some(u => u.username === n.trim() && u.email !== current.email)) { alert('Занято'); return; } current.username = n.trim(); saveUsers(); hideModal('profileModal'); alert('Изменено'); } }
         function showPromo() { toggleProfileMenu(false); showModal('promoModal'); }
         function activatePromo() {
             let code = document.getElementById('promoCode').value.trim().toUpperCase();
@@ -629,56 +529,23 @@
             if (!promo) { alert('Не найден'); return; }
             if (promo.usedBy?.some(u => u.user === current.email)) { alert('Уже активирован'); return; }
             if (promo.expire && new Date() > new Date(promo.expire)) { alert('Истёк'); return; }
-            if (promo.maxUses > 0 && (promo.usedBy||[]).length >= promo.maxUses) { alert('Лимит'); return; }
+            if (promo.maxUses > 0 && (promo.usedBy || []).length >= promo.maxUses) { alert('Лимит'); return; }
             if (promo.stars) current.stars += promo.stars;
             if (promo.tariff === 'premium') current.tariff = 'premium';
             if (!promo.usedBy) promo.usedBy = [];
             promo.usedBy.push({ user: current.email, username: current.username, date: new Date().toISOString() });
             localStorage.setItem('promos', JSON.stringify(promos));
-            saveUsers();
-            hideModal('promoModal');
-            alert('Активирован!');
-            updateUI();
+            saveUsers(); hideModal('promoModal'); alert('Активирован!'); updateUI();
         }
-        function showAdmin() {
-            if (current.email !== 'sasaburk4659@gmail.com') return;
-            toggleProfileMenu(false);
-            renderPromoList();
-            showModal('adminModal');
-        }
+        function showAdmin() { if (current.email !== 'sasaburk4659@gmail.com') return; toggleProfileMenu(false); renderPromoList(); showModal('adminModal'); }
         function renderPromoList() {
-            let html = '';
-            promos.forEach(p => {
-                let used = p.usedBy ? p.usedBy.length : 0;
-                let expire = p.expire ? new Date(p.expire).toLocaleDateString() : 'бессрочно';
-                html += `<div class="promo-item"><span><b>${p.code}</b> — ${p.stars}⭐, исп: ${used}/${p.maxUses||'∞'}, до ${expire}</span>
-                <button onclick="deletePromo('${p.code}')" style="background:none;border:none;color:#ff4444;">✕</button></div>`;
-            });
+            let html = ''; promos.forEach(p => { let used = p.usedBy ? p.usedBy.length : 0; let expire = p.expire ? new Date(p.expire).toLocaleDateString() : 'бессрочно'; html += `<div style="background:#0a0a0a; border:1px solid #2a2a2a; border-radius:8px; padding:8px; margin-bottom:6px; display:flex; justify-content:space-between;"><span><b>${p.code}</b> — ${p.stars}⭐, исп: ${used}/${p.maxUses || '∞'}, до ${expire}</span><button onclick="deletePromo('${p.code}')" style="background:none;border:none;color:#ff4444;">✕</button></div>`; });
             document.getElementById('promoList').innerHTML = html;
         }
         function deletePromo(code) { promos = promos.filter(p => p.code !== code); localStorage.setItem('promos', JSON.stringify(promos)); renderPromoList(); }
-        function adminGiveStars() {
-            let id = document.getElementById('adminUser').value.trim();
-            let s = parseInt(document.getElementById('adminStars').value);
-            if (!id || isNaN(s)) return;
-            let u = Object.values(users).find(u => u.email === id || u.username === id);
-            if (!u) { alert('Не найден'); return; }
-            u.stars += s; saveUsers(); alert('Выдано');
-        }
-        function adminResetStars() {
-            let id = document.getElementById('adminResetUser').value.trim();
-            if (!id) return;
-            let u = Object.values(users).find(u => u.email === id || u.username === id);
-            if (!u) { alert('Не найден'); return; }
-            u.stars = 2000; saveUsers(); alert('Сброшено');
-        }
-        function adminChangeTariff() {
-            let id = document.getElementById('adminTariffUser').value.trim();
-            let t = document.getElementById('adminTariffSelect').value;
-            let u = Object.values(users).find(u => u.email === id || u.username === id);
-            if (!u) { alert('Не найден'); return; }
-            u.tariff = t; saveUsers(); alert('Изменён');
-        }
+        function adminGiveStars() { let id = document.getElementById('adminUser').value.trim(), s = parseInt(document.getElementById('adminStars').value); if (!id || isNaN(s)) return; let u = Object.values(users).find(u => u.email === id || u.username === id); if (!u) { alert('Не найден'); return; } u.stars += s; saveUsers(); alert('Выдано'); }
+        function adminResetStars() { let id = document.getElementById('adminResetUser').value.trim(); if (!id) return; let u = Object.values(users).find(u => u.email === id || u.username === id); if (!u) { alert('Не найден'); return; } u.stars = 2000; saveUsers(); alert('Сброшено'); }
+        function adminChangeTariff() { let id = document.getElementById('adminTariffUser').value.trim(), t = document.getElementById('adminTariffSelect').value; let u = Object.values(users).find(u => u.email === id || u.username === id); if (!u) { alert('Не найден'); return; } u.tariff = t; saveUsers(); alert('Изменён'); }
         function adminCreatePromo() {
             let code = document.getElementById('newPromoCode').value.trim().toUpperCase();
             let stars = parseInt(document.getElementById('newPromoStars').value) || 0;
@@ -690,16 +557,11 @@
             promos.push({ code, stars, maxUses, expire, tariff: tariff === 'premium' ? 'premium' : null, usedBy: [] });
             localStorage.setItem('promos', JSON.stringify(promos));
             renderPromoList();
-            document.getElementById('newPromoCode').value = '';
-            document.getElementById('newPromoStars').value = '';
-            document.getElementById('newPromoUses').value = '';
-            document.getElementById('newPromoExpire').value = '';
-            document.getElementById('newPromoTariff').value = 'none';
+            document.getElementById('newPromoCode').value = ''; document.getElementById('newPromoStars').value = ''; document.getElementById('newPromoUses').value = ''; document.getElementById('newPromoExpire').value = ''; document.getElementById('newPromoTariff').value = 'none';
         }
 
         // ==================== ВСПОМОГАТЕЛЬНЫЕ ====================
         function saveUsers() { localStorage.setItem('users', JSON.stringify(users)); }
-        function saveChats() { localStorage.setItem('chats', JSON.stringify(chats)); }
         function updateUI() {
             document.getElementById('starCount').innerText = current ? current.stars : '0';
             document.getElementById('messageInput').disabled = !current;
@@ -710,14 +572,11 @@
         }
         function showModal(id) { document.getElementById(id).classList.add('active'); }
         function hideModal(id) { document.getElementById(id).classList.remove('active'); }
-        function toggleProfileMenu(show) {
-            let m = document.getElementById('profileMenu');
-            m.classList.toggle('active', show !== undefined ? show : !m.classList.contains('active'));
-        }
+        function toggleProfileMenu(show) { let m = document.getElementById('profileMenu'); m.classList.toggle('active', show !== undefined ? show : !m.classList.contains('active')); }
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
         function quickImage() { document.getElementById('messageInput').value = 'нарисуй '; }
         function quickAudio() { document.getElementById('messageInput').value = 'аудио '; }
-        function escape(s) { return s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m]); }
+        function escape(s) { return s.replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[m]); }
     </script>
 </body>
-</html>
+>HTML>
