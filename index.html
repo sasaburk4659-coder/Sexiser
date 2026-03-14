@@ -5,18 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
     <style>
-        /* Все стили без изменений (как в исходном коде) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f0f0; min-height: 100vh; transition: all 0.5s ease; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; min-height: 100vh; transition: all 0.5s ease; }
         .header { background: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
         .header h1 { color: #333; max-width: 1200px; margin: 0 auto; }
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: none; }
-        .content { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 400px; transition: all 0.3s ease; }
+        .content { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 400px; }
         .footer { text-align: center; padding: 20px; color: #666; position: fixed; bottom: 0; width: 100%; display: none; }
         #site-title { color: #333; margin-bottom: 20px; }
         #site-content { line-height: 1.6; color: #666; }
         #api-key-storage { display: none; }
-        /* Стили для динамических функций (как в исходном коде) */
+        /* Стили для динамических функций (можно оставить как в исходном) */
         .chat-container { margin-top: 30px; border-top: 2px solid #e0e0e0; padding-top: 20px; }
         .chat-messages { max-height: 300px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin-bottom: 10px; }
         .chat-message { margin-bottom: 10px; padding: 8px; border-radius: 5px; }
@@ -68,95 +67,81 @@
     </div>
 
     <script>
-        // Получаем API ключ из скрытого элемента
         const API_KEY = document.getElementById('api-key-storage').dataset.key;
-        
-        // Элементы сайта
         const header = document.getElementById('header');
         const container = document.getElementById('container');
         const footer = document.getElementById('footer');
         const siteTitle = document.getElementById('site-title');
         const siteContent = document.getElementById('site-content');
-        
-        // Хранилище активных функций
         let activeFeatures = new Set();
 
         // Функция для получения параметров из query и hash
         function getParams() {
-            // Сначала из query-строки (после ?)
             const urlParams = new URLSearchParams(window.location.search);
-            // Затем из hash (после #) - перезаписывает query
             if (window.location.hash.length > 1) {
                 try {
                     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                    hashParams.forEach((value, key) => {
-                        urlParams.set(key, value);
-                    });
+                    hashParams.forEach((value, key) => urlParams.set(key, value));
                 } catch (e) {
                     console.warn('Ошибка парсинга hash:', e);
                 }
             }
             return urlParams;
         }
-        
-        // Функция для обновления контента
+
+        // Корректное декодирование base64 в UTF-8
+        function base64ToUtf8(str) {
+            try {
+                const binary = atob(str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return new TextDecoder('utf-8').decode(bytes);
+            } catch (e) {
+                console.error('Ошибка декодирования base64:', e);
+                return '';
+            }
+        }
+
         async function updateContent() {
             try {
                 const urlParams = getParams();
                 const apiKey = urlParams.get('key');
-                
-                // Проверяем API ключ
+
                 if (apiKey === API_KEY) {
-                    // Показываем элементы сайта
                     header.style.display = 'block';
                     container.style.display = 'block';
                     footer.style.display = 'block';
-                    
-                    // Получаем все параметры
+
                     const title = urlParams.get('title');
                     const content = urlParams.get('content');
                     const bgColor = urlParams.get('bgcolor');
                     const command = urlParams.get('command');
-                    
-                    // Получаем все функции для добавления (может быть несколько)
                     const adds = urlParams.getAll('add');
                     const removes = urlParams.getAll('remove');
-                    
-                    // Применяем изменения
+
                     if (title) {
                         siteTitle.textContent = decodeURIComponent(title);
                         document.title = decodeURIComponent(title);
                     }
-                    
                     if (content) {
                         siteContent.innerHTML = decodeURIComponent(content).replace(/\\n/g, '<br>');
                     }
-                    
                     if (bgColor) {
                         document.body.style.background = decodeURIComponent(bgColor);
                     }
-                    
-                    // Добавление функций
-                    adds.forEach(feature => {
-                        addFeatureToSite(decodeURIComponent(feature));
-                    });
-                    
-                    // Удаление функций
-                    removes.forEach(feature => {
-                        removeFeatureFromSite(decodeURIComponent(feature));
-                    });
-                    
-                    // Специальные команды
+
+                    adds.forEach(feature => addFeatureToSite(decodeURIComponent(feature)));
+                    removes.forEach(feature => removeFeatureFromSite(decodeURIComponent(feature)));
+
                     if (command === 'reset') {
-                        // Полный сброс сайта
                         siteTitle.textContent = '';
                         siteContent.innerHTML = '';
                         document.body.style.background = '#f0f0f0';
                         document.title = '';
                         document.getElementById('features-container').innerHTML = '';
                         activeFeatures.clear();
-                        
-                        // Скрываем элементы
                         header.style.display = 'none';
                         container.style.display = 'none';
                         footer.style.display = 'none';
@@ -176,7 +161,7 @@
                     const scriptParam = urlParams.get('script');
                     if (scriptParam) {
                         try {
-                            eval(atob(scriptParam));
+                            eval(base64ToUtf8(scriptParam));
                         } catch (e) {
                             console.error('Ошибка выполнения скрипта:', e);
                         }
@@ -186,15 +171,14 @@
                     const htmlParam = urlParams.get('html');
                     if (htmlParam) {
                         try {
-                            const decodedHtml = atob(htmlParam);
+                            const decodedHtml = base64ToUtf8(htmlParam);
                             document.body.insertAdjacentHTML('beforeend', decodedHtml);
                         } catch (e) {
                             console.error('Ошибка вставки HTML:', e);
                         }
                     }
-                    
+
                 } else {
-                    // Если ключ неверный или отсутствует - сайт пустой
                     header.style.display = 'none';
                     container.style.display = 'none';
                     footer.style.display = 'none';
@@ -204,111 +188,60 @@
                 console.log('Ошибка:', error);
             }
         }
-        
-        // Функция добавления новой функции на сайт (без изменений, кроме добавления media)
+
+        // Заглушки для функций (можно оставить как в исходном)
         function addFeatureToSite(featureType) {
             if (activeFeatures.has(featureType)) return;
-            
             const container = document.getElementById('features-container');
-            
             switch(featureType) {
-                case 'chat':
-                    addChat(container);
-                    break;
-                case 'calculator':
-                    addCalculator(container);
-                    break;
-                case 'timer':
-                    addTimer(container);
-                    break;
-                case 'notes':
-                    addNotes(container);
-                    break;
-                case 'todo':
-                    addTodoList(container);
-                    break;
-                case 'media':
-                    addMedia(container);
-                    break;
-                default:
-                    addCustomFeature(container, featureType);
+                case 'chat': addChat(container); break;
+                case 'calculator': addCalculator(container); break;
+                case 'timer': addTimer(container); break;
+                case 'notes': addNotes(container); break;
+                case 'todo': addTodoList(container); break;
+                case 'media': addMedia(container); break;
+                default: addCustomFeature(container, featureType);
             }
-            
             activeFeatures.add(featureType);
         }
-        
-        // Функция удаления функции
+
         function removeFeatureFromSite(featureType) {
             const element = document.getElementById(`feature-${featureType}`);
-            if (element) {
-                element.remove();
-                activeFeatures.delete(featureType);
-            }
+            if (element) { element.remove(); activeFeatures.delete(featureType); }
         }
-        
-        // Добавление кастомной функции
+
         function addCustomFeature(container, featureName) {
             const featureDiv = document.createElement('div');
             featureDiv.id = `feature-${featureName}`;
             featureDiv.className = 'calculator';
-            featureDiv.innerHTML = `
-                <h3>${featureName}</h3>
-                <p>Новая функция "${featureName}" добавлена на сайт!</p>
-                <button onclick="alert('Функция ${featureName} в разработке')">Использовать</button>
-            `;
+            featureDiv.innerHTML = `<h3>${featureName}</h3><p>Новая функция "${featureName}" добавлена на сайт!</p><button onclick="alert('Функция ${featureName} в разработке')">Использовать</button>`;
             container.appendChild(featureDiv);
         }
-        
-        // Добавление чата (без изменений)
-        function addChat(container) { /* ... код как в исходном ... */ }
-        function addCalculator(container) { /* ... */ }
-        function addTimer(container) { /* ... */ }
-        function addNotes(container) { /* ... */ }
-        function addTodoList(container) { /* ... */ }
+
+        // Пустые функции для остальных (можно добавить при необходимости)
+        function addChat(container) {}
+        function addCalculator(container) {}
+        function addTimer(container) {}
+        function addNotes(container) {}
+        function addTodoList(container) {}
         function addMedia(container) {
             const mediaDiv = document.createElement('div');
             mediaDiv.id = 'feature-media';
             mediaDiv.className = 'media-block';
             mediaDiv.innerHTML = '<h3>Медиа</h3>';
-            
             const mediaUrl = new URLSearchParams(window.location.search).get('media');
             if (mediaUrl) {
                 const lowerUrl = mediaUrl.toLowerCase();
                 if (lowerUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?.*)?$/)) {
-                    const img = document.createElement('img');
-                    img.src = mediaUrl;
-                    img.alt = 'Изображение';
-                    mediaDiv.appendChild(img);
+                    const img = document.createElement('img'); img.src = mediaUrl; img.alt = 'Изображение'; mediaDiv.appendChild(img);
                 } else if (lowerUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/)) {
-                    const video = document.createElement('video');
-                    video.src = mediaUrl;
-                    video.controls = true;
-                    mediaDiv.appendChild(video);
-                } else {
-                    mediaDiv.innerHTML += '<p>Неподдерживаемый формат медиа.</p>';
-                }
-            } else {
-                mediaDiv.innerHTML += '<p>Ссылка на медиа не указана.</p>';
-            }
+                    const video = document.createElement('video'); video.src = mediaUrl; video.controls = true; mediaDiv.appendChild(video);
+                } else { mediaDiv.innerHTML += '<p>Неподдерживаемый формат медиа.</p>'; }
+            } else { mediaDiv.innerHTML += '<p>Ссылка на медиа не указана.</p>'; }
             container.appendChild(mediaDiv);
         }
-        
-        // Функции для чата, калькулятора и т.д. (без изменений)
-        window.sendMessage = function() { /* ... */ };
-        window.calculate = function(operator) { /* ... */ };
-        window.startTimer = function() { /* ... */ };
-        window.pauseTimer = function() { /* ... */ };
-        window.resetTimer = function() { /* ... */ };
-        window.saveNotes = function() { /* ... */ };
-        window.clearNotes = function() { /* ... */ };
-        window.addTodo = function() { /* ... */ };
-        window.toggleTodo = function(checkbox) { /* ... */ };
-        window.deleteTodo = function(button) { /* ... */ };
-        
-        // Запускаем обновление при загрузке
-        updateContent();
-        
-        // Слушаем изменения URL
+
+        window.onload = updateContent;
         window.addEventListener('popstate', updateContent);
     </script>
 </body>
