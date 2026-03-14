@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управляемый сайт</title>
+    <title>Управляемый сайт с AI</title>
     <style>
         * {
             margin: 0;
@@ -15,6 +15,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            transition: background 0.5s ease;
         }
         
         .header {
@@ -41,6 +42,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             min-height: 400px;
+            transition: all 0.3s ease;
         }
         
         .footer {
@@ -70,24 +72,166 @@
             font-family: monospace;
         }
         
-        .api-key-display {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-left: 4px solid #2196F3;
+        /* Скрытый элемент для API ключа */
+        #api-key-storage {
+            display: none;
         }
         
-        .api-key-display code {
-            background: #fff;
-            padding: 5px 10px;
-            border-radius: 3px;
-            font-size: 16px;
-            color: #d32f2f;
+        /* Стили для чата */
+        .chat-container {
+            margin-top: 30px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 20px;
+        }
+        
+        .chat-messages {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        
+        .user-message {
+            background: #e3f2fd;
+            text-align: right;
+        }
+        
+        .bot-message {
+            background: #f1f1f1;
+            text-align: left;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .chat-input button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        /* Стили для калькулятора */
+        .calculator {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .calculator input {
+            width: 100px;
+            padding: 10px;
+            margin: 5px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .calculator button {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .calculator-result {
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        /* Стили для таймера */
+        .timer {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .timer-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .timer button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .timer-start {
+            background: #28a745;
+            color: white;
+        }
+        
+        .timer-pause {
+            background: #ffc107;
+            color: black;
+        }
+        
+        .timer-reset {
+            background: #dc3545;
+            color: white;
+        }
+        
+        /* Кнопки функционала */
+        .feature-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .feature-btn {
+            padding: 10px 20px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .feature-btn:hover {
+            background: #138496;
+        }
+        
+        .feature-btn.remove {
+            background: #dc3545;
+        }
+        
+        .feature-btn.remove:hover {
+            background: #c82333;
         }
     </style>
 </head>
 <body>
+    <!-- Скрытое хранилище API ключа -->
+    <div id="api-key-storage" data-key="sk-live-9a7b3c1d5e8f2g4h6i8j0k1l2m3n4o5p"></div>
+    
     <div class="header">
         <h1 id="site-title">Загрузка...</h1>
     </div>
@@ -97,36 +241,34 @@
             Статус API: <span id="api-status-text">Проверка...</span>
         </div>
         
-        <div class="api-key-display" id="api-key-display">
-            🔑 API ключ: <code>sk-live-9a7b3c1d5e8f2g4h6i8j0k1l2m3n4o5p</code>
-        </div>
-        
-        <div class="content">
+        <div class="content" id="main-content">
             <div id="site-content">Загрузка контента...</div>
+            
+            <!-- Контейнер для динамических функций -->
+            <div id="features-container"></div>
         </div>
     </div>
     
     <div class="footer">
-        <p>Управляется через API ключ | Ссылка для управления: <span id="current-url"></span></p>
+        <p>Управляется через API | Версия 2.0</p>
     </div>
 
     <script>
-        // API конфигурация
-        const API_KEY = 'sk-live-9a7b3c1d5e8f2g4h6i8j0k1l2m3n4o5p'; // Сложный ключ как у нейросетей
+        // Получаем API ключ из скрытого элемента
+        const API_KEY = document.getElementById('api-key-storage').dataset.key;
+        
+        // Хранилище активных функций
+        let activeFeatures = new Set();
         
         // Функция для обновления контента
         async function updateContent() {
             try {
-                // Получаем параметры из URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const apiKey = urlParams.get('key');
                 
-                // Показываем текущий URL
-                document.getElementById('current-url').textContent = window.location.href;
-                
-                // Проверяем API ключ
+                // Проверяем API ключ (сравниваем со скрытым ключом)
                 if (apiKey === API_KEY) {
-                    document.getElementById('api-status-text').innerHTML = '✅ Активен (ключ верный)';
+                    document.getElementById('api-status-text').innerHTML = '✅ Активен';
                     document.getElementById('api-status').style.backgroundColor = '#d4edda';
                     
                     // Получаем параметры для управления
@@ -134,6 +276,8 @@
                     const content = urlParams.get('content');
                     const bgColor = urlParams.get('bgcolor');
                     const command = urlParams.get('command');
+                    const addFeature = urlParams.get('add');
+                    const removeFeature = urlParams.get('remove');
                     
                     // Применяем изменения
                     if (title) {
@@ -145,20 +289,30 @@
                     }
                     
                     if (bgColor) {
-                        document.querySelector('.content').style.backgroundColor = decodeURIComponent(bgColor);
+                        document.body.style.background = decodeURIComponent(bgColor);
+                    }
+                    
+                    // Добавление новых функций
+                    if (addFeature) {
+                        addFeatureToSite(decodeURIComponent(addFeature));
+                    }
+                    
+                    // Удаление функций
+                    if (removeFeature) {
+                        removeFeatureFromSite(decodeURIComponent(removeFeature));
                     }
                     
                     // Специальные команды
                     if (command === 'reset') {
-                        document.getElementById('site-title').textContent = 'Управляемый сайт';
+                        document.getElementById('site-title').textContent = 'Управляемый сайт с AI';
                         document.getElementById('site-content').innerHTML = 'Контент сброшен через API';
-                        document.querySelector('.content').style.backgroundColor = 'white';
-                    } else if (command === 'alert') {
-                        alert('Команда выполнена через API!');
+                        document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        document.getElementById('features-container').innerHTML = '';
+                        activeFeatures.clear();
                     }
                     
                 } else if (apiKey) {
-                    document.getElementById('api-status-text').innerHTML = '❌ Неверный ключ API';
+                    document.getElementById('api-status-text').innerHTML = '❌ Неверный ключ';
                     document.getElementById('api-status').style.backgroundColor = '#f8d7da';
                 } else {
                     document.getElementById('api-status-text').innerHTML = '⏸ Ожидание ключа';
@@ -168,6 +322,237 @@
                 document.getElementById('api-status-text').innerHTML = '❌ Ошибка: ' + error.message;
             }
         }
+        
+        // Функция добавления новой функции на сайт
+        function addFeatureToSite(featureType) {
+            if (activeFeatures.has(featureType)) return;
+            
+            const container = document.getElementById('features-container');
+            
+            switch(featureType) {
+                case 'chat':
+                    addChat(container);
+                    break;
+                case 'calculator':
+                    addCalculator(container);
+                    break;
+                case 'timer':
+                    addTimer(container);
+                    break;
+                case 'notes':
+                    addNotes(container);
+                    break;
+                case 'todo':
+                    addTodoList(container);
+                    break;
+            }
+            
+            activeFeatures.add(featureType);
+        }
+        
+        // Функция удаления функции
+        function removeFeatureFromSite(featureType) {
+            const element = document.getElementById(`feature-${featureType}`);
+            if (element) {
+                element.remove();
+                activeFeatures.delete(featureType);
+            }
+        }
+        
+        // Добавление чата
+        function addChat(container) {
+            const chatDiv = document.createElement('div');
+            chatDiv.id = 'feature-chat';
+            chatDiv.className = 'chat-container';
+            chatDiv.innerHTML = `
+                <h3>Чат</h3>
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Введите сообщение...">
+                    <button onclick="sendMessage()">Отправить</button>
+                </div>
+            `;
+            container.appendChild(chatDiv);
+        }
+        
+        // Добавление калькулятора
+        function addCalculator(container) {
+            const calcDiv = document.createElement('div');
+            calcDiv.id = 'feature-calculator';
+            calcDiv.className = 'calculator';
+            calcDiv.innerHTML = `
+                <h3>Калькулятор</h3>
+                <input type="number" id="calc-num1" placeholder="Число 1">
+                <input type="number" id="calc-num2" placeholder="Число 2">
+                <br>
+                <button onclick="calculate('+')">+</button>
+                <button onclick="calculate('-')">-</button>
+                <button onclick="calculate('*')">×</button>
+                <button onclick="calculate('/')">÷</button>
+                <div class="calculator-result" id="calc-result">0</div>
+            `;
+            container.appendChild(calcDiv);
+        }
+        
+        // Добавление таймера
+        function addTimer(container) {
+            const timerDiv = document.createElement('div');
+            timerDiv.id = 'feature-timer';
+            timerDiv.className = 'timer';
+            timerDiv.innerHTML = `
+                <h3>Таймер</h3>
+                <div class="timer-display" id="timer-display">00:00</div>
+                <button class="timer-start" onclick="startTimer()">Старт</button>
+                <button class="timer-pause" onclick="pauseTimer()">Пауза</button>
+                <button class="timer-reset" onclick="resetTimer()">Сброс</button>
+            `;
+            container.appendChild(timerDiv);
+            
+            // Инициализация таймера
+            window.timerInterval = null;
+            window.timerSeconds = 0;
+            window.timerRunning = false;
+        }
+        
+        // Добавление заметок
+        function addNotes(container) {
+            const notesDiv = document.createElement('div');
+            notesDiv.id = 'feature-notes';
+            notesDiv.className = 'calculator';
+            notesDiv.innerHTML = `
+                <h3>Заметки</h3>
+                <textarea id="notes-text" rows="5" style="width: 100%; padding: 10px;"></textarea>
+                <br>
+                <button onclick="saveNotes()">Сохранить</button>
+                <button onclick="clearNotes()">Очистить</button>
+            `;
+            container.appendChild(notesDiv);
+            
+            // Загружаем сохраненные заметки
+            const saved = localStorage.getItem('notes');
+            if (saved) {
+                document.getElementById('notes-text').value = saved;
+            }
+        }
+        
+        // Добавление списка дел
+        function addTodoList(container) {
+            const todoDiv = document.createElement('div');
+            todoDiv.id = 'feature-todo';
+            todoDiv.className = 'calculator';
+            todoDiv.innerHTML = `
+                <h3>Список дел</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="todo-input" style="flex: 1;" placeholder="Новая задача...">
+                    <button onclick="addTodo()">Добавить</button>
+                </div>
+                <ul id="todo-list" style="margin-top: 10px; list-style: none;"></ul>
+            `;
+            container.appendChild(todoDiv);
+        }
+        
+        // Функции для чата
+        window.sendMessage = function() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const messages = document.getElementById('chat-messages');
+            
+            // Сообщение пользователя
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user-message';
+            userMsg.textContent = message;
+            messages.appendChild(userMsg);
+            
+            // Ответ бота
+            const botMsg = document.createElement('div');
+            botMsg.className = 'chat-message bot-message';
+            botMsg.textContent = 'Получено: ' + message;
+            messages.appendChild(botMsg);
+            
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+        };
+        
+        // Функции для калькулятора
+        window.calculate = function(operator) {
+            const num1 = parseFloat(document.getElementById('calc-num1').value) || 0;
+            const num2 = parseFloat(document.getElementById('calc-num2').value) || 0;
+            let result;
+            
+            switch(operator) {
+                case '+': result = num1 + num2; break;
+                case '-': result = num1 - num2; break;
+                case '*': result = num1 * num2; break;
+                case '/': result = num2 !== 0 ? num1 / num2 : 'Ошибка'; break;
+            }
+            
+            document.getElementById('calc-result').textContent = result;
+        };
+        
+        // Функции для таймера
+        window.startTimer = function() {
+            if (window.timerRunning) return;
+            window.timerRunning = true;
+            
+            window.timerInterval = setInterval(() => {
+                window.timerSeconds++;
+                const mins = Math.floor(window.timerSeconds / 60);
+                const secs = window.timerSeconds % 60;
+                document.getElementById('timer-display').textContent = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }, 1000);
+        };
+        
+        window.pauseTimer = function() {
+            window.timerRunning = false;
+            clearInterval(window.timerInterval);
+        };
+        
+        window.resetTimer = function() {
+            window.pauseTimer();
+            window.timerSeconds = 0;
+            document.getElementById('timer-display').textContent = '00:00';
+        };
+        
+        // Функции для заметок
+        window.saveNotes = function() {
+            const notes = document.getElementById('notes-text').value;
+            localStorage.setItem('notes', notes);
+            alert('Заметки сохранены!');
+        };
+        
+        window.clearNotes = function() {
+            document.getElementById('notes-text').value = '';
+            localStorage.removeItem('notes');
+        };
+        
+        // Функции для списка дел
+        window.addTodo = function() {
+            const input = document.getElementById('todo-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const list = document.getElementById('todo-list');
+            const item = document.createElement('li');
+            item.innerHTML = `
+                <input type="checkbox" onchange="toggleTodo(this)">
+                <span>${text}</span>
+                <button onclick="deleteTodo(this)" style="margin-left: 10px; color: red;">❌</button>
+            `;
+            list.appendChild(item);
+            input.value = '';
+        };
+        
+        window.toggleTodo = function(checkbox) {
+            const span = checkbox.nextElementSibling;
+            span.style.textDecoration = checkbox.checked ? 'line-through' : 'none';
+        };
+        
+        window.deleteTodo = function(button) {
+            button.parentElement.remove();
+        };
         
         // Запускаем обновление при загрузке
         updateContent();
