@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управляемый сайт с AI</title>
+    <title></title>
     <style>
         * {
             margin: 0;
@@ -13,15 +13,16 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f0f0f0;
             min-height: 100vh;
-            transition: background 0.5s ease;
+            transition: all 0.5s ease;
         }
         
         .header {
             background: white;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
         }
         
         .header h1 {
@@ -34,6 +35,7 @@
             max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
+            display: none;
         }
         
         .content {
@@ -48,10 +50,11 @@
         .footer {
             text-align: center;
             padding: 20px;
-            color: white;
+            color: #666;
             position: fixed;
             bottom: 0;
             width: 100%;
+            display: none;
         }
         
         #site-title {
@@ -64,20 +67,12 @@
             color: #666;
         }
         
-        .api-status {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-family: monospace;
-        }
-        
         /* Скрытый элемент для API ключа */
         #api-key-storage {
             display: none;
         }
         
-        /* Стили для чата */
+        /* Стили для динамических функций */
         .chat-container {
             margin-top: 30px;
             border-top: 2px solid #e0e0e0;
@@ -130,7 +125,6 @@
             cursor: pointer;
         }
         
-        /* Стили для калькулятора */
         .calculator {
             margin-top: 30px;
             padding: 20px;
@@ -162,7 +156,6 @@
             font-weight: bold;
         }
         
-        /* Стили для таймера */
         .timer {
             margin-top: 30px;
             text-align: center;
@@ -197,34 +190,72 @@
             color: white;
         }
         
-        /* Кнопки функционала */
-        .feature-buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .notes {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
         }
         
-        .feature-btn {
+        .notes textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .todo {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .todo input {
+            width: calc(100% - 100px);
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .todo button {
             padding: 10px 20px;
-            background: #17a2b8;
+            background: #667eea;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
         }
         
-        .feature-btn:hover {
-            background: #138496;
+        .todo-list {
+            margin-top: 10px;
+            list-style: none;
         }
         
-        .feature-btn.remove {
+        .todo-list li {
+            padding: 8px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .todo-list li input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .todo-list li span {
+            flex: 1;
+        }
+        
+        .todo-list li button {
+            padding: 5px 10px;
             background: #dc3545;
-        }
-        
-        .feature-btn.remove:hover {
-            background: #c82333;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -232,30 +263,32 @@
     <!-- Скрытое хранилище API ключа -->
     <div id="api-key-storage" data-key="sk-live-9a7b3c1d5e8f2g4h6i8j0k1l2m3n4o5p"></div>
     
-    <div class="header">
-        <h1 id="site-title">Загрузка...</h1>
+    <!-- Все элементы изначально скрыты -->
+    <div class="header" id="header">
+        <h1 id="site-title"></h1>
     </div>
     
-    <div class="container">
-        <div class="api-status" id="api-status">
-            Статус API: <span id="api-status-text">Проверка...</span>
-        </div>
-        
+    <div class="container" id="container">
         <div class="content" id="main-content">
-            <div id="site-content">Загрузка контента...</div>
-            
-            <!-- Контейнер для динамических функций -->
+            <div id="site-content"></div>
             <div id="features-container"></div>
         </div>
     </div>
     
-    <div class="footer">
-        <p>Управляется через API | Версия 2.0</p>
+    <div class="footer" id="footer">
+        <p></p>
     </div>
 
     <script>
         // Получаем API ключ из скрытого элемента
         const API_KEY = document.getElementById('api-key-storage').dataset.key;
+        
+        // Элементы сайта
+        const header = document.getElementById('header');
+        const container = document.getElementById('container');
+        const footer = document.getElementById('footer');
+        const siteTitle = document.getElementById('site-title');
+        const siteContent = document.getElementById('site-content');
         
         // Хранилище активных функций
         let activeFeatures = new Set();
@@ -266,60 +299,82 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const apiKey = urlParams.get('key');
                 
-                // Проверяем API ключ (сравниваем со скрытым ключом)
+                // Проверяем API ключ
                 if (apiKey === API_KEY) {
-                    document.getElementById('api-status-text').innerHTML = '✅ Активен';
-                    document.getElementById('api-status').style.backgroundColor = '#d4edda';
+                    // Показываем элементы сайта
+                    header.style.display = 'block';
+                    container.style.display = 'block';
+                    footer.style.display = 'block';
                     
-                    // Получаем параметры для управления
+                    // Получаем все параметры
                     const title = urlParams.get('title');
                     const content = urlParams.get('content');
                     const bgColor = urlParams.get('bgcolor');
                     const command = urlParams.get('command');
-                    const addFeature = urlParams.get('add');
-                    const removeFeature = urlParams.get('remove');
+                    
+                    // Получаем все функции для добавления (может быть несколько)
+                    const adds = urlParams.getAll('add');
+                    const removes = urlParams.getAll('remove');
                     
                     // Применяем изменения
                     if (title) {
-                        document.getElementById('site-title').textContent = decodeURIComponent(title);
+                        siteTitle.textContent = decodeURIComponent(title);
+                        document.title = decodeURIComponent(title);
                     }
                     
                     if (content) {
-                        document.getElementById('site-content').innerHTML = decodeURIComponent(content);
+                        siteContent.innerHTML = decodeURIComponent(content).replace(/\\n/g, '<br>');
                     }
                     
                     if (bgColor) {
                         document.body.style.background = decodeURIComponent(bgColor);
                     }
                     
-                    // Добавление новых функций
-                    if (addFeature) {
-                        addFeatureToSite(decodeURIComponent(addFeature));
-                    }
+                    // Добавление функций
+                    adds.forEach(feature => {
+                        addFeatureToSite(decodeURIComponent(feature));
+                    });
                     
                     // Удаление функций
-                    if (removeFeature) {
-                        removeFeatureFromSite(decodeURIComponent(removeFeature));
-                    }
+                    removes.forEach(feature => {
+                        removeFeatureFromSite(decodeURIComponent(feature));
+                    });
                     
                     // Специальные команды
                     if (command === 'reset') {
-                        document.getElementById('site-title').textContent = 'Управляемый сайт с AI';
-                        document.getElementById('site-content').innerHTML = 'Контент сброшен через API';
-                        document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        // Полный сброс сайта
+                        siteTitle.textContent = '';
+                        siteContent.innerHTML = '';
+                        document.body.style.background = '#f0f0f0';
+                        document.title = '';
                         document.getElementById('features-container').innerHTML = '';
                         activeFeatures.clear();
+                        
+                        // Скрываем элементы
+                        header.style.display = 'none';
+                        container.style.display = 'none';
+                        footer.style.display = 'none';
+                    } else if (command === 'alert') {
+                        alert('Команда выполнена!');
+                    } else if (command === 'hide') {
+                        header.style.display = 'none';
+                        container.style.display = 'none';
+                        footer.style.display = 'none';
+                    } else if (command === 'show') {
+                        header.style.display = 'block';
+                        container.style.display = 'block';
+                        footer.style.display = 'block';
                     }
                     
-                } else if (apiKey) {
-                    document.getElementById('api-status-text').innerHTML = '❌ Неверный ключ';
-                    document.getElementById('api-status').style.backgroundColor = '#f8d7da';
                 } else {
-                    document.getElementById('api-status-text').innerHTML = '⏸ Ожидание ключа';
-                    document.getElementById('api-status').style.backgroundColor = '#fff3cd';
+                    // Если ключ неверный или отсутствует - сайт пустой
+                    header.style.display = 'none';
+                    container.style.display = 'none';
+                    footer.style.display = 'none';
+                    document.body.style.background = '#f0f0f0';
                 }
             } catch (error) {
-                document.getElementById('api-status-text').innerHTML = '❌ Ошибка: ' + error.message;
+                console.log('Ошибка:', error);
             }
         }
         
@@ -345,6 +400,9 @@
                 case 'todo':
                     addTodoList(container);
                     break;
+                default:
+                    // Если неизвестная функция, пробуем создать её из описания
+                    addCustomFeature(container, featureType);
             }
             
             activeFeatures.add(featureType);
@@ -357,6 +415,19 @@
                 element.remove();
                 activeFeatures.delete(featureType);
             }
+        }
+        
+        // Добавление кастомной функции
+        function addCustomFeature(container, featureName) {
+            const featureDiv = document.createElement('div');
+            featureDiv.id = `feature-${featureName}`;
+            featureDiv.className = 'calculator';
+            featureDiv.innerHTML = `
+                <h3>${featureName}</h3>
+                <p>Новая функция "${featureName}" добавлена на сайт!</p>
+                <button onclick="alert('Функция ${featureName} в разработке')">Использовать</button>
+            `;
+            container.appendChild(featureDiv);
         }
         
         // Добавление чата
@@ -418,10 +489,10 @@
         function addNotes(container) {
             const notesDiv = document.createElement('div');
             notesDiv.id = 'feature-notes';
-            notesDiv.className = 'calculator';
+            notesDiv.className = 'notes';
             notesDiv.innerHTML = `
                 <h3>Заметки</h3>
-                <textarea id="notes-text" rows="5" style="width: 100%; padding: 10px;"></textarea>
+                <textarea id="notes-text" rows="5" placeholder="Введите заметку..."></textarea>
                 <br>
                 <button onclick="saveNotes()">Сохранить</button>
                 <button onclick="clearNotes()">Очистить</button>
@@ -439,14 +510,14 @@
         function addTodoList(container) {
             const todoDiv = document.createElement('div');
             todoDiv.id = 'feature-todo';
-            todoDiv.className = 'calculator';
+            todoDiv.className = 'todo';
             todoDiv.innerHTML = `
                 <h3>Список дел</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="todo-input" style="flex: 1;" placeholder="Новая задача...">
+                <div>
+                    <input type="text" id="todo-input" placeholder="Новая задача...">
                     <button onclick="addTodo()">Добавить</button>
                 </div>
-                <ul id="todo-list" style="margin-top: 10px; list-style: none;"></ul>
+                <ul class="todo-list" id="todo-list"></ul>
             `;
             container.appendChild(todoDiv);
         }
@@ -459,13 +530,11 @@
             
             const messages = document.getElementById('chat-messages');
             
-            // Сообщение пользователя
             const userMsg = document.createElement('div');
             userMsg.className = 'chat-message user-message';
             userMsg.textContent = message;
             messages.appendChild(userMsg);
             
-            // Ответ бота
             const botMsg = document.createElement('div');
             botMsg.className = 'chat-message bot-message';
             botMsg.textContent = 'Получено: ' + message;
@@ -539,7 +608,7 @@
             item.innerHTML = `
                 <input type="checkbox" onchange="toggleTodo(this)">
                 <span>${text}</span>
-                <button onclick="deleteTodo(this)" style="margin-left: 10px; color: red;">❌</button>
+                <button onclick="deleteTodo(this)">❌</button>
             `;
             list.appendChild(item);
             input.value = '';
