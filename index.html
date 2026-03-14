@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
     <style>
+        /* Стили без изменений (как в исходном коде) */
         * {
             margin: 0;
             padding: 0;
@@ -67,203 +68,58 @@
             color: #666;
         }
         
-        /* Скрытый элемент для API ключа */
         #api-key-storage {
             display: none;
         }
         
-        /* Стили для динамических функций */
-        .chat-container {
-            margin-top: 30px;
-            border-top: 2px solid #e0e0e0;
-            padding-top: 20px;
-        }
-        
-        .chat-messages {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .chat-message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        
-        .user-message {
-            background: #e3f2fd;
-            text-align: right;
-        }
-        
-        .bot-message {
-            background: #f1f1f1;
-            text-align: left;
-        }
-        
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-input input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-        }
-        
-        .chat-input button {
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .calculator {
+        /* Стили для динамических функций (как в исходном коде) */
+        .chat-container { margin-top: 30px; border-top: 2px solid #e0e0e0; padding-top: 20px; }
+        .chat-messages { max-height: 300px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin-bottom: 10px; }
+        .chat-message { margin-bottom: 10px; padding: 8px; border-radius: 5px; }
+        .user-message { background: #e3f2fd; text-align: right; }
+        .bot-message { background: #f1f1f1; text-align: left; }
+        .chat-input { display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; }
+        .chat-input button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .calculator { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+        .calculator input { width: 100px; padding: 10px; margin: 5px; border: 2px solid #e0e0e0; border-radius: 5px; }
+        .calculator button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .calculator-result { margin-top: 10px; font-size: 18px; font-weight: bold; }
+        .timer { margin-top: 30px; text-align: center; }
+        .timer-display { font-size: 48px; font-weight: bold; color: #333; }
+        .timer button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+        .timer-start { background: #28a745; color: white; }
+        .timer-pause { background: #ffc107; color: black; }
+        .timer-reset { background: #dc3545; color: white; }
+        .notes { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+        .notes textarea { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; margin-bottom: 10px; }
+        .todo { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
+        .todo input { width: calc(100% - 100px); padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; }
+        .todo button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .todo-list { margin-top: 10px; list-style: none; }
+        .todo-list li { padding: 8px; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; }
+        .todo-list li input[type="checkbox"] { width: auto; }
+        .todo-list li span { flex: 1; }
+        .todo-list li button { padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; }
+
+        /* Дополнительный стиль для блока медиа (можно оформить как остальные) */
+        .media-block {
             margin-top: 30px;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 5px;
-        }
-        
-        .calculator input {
-            width: 100px;
-            padding: 10px;
-            margin: 5px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-        }
-        
-        .calculator button {
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
-        
-        .calculator-result {
-            margin-top: 10px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .timer {
-            margin-top: 30px;
             text-align: center;
         }
-        
-        .timer-display {
-            font-size: 48px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .timer button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .timer-start {
-            background: #28a745;
-            color: white;
-        }
-        
-        .timer-pause {
-            background: #ffc107;
-            color: black;
-        }
-        
-        .timer-reset {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .notes {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        .notes textarea {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        
-        .todo {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-        
-        .todo input {
-            width: calc(100% - 100px);
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-        }
-        
-        .todo button {
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .todo-list {
-            margin-top: 10px;
-            list-style: none;
-        }
-        
-        .todo-list li {
-            padding: 8px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .todo-list li input[type="checkbox"] {
-            width: auto;
-        }
-        
-        .todo-list li span {
-            flex: 1;
-        }
-        
-        .todo-list li button {
-            padding: 5px 10px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
+        .media-block img, .media-block video {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
-    <!-- Скрытое хранилище API ключа -->
     <div id="api-key-storage" data-key="sk-live-9a7b3c1d5e8f2g4h6i8j0k1l2m3n4o5p"></div>
     
-    <!-- Все элементы изначально скрыты -->
     <div class="header" id="header">
         <h1 id="site-title"></h1>
     </div>
@@ -292,6 +148,9 @@
         
         // Хранилище активных функций
         let activeFeatures = new Set();
+
+        // Сохраняем параметры URL для доступа из функций
+        let urlParams = new URLSearchParams(window.location.search);
         
         // Функция для обновления контента
         async function updateContent() {
@@ -301,22 +160,18 @@
                 
                 // Проверяем API ключ
                 if (apiKey === API_KEY) {
-                    // Показываем элементы сайта
                     header.style.display = 'block';
                     container.style.display = 'block';
                     footer.style.display = 'block';
                     
-                    // Получаем все параметры
                     const title = urlParams.get('title');
                     const content = urlParams.get('content');
                     const bgColor = urlParams.get('bgcolor');
                     const command = urlParams.get('command');
                     
-                    // Получаем все функции для добавления (может быть несколько)
                     const adds = urlParams.getAll('add');
                     const removes = urlParams.getAll('remove');
                     
-                    // Применяем изменения
                     if (title) {
                         siteTitle.textContent = decodeURIComponent(title);
                         document.title = decodeURIComponent(title);
@@ -342,7 +197,6 @@
                     
                     // Специальные команды
                     if (command === 'reset') {
-                        // Полный сброс сайта
                         siteTitle.textContent = '';
                         siteContent.innerHTML = '';
                         document.body.style.background = '#f0f0f0';
@@ -350,7 +204,6 @@
                         document.getElementById('features-container').innerHTML = '';
                         activeFeatures.clear();
                         
-                        // Скрываем элементы
                         header.style.display = 'none';
                         container.style.display = 'none';
                         footer.style.display = 'none';
@@ -367,7 +220,6 @@
                     }
                     
                 } else {
-                    // Если ключ неверный или отсутствует - сайт пустой
                     header.style.display = 'none';
                     container.style.display = 'none';
                     footer.style.display = 'none';
@@ -400,8 +252,10 @@
                 case 'todo':
                     addTodoList(container);
                     break;
+                case 'media':                 // НОВАЯ ФУНКЦИЯ
+                    addMedia(container);
+                    break;
                 default:
-                    // Если неизвестная функция, пробуем создать её из описания
                     addCustomFeature(container, featureType);
             }
             
@@ -430,7 +284,7 @@
             container.appendChild(featureDiv);
         }
         
-        // Добавление чата
+        // Добавление чата (без изменений)
         function addChat(container) {
             const chatDiv = document.createElement('div');
             chatDiv.id = 'feature-chat';
@@ -446,7 +300,7 @@
             container.appendChild(chatDiv);
         }
         
-        // Добавление калькулятора
+        // Добавление калькулятора (без изменений)
         function addCalculator(container) {
             const calcDiv = document.createElement('div');
             calcDiv.id = 'feature-calculator';
@@ -465,7 +319,7 @@
             container.appendChild(calcDiv);
         }
         
-        // Добавление таймера
+        // Добавление таймера (без изменений)
         function addTimer(container) {
             const timerDiv = document.createElement('div');
             timerDiv.id = 'feature-timer';
@@ -479,13 +333,12 @@
             `;
             container.appendChild(timerDiv);
             
-            // Инициализация таймера
             window.timerInterval = null;
             window.timerSeconds = 0;
             window.timerRunning = false;
         }
         
-        // Добавление заметок
+        // Добавление заметок (без изменений)
         function addNotes(container) {
             const notesDiv = document.createElement('div');
             notesDiv.id = 'feature-notes';
@@ -499,14 +352,13 @@
             `;
             container.appendChild(notesDiv);
             
-            // Загружаем сохраненные заметки
             const saved = localStorage.getItem('notes');
             if (saved) {
                 document.getElementById('notes-text').value = saved;
             }
         }
         
-        // Добавление списка дел
+        // Добавление списка дел (без изменений)
         function addTodoList(container) {
             const todoDiv = document.createElement('div');
             todoDiv.id = 'feature-todo';
@@ -521,8 +373,38 @@
             `;
             container.appendChild(todoDiv);
         }
+
+        // НОВАЯ ФУНКЦИЯ: добавление медиа (видео или фото) по ссылке из параметра media
+        function addMedia(container) {
+            const mediaUrl = urlParams.get('media');  // получаем ссылку из параметров
+            const mediaDiv = document.createElement('div');
+            mediaDiv.id = 'feature-media';
+            mediaDiv.className = 'media-block';
+            mediaDiv.innerHTML = '<h3>Медиа</h3>';
+            
+            if (mediaUrl) {
+                const lowerUrl = mediaUrl.toLowerCase();
+                // Проверяем расширение файла (можно улучшить, но для примера достаточно)
+                if (lowerUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?.*)?$/)) {
+                    const img = document.createElement('img');
+                    img.src = mediaUrl;
+                    img.alt = 'Изображение';
+                    mediaDiv.appendChild(img);
+                } else if (lowerUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/)) {
+                    const video = document.createElement('video');
+                    video.src = mediaUrl;
+                    video.controls = true;
+                    mediaDiv.appendChild(video);
+                } else {
+                    mediaDiv.innerHTML += '<p>Неподдерживаемый формат медиа. Попробуйте ссылку на изображение (.jpg, .png и т.д.) или видео (.mp4, .webm).</p>';
+                }
+            } else {
+                mediaDiv.innerHTML += '<p>Ссылка на медиа не указана. Добавьте параметр <code>media=URL</code> в адресную строку.</p>';
+            }
+            container.appendChild(mediaDiv);
+        }
         
-        // Функции для чата
+        // Функции для чата (без изменений)
         window.sendMessage = function() {
             const input = document.getElementById('chat-input');
             const message = input.value.trim();
@@ -544,7 +426,7 @@
             messages.scrollTop = messages.scrollHeight;
         };
         
-        // Функции для калькулятора
+        // Функции для калькулятора (без изменений)
         window.calculate = function(operator) {
             const num1 = parseFloat(document.getElementById('calc-num1').value) || 0;
             const num2 = parseFloat(document.getElementById('calc-num2').value) || 0;
@@ -560,7 +442,7 @@
             document.getElementById('calc-result').textContent = result;
         };
         
-        // Функции для таймера
+        // Функции для таймера (без изменений)
         window.startTimer = function() {
             if (window.timerRunning) return;
             window.timerRunning = true;
@@ -585,7 +467,7 @@
             document.getElementById('timer-display').textContent = '00:00';
         };
         
-        // Функции для заметок
+        // Функции для заметок (без изменений)
         window.saveNotes = function() {
             const notes = document.getElementById('notes-text').value;
             localStorage.setItem('notes', notes);
@@ -597,7 +479,7 @@
             localStorage.removeItem('notes');
         };
         
-        // Функции для списка дел
+        // Функции для списка дел (без изменений)
         window.addTodo = function() {
             const input = document.getElementById('todo-input');
             const text = input.value.trim();
@@ -626,7 +508,7 @@
         // Запускаем обновление при загрузке
         updateContent();
         
-        // Слушаем изменения URL
+        // Слушаем изменения URL (если нужно)
         window.addEventListener('popstate', updateContent);
     </script>
 </body>
