@@ -5,29 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sexiser</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',sans-serif; min-height:100vh; transition:all .3s; }
-        .container { max-width:1200px; margin:0 auto; padding:20px; min-height:100vh; }
-        header { text-align:center; padding:50px 20px; }
-        h1 { font-size:48px; margin-bottom:20px; animation:fadeDown .8s; }
-        .subtitle { font-size:18px; opacity:.9; animation:fadeUp .8s; }
-        .content { background:rgba(255,255,255,.1); backdrop-filter:blur(10px); border-radius:20px; padding:30px; margin-top:30px; min-height:400px; position:relative; }
-        .objects-container { position:relative; min-height:300px; }
-        .page-object { position:absolute; cursor:pointer; transition:transform .3s; }
-        .page-object:hover { transform:scale(1.05); }
-        .navigation { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,.7); backdrop-filter:blur(10px); padding:10px 20px; border-radius:50px; display:flex; gap:15px; z-index:1000; }
-        .nav-btn { background:#fff; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px; transition:.3s; }
-        .nav-btn:hover { transform:scale(1.1); background:#667eea; color:#fff; }
-        .page-indicator { color:#fff; display:flex; align-items:center; gap:8px; font-size:14px; }
-        @keyframes fadeDown { from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
-        @keyframes slideLeft { from{transform:translateX(-100%);opacity:0;}to{transform:translateX(0);opacity:1;} }
-        @keyframes slideRight { from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;} }
-        .trans-left { animation:slideLeft .5s ease-out; }
-        .trans-right { animation:slideRight .5s ease-out; }
-        .blocked-screen { display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; background:#1a1a2e; color:#fff; flex-direction:column; gap:20px; }
-        .blocked-screen h1 { font-size:72px; color:#dc3545; }
-        .blocked-screen p { font-size:18px; opacity:.8; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+        header { text-align: center; padding: 50px 20px; color: white; }
+        h1 { font-size: 48px; margin-bottom: 20px; }
+        p { font-size: 18px; opacity: 0.9; }
+        .content { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; margin-top: 30px; text-align: center; color: white; }
+        .navigation { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); padding: 10px 20px; border-radius: 50px; display: flex; gap: 15px; z-index: 1000; }
+        .nav-btn { background: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; transition: 0.3s; }
+        .nav-btn:hover { transform: scale(1.1); background: #667eea; color: white; }
+        .page-indicator { color: white; display: flex; align-items: center; gap: 8px; }
+        .blocked-screen { display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; background: #1a1a2e; color: white; flex-direction: column; gap: 20px; }
+        .blocked-screen h1 { font-size: 72px; color: #dc3545; }
     </style>
 </head>
 <body id="mainBody">
@@ -38,86 +28,49 @@
     </div>
     <div id="siteContent" style="display:none">
         <div class="container">
-            <header><h1 id="pageTitle">Sexiser</h1><p id="pageSubtitle" class="subtitle"></p></header>
-            <div class="content"><div class="objects-container" id="objectsContainer"></div></div>
-        </div>
-        <div class="navigation">
-            <button class="nav-btn" onclick="changePage('prev')">◀</button>
-            <div class="page-indicator"><span id="currentPageNum">1</span> / <span id="totalPagesNum">1</span></div>
-            <button class="nav-btn" onclick="changePage('next')">▶</button>
+            <header><h1 id="pageTitle">Sexiser</h1><p id="pageSubtitle" class="subtitle">Добро пожаловать!</p></header>
+            <div class="content"><div id="content">Загрузка...</div></div>
         </div>
     </div>
+
     <script>
-        let currentPage=0, totalPages=1;
         const API = 'http://localhost:5000';
         
-        function loadData(){
-            fetch(API+'/data.json')
-                .then(r=>{
-                    if(r.status===403){
-                        document.getElementById('blockedScreen').style.display='flex';
-                        document.getElementById('siteContent').style.display='none';
-                        throw new Error();
-                    }
-                    return r.json();
-                })
-                .then(d=>{
-                    if(d&&!d.blocked){
-                        document.getElementById('blockedScreen').style.display='none';
-                        document.getElementById('siteContent').style.display='block';
-                        if(d.settings){
-                            document.getElementById('pageTitle').textContent=d.settings.title||'Sexiser';
-                            document.getElementById('pageSubtitle').textContent=d.settings.subtitle||'';
-                            document.body.style.background=d.settings.bg_color;
-                        }
-                        totalPages=d.pages.length;
-                        currentPage=d.current_page;
-                        document.getElementById('currentPageNum').textContent=currentPage+1;
-                        document.getElementById('totalPagesNum').textContent=totalPages;
-                        renderObjects(d.objects);
-                    }
-                })
-                .catch(()=>{});
-        }
-        
-        function renderObjects(objects){
-            const c=document.getElementById('objectsContainer');
-            c.innerHTML='';
-            if(objects.length===0){
-                c.innerHTML='<div style="text-align:center;color:#fff;padding:50px;">✨ Здесь будут ваши картинки и текст ✨</div>';
-                return;
-            }
-            objects.forEach(obj=>{
-                const div=document.createElement('div');
-                div.className='page-object';
-                div.style.left=(obj.data.x||50)+'px';
-                div.style.top=(obj.data.y||50)+'px';
-                if(obj.type==='image'){
-                    div.innerHTML=`<img src="${API}${obj.data.src}" style="width:${obj.data.width||200}px; border-radius:${obj.data.border_radius||10}px;">`;
-                }else{
-                    div.innerHTML=`<div style="font-size:${obj.data.font_size||16}px;color:${obj.data.color||'#fff'};background:rgba(0,0,0,0.5);padding:10px;border-radius:10px;">${obj.data.text}</div>`;
+        async function loadSite() {
+            try {
+                let res = await fetch(API + '/site');
+                if(res.status === 403) {
+                    document.getElementById('blockedScreen').style.display = 'flex';
+                    document.getElementById('siteContent').style.display = 'none';
+                    return;
                 }
-                c.appendChild(div);
-            });
+                let html = await res.text();
+                document.getElementById('siteContent').style.display = 'block';
+                document.getElementById('blockedScreen').style.display = 'none';
+                
+                // Извлекаем контент из HTML
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(html, 'text/html');
+                let title = doc.querySelector('title')?.innerText || 'Sexiser';
+                let bodyContent = doc.body.innerHTML;
+                
+                document.getElementById('pageTitle').innerText = title;
+                document.getElementById('content').innerHTML = bodyContent;
+                
+                // Применяем стили
+                let styles = doc.querySelectorAll('style');
+                let styleElem = document.createElement('style');
+                styles.forEach(s => styleElem.innerHTML += s.innerHTML);
+                document.head.appendChild(styleElem);
+                
+            } catch(e) {
+                console.error('Error loading site:', e);
+                document.getElementById('content').innerHTML = '<p>Ошибка загрузки. Убедитесь, что сервер запущен.</p>';
+            }
         }
         
-        function changePage(dir){
-            const c=document.getElementById('objectsContainer');
-            const anim=dir==='next'?'trans-left':'trans-right';
-            c.classList.add(anim);
-            setTimeout(()=>{
-                if(dir==='next') currentPage=(currentPage+1)%totalPages;
-                else currentPage=(currentPage-1+totalPages)%totalPages;
-                document.getElementById('currentPageNum').textContent=currentPage+1;
-                fetch(API+'/data.json').then(r=>r.json()).then(d=>{
-                    renderObjects(d.objects);
-                    setTimeout(()=>c.classList.remove(anim),100);
-                });
-            },200);
-        }
-        
-        loadData();
-        setInterval(loadData,3000);
+        loadSite();
+        setInterval(loadSite, 5000);
     </script>
 </body>
 </html>
