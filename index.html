@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sexiser - Главная</title>
+    <title>Sexiser</title>
     <style>
         * {
             margin: 0;
@@ -13,21 +13,22 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             position: relative;
+            transition: all 0.3s;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            position: relative;
+            min-height: 100vh;
         }
 
         header {
             text-align: center;
             padding: 50px 20px;
-            color: white;
         }
 
         h1 {
@@ -36,7 +37,7 @@
             animation: fadeInDown 0.8s ease;
         }
 
-        p {
+        .subtitle {
             font-size: 18px;
             opacity: 0.9;
             animation: fadeInUp 0.8s ease;
@@ -48,37 +49,26 @@
             border-radius: 20px;
             padding: 30px;
             margin-top: 30px;
-            animation: fadeIn 1s ease;
+            min-height: 400px;
+            position: relative;
         }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .objects-container {
+            position: relative;
+            min-height: 300px;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .page-object {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .page-object:hover {
+            transform: scale(1.05);
         }
 
-        .nav-bar {
+        .navigation {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -113,7 +103,7 @@
             color: white;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-size: 14px;
         }
 
@@ -134,19 +124,14 @@
             transform: scale(1.2);
         }
 
-        .objects-container {
-            position: relative;
-            min-height: 400px;
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .page-object {
-            position: absolute;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .page-object:hover {
-            transform: scale(1.05);
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideInLeft {
@@ -166,23 +151,29 @@
         .transition-right {
             animation: slideInRight 0.5s ease-out;
         }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+        }
     </style>
 </head>
-<body>
+<body id="mainBody">
     <div class="container">
         <header>
-            <h1 id="pageTitle">✨ Sexiser ✨</h1>
-            <p id="pageDescription">Добро пожаловать на наш сайт!</p>
+            <h1 id="pageTitle">Sexiser</h1>
+            <p id="pageSubtitle" class="subtitle">Добро пожаловать!</p>
         </header>
         
         <div class="content">
             <div class="objects-container" id="objectsContainer">
-                <!-- Здесь будут динамические объекты -->
+                <div class="loading">Загрузка...</div>
             </div>
         </div>
     </div>
 
-    <div class="nav-bar">
+    <div class="navigation">
         <button class="nav-btn" onclick="changePage('prev')">◀</button>
         <div class="page-indicator" id="pageIndicator">
             <span id="currentPageNum">1</span> / <span id="totalPagesNum">1</span>
@@ -195,47 +186,36 @@
         let totalPages = 1;
         let pagesData = [];
         let currentObjects = [];
+        let isTransitioning = false;
 
-        // Загрузка данных с сервера редактора
+        // Адрес вашего Python сервера (измените если нужно)
+        const API_URL = 'http://localhost:5000';
+
         function loadSiteData() {
-            // Пытаемся подключиться к локальному серверу редактора
-            fetch('http://localhost:5000/api/public/site_data')
+            fetch(`${API_URL}/api/site/data`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        pagesData = data.pages;
-                        totalPages = pagesData.length;
-                        currentPageIndex = data.current_page;
-                        updatePageDisplay();
+                    // Применяем настройки
+                    if (data.settings) {
+                        document.getElementById('pageTitle').textContent = data.settings.title || 'Sexiser';
+                        document.getElementById('pageSubtitle').textContent = data.settings.subtitle || 'Добро пожаловать!';
+                        if (data.settings.bg_color) {
+                            document.getElementById('mainBody').style.background = data.settings.bg_color;
+                        }
                     }
+                    
+                    pagesData = data.pages;
+                    totalPages = pagesData.length;
+                    currentPageIndex = data.current_page;
+                    
+                    document.getElementById('currentPageNum').textContent = currentPageIndex + 1;
+                    document.getElementById('totalPagesNum').textContent = totalPages;
+                    
+                    renderObjects(data.objects);
                 })
                 .catch(error => {
                     console.log('Редактор не запущен, показываем статическую версию');
-                });
-        }
-
-        function updatePageDisplay() {
-            if (pagesData.length === 0) return;
-            
-            const page = pagesData[currentPageIndex];
-            document.getElementById('pageTitle').textContent = page.name;
-            document.getElementById('currentPageNum').textContent = currentPageIndex + 1;
-            document.getElementById('totalPagesNum').textContent = totalPages;
-            
-            // Загружаем объекты для этой страницы
-            loadPageObjects(page.id);
-        }
-
-        function loadPageObjects(pageId) {
-            fetch(`http://localhost:5000/api/public/page_objects/${pageId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        renderObjects(data.objects);
-                    }
-                })
-                .catch(error => {
-                    console.log('Ошибка загрузки объектов');
+                    document.getElementById('objectsContainer').innerHTML = '<div class="loading">✨ Добро пожаловать на сайт! ✨</div>';
                 });
         }
 
@@ -243,26 +223,36 @@
             const container = document.getElementById('objectsContainer');
             container.innerHTML = '';
             
+            if (objects.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: white; padding: 50px;">✨ Здесь будут ваши картинки и текст ✨</div>';
+                return;
+            }
+            
             objects.forEach(obj => {
                 if (obj.type === 'image') {
                     const div = document.createElement('div');
                     div.className = 'page-object';
-                    div.style.left = obj.data.x + 'px';
-                    div.style.top = obj.data.y + 'px';
-                    div.innerHTML = `<img src="${obj.data.src}" style="width: ${obj.data.width}px; border-radius: ${obj.data.border_radius || 0}px;">`;
+                    div.style.left = (obj.data.x || 50) + 'px';
+                    div.style.top = (obj.data.y || 50) + 'px';
+                    div.innerHTML = `<img src="${API_URL}${obj.data.src}" style="width: ${obj.data.width || 200}px; border-radius: ${obj.data.border_radius || 10}px;">`;
                     container.appendChild(div);
                 } else if (obj.type === 'text') {
                     const div = document.createElement('div');
                     div.className = 'page-object';
-                    div.style.left = obj.data.x + 'px';
-                    div.style.top = obj.data.y + 'px';
-                    div.innerHTML = `<div style="font-size: ${obj.data.font_size}px; color: ${obj.data.color}">${obj.data.text}</div>`;
+                    div.style.left = (obj.data.x || 50) + 'px';
+                    div.style.top = (obj.data.y || 100) + 'px';
+                    div.innerHTML = `<div style="font-size: ${obj.data.font_size || 16}px; color: ${obj.data.color || '#ffffff'}; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px;">
+                        ${obj.data.text}
+                    </div>`;
                     container.appendChild(div);
                 }
             });
         }
 
         function changePage(direction) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
             const container = document.getElementById('objectsContainer');
             const animationClass = direction === 'next' ? 'transition-left' : 'transition-right';
             
@@ -274,19 +264,24 @@
                 } else {
                     currentPageIndex = (currentPageIndex - 1 + totalPages) % totalPages;
                 }
-                updatePageDisplay();
                 
-                setTimeout(() => {
-                    container.classList.remove(animationClass);
-                }, 100);
+                document.getElementById('currentPageNum').textContent = currentPageIndex + 1;
+                
+                fetch(`${API_URL}/api/site/data`)
+                    .then(response => response.json())
+                    .then(data => {
+                        renderObjects(data.objects);
+                        setTimeout(() => {
+                            container.classList.remove(animationClass);
+                            isTransitioning = false;
+                        }, 100);
+                    });
             }, 200);
         }
 
-        // Загружаем данные при старте
+        // Загружаем данные каждые 3 секунды (чтобы видеть изменения от редактора)
         loadSiteData();
-        
-        // Обновляем каждые 5 секунд (для实时ных изменений)
-        setInterval(loadSiteData, 5000);
+        setInterval(loadSiteData, 3000);
     </script>
 </body>
 </html>
