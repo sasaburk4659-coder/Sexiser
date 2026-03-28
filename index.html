@@ -15,19 +15,20 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
 
         .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-            max-width: 500px;
-            width: 100%;
+            margin-bottom: 20px;
             animation: fadeIn 0.5s ease-in;
         }
 
@@ -54,39 +55,15 @@
             margin-bottom: 10px;
         }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
         .content {
             padding: 30px;
-        }
-
-        .info-box {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-        }
-
-        .info-box h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .info-box p {
-            color: #666;
-            line-height: 1.6;
         }
 
         .visitor-info {
             background: #e8f4f8;
             border-radius: 10px;
             padding: 15px;
-            margin-top: 20px;
+            margin-bottom: 20px;
             font-size: 14px;
             color: #555;
         }
@@ -94,6 +71,48 @@
         .visitor-info span {
             color: #667eea;
             font-weight: bold;
+        }
+
+        .messages-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        .message-text {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         .notification {
@@ -123,6 +142,16 @@
             }
         }
 
+        .status {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+            color: #0066cc;
+        }
+
         .footer {
             background: #f8f9fa;
             padding: 15px;
@@ -134,63 +163,66 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🚀 Добро пожаловать!</h1>
-            <p>Ваше посещение зафиксировано</p>
-        </div>
-        <div class="content">
-            <div class="info-box">
-                <h3>📊 Информация о посещении</h3>
-                <p>Ваш визит был автоматически зарегистрирован и отправлено уведомление администратору.</p>
+        <div class="card">
+            <div class="header">
+                <h1>🚀 Добро пожаловать!</h1>
+                <p>Ваше посещение зафиксировано</p>
             </div>
-            <div class="visitor-info">
-                <strong>📝 Детали визита:</strong><br>
-                🌐 IP адрес: <span id="ip">Определяется...</span><br>
-                🕐 Время: <span id="time"></span><br>
-                🔍 Браузер: <span id="browser"></span>
+            <div class="content">
+                <div class="visitor-info">
+                    <strong>📝 Ваши данные:</strong><br>
+                    🌐 IP адрес: <span id="ip">Определяется...</span><br>
+                    🕐 Время: <span id="time"></span><br>
+                    🔍 Браузер: <span id="browser"></span>
+                </div>
+                
+                <div class="status" id="connectionStatus">
+                    🔄 Подключение к серверу...
+                </div>
+                
+                <h3>💬 Сообщения от администратора:</h3>
+                <div class="messages-container" id="messages">
+                    <div class="message">
+                        <div class="message-time">Только что</div>
+                        <div class="message-text">✨ Добро пожаловать! Здесь будут появляться сообщения от администратора.</div>
+                    </div>
+                </div>
+                
+                <div id="notification" class="notification">
+                    ✅ Новое сообщение!
+                </div>
             </div>
-            <div id="notification" class="notification">
-                ✅ Уведомление отправлено администратору!
+            <div class="footer">
+                Система实时ных уведомлений v2.0
             </div>
-        </div>
-        <div class="footer">
-            Система мониторинга посещений v1.0
         </div>
     </div>
 
     <script>
+        let lastMessageId = 0;
+        
         // Получаем информацию о посетителе
         function getVisitorInfo() {
-            // Время посещения
             const now = new Date();
             document.getElementById('time').textContent = now.toLocaleString('ru-RU');
-            
-            // Информация о браузере
             const browserInfo = navigator.userAgent;
             document.getElementById('browser').textContent = browserInfo.substring(0, 100) + '...';
             
-            // Получаем IP через API
             fetch('https://api.ipify.org?format=json')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('ip').textContent = data.ip;
-                    
-                    // Отправляем данные на сервер
-                    sendNotification(data.ip, browserInfo, now.toISOString());
+                    sendVisitNotification(data.ip, browserInfo, now.toISOString());
                 })
                 .catch(error => {
                     document.getElementById('ip').textContent = 'Не удалось определить';
-                    console.error('Ошибка получения IP:', error);
-                    // Все равно пытаемся отправить уведомление
-                    sendNotification('Неизвестный', browserInfo, now.toISOString());
+                    sendVisitNotification('Неизвестный', browserInfo, now.toISOString());
                 });
         }
         
-        function sendNotification(ip, browser, time) {
-            // Получаем ссылку на сайт из текущего URL
+        function sendVisitNotification(ip, browser, time) {
             const siteUrl = window.location.href;
             
-            // Отправляем данные на Python сервер
             fetch('http://localhost:5000/notify', {
                 method: 'POST',
                 headers: {
@@ -201,26 +233,74 @@
                     browser: browser,
                     time: time,
                     siteUrl: siteUrl,
-                    password: 'your_secret_password_123' // Пароль для защиты
+                    password: 'your_secret_password_123'
                 })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    const notification = document.getElementById('notification');
-                    notification.classList.add('show');
-                    setTimeout(() => {
-                        notification.classList.remove('show');
-                    }, 5000);
-                }
+                console.log('Посещение зарегистрировано');
             })
             .catch(error => {
-                console.error('Ошибка отправки уведомления:', error);
+                console.error('Ошибка:', error);
             });
         }
         
-        // Запускаем при загрузке страницы
-        window.addEventListener('DOMContentLoaded', getVisitorInfo);
+        // Получаем сообщения с сервера
+        function checkMessages() {
+            fetch('http://localhost:5000/get_messages')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('connectionStatus').innerHTML = '✅ Соединение установлено';
+                    document.getElementById('connectionStatus').style.background = '#d4edda';
+                    document.getElementById('connectionStatus').style.color = '#155724';
+                    
+                    if (data.messages && data.messages.length > 0) {
+                        const messagesContainer = document.getElementById('messages');
+                        const currentMessages = data.messages;
+                        
+                        // Проверяем новые сообщения
+                        if (currentMessages.length > lastMessageId) {
+                            // Показываем только новые
+                            for (let i = lastMessageId; i < currentMessages.length; i++) {
+                                addMessageToPage(currentMessages[i]);
+                            }
+                            lastMessageId = currentMessages.length;
+                            
+                            // Показываем уведомление
+                            const notification = document.getElementById('notification');
+                            notification.classList.add('show');
+                            setTimeout(() => {
+                                notification.classList.remove('show');
+                            }, 3000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('connectionStatus').innerHTML = '⚠️ Ожидание подключения к серверу...';
+                    document.getElementById('connectionStatus').style.background = '#fff3cd';
+                    document.getElementById('connectionStatus').style.color = '#856404';
+                    console.error('Ошибка получения сообщений:', error);
+                });
+        }
+        
+        function addMessageToPage(message) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            messageDiv.innerHTML = `
+                <div class="message-time">${message.time}</div>
+                <div class="message-text">${message.text}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // Запускаем при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            getVisitorInfo();
+            checkMessages();
+            setInterval(checkMessages, 2000); // Проверяем новые сообщения каждые 2 секунды
+        });
     </script>
 </body>
 </html>
