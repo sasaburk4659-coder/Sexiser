@@ -19,8 +19,6 @@
         .nav-btn { background:#fff; border:none; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px; transition:.3s; }
         .nav-btn:hover { transform:scale(1.1); background:#667eea; color:#fff; }
         .page-indicator { color:#fff; display:flex; align-items:center; gap:8px; font-size:14px; }
-        .page-dot { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.3); border:none; color:#fff; cursor:pointer; transition:.3s; }
-        .page-dot.active { background:#fff; color:#667eea; transform:scale(1.2); }
         @keyframes fadeDown { from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);} }
         @keyframes slideLeft { from{transform:translateX(-100%);opacity:0;}to{transform:translateX(0);opacity:1;} }
@@ -30,139 +28,96 @@
         .blocked-screen { display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; background:#1a1a2e; color:#fff; flex-direction:column; gap:20px; }
         .blocked-screen h1 { font-size:72px; color:#dc3545; }
         .blocked-screen p { font-size:18px; opacity:.8; }
-        .unblock-btn { background:#28a745; color:#fff; border:none; padding:12px 30px; font-size:18px; border-radius:50px; cursor:pointer; transition:.3s; }
-        .unblock-btn:hover { transform:scale(1.05); background:#218838; }
     </style>
 </head>
 <body id="mainBody">
     <div id="blockedScreen" style="display:none" class="blocked-screen">
         <h1>🔒 403</h1>
-        <p>Доступ к сайту заблокирован администратором</p>
-        <button class="unblock-btn" onclick="checkUnblock()">🔓 Разблокировать</button>
-        <p style="font-size:12px; margin-top:20px;">Введите пароль для разблокировки</p>
-        <input type="password" id="unblockPwd" style="padding:10px; border-radius:10px; border:none; width:200px;">
+        <p>Доступ к сайту заблокирован</p>
+        <p style="font-size:14px">Сайт заблокирован администратором</p>
     </div>
-    
     <div id="siteContent" style="display:none">
         <div class="container">
-            <header>
-                <h1 id="pageTitle">Sexiser</h1>
-                <p id="pageSubtitle" class="subtitle">Добро пожаловать!</p>
-            </header>
-            <div class="content">
-                <div class="objects-container" id="objectsContainer">
-                    <div class="loading">Загрузка...</div>
-                </div>
-            </div>
+            <header><h1 id="pageTitle">Sexiser</h1><p id="pageSubtitle" class="subtitle"></p></header>
+            <div class="content"><div class="objects-container" id="objectsContainer"></div></div>
         </div>
         <div class="navigation">
             <button class="nav-btn" onclick="changePage('prev')">◀</button>
-            <div class="page-indicator" id="pageIndicator">
-                <span id="currentPageNum">1</span> / <span id="totalPagesNum">1</span>
-            </div>
+            <div class="page-indicator"><span id="currentPageNum">1</span> / <span id="totalPagesNum">1</span></div>
             <button class="nav-btn" onclick="changePage('next')">▶</button>
         </div>
     </div>
-
     <script>
-        let currentPageIndex = 0, totalPages = 1, pagesData = [], isTransitioning = false;
+        let currentPage=0, totalPages=1;
         const API = 'http://localhost:5000';
         
-        function checkUnblock() {
-            let pwd = document.getElementById('unblockPwd').value;
-            if(pwd === 'admin123') {
-                localStorage.setItem('unblocked', 'true');
-                location.reload();
-            } else {
-                alert('Неверный пароль');
-            }
-        }
-        
-        function loadSiteData() {
-            fetch(`${API}/data.json`)
-                .then(res => {
-                    if(res.status === 403) {
-                        if(localStorage.getItem('unblocked') === 'true') {
-                            return fetch(`${API}/data.json`).then(r => r.json());
-                        }
-                        document.getElementById('blockedScreen').style.display = 'flex';
-                        document.getElementById('siteContent').style.display = 'none';
-                        throw new Error('Blocked');
+        function loadData(){
+            fetch(API+'/data.json')
+                .then(r=>{
+                    if(r.status===403){
+                        document.getElementById('blockedScreen').style.display='flex';
+                        document.getElementById('siteContent').style.display='none';
+                        throw new Error();
                     }
-                    return res.json();
+                    return r.json();
                 })
-                .then(data => {
-                    if(data && !data.blocked) {
-                        document.getElementById('blockedScreen').style.display = 'none';
-                        document.getElementById('siteContent').style.display = 'block';
-                        
-                        if(data.settings) {
-                            document.getElementById('pageTitle').textContent = data.settings.title || 'Sexiser';
-                            document.getElementById('pageSubtitle').textContent = data.settings.subtitle || 'Добро пожаловать!';
-                            if(data.settings.bg_color) {
-                                document.getElementById('mainBody').style.background = data.settings.bg_color;
-                            }
+                .then(d=>{
+                    if(d&&!d.blocked){
+                        document.getElementById('blockedScreen').style.display='none';
+                        document.getElementById('siteContent').style.display='block';
+                        if(d.settings){
+                            document.getElementById('pageTitle').textContent=d.settings.title||'Sexiser';
+                            document.getElementById('pageSubtitle').textContent=d.settings.subtitle||'';
+                            document.body.style.background=d.settings.bg_color;
                         }
-                        pagesData = data.pages;
-                        totalPages = pagesData.length;
-                        currentPageIndex = data.current_page;
-                        document.getElementById('currentPageNum').textContent = currentPageIndex + 1;
-                        document.getElementById('totalPagesNum').textContent = totalPages;
-                        renderObjects(data.objects);
+                        totalPages=d.pages.length;
+                        currentPage=d.current_page;
+                        document.getElementById('currentPageNum').textContent=currentPage+1;
+                        document.getElementById('totalPagesNum').textContent=totalPages;
+                        renderObjects(d.objects);
                     }
                 })
-                .catch(err => {
-                    if(err.message !== 'Blocked') {
-                        document.getElementById('objectsContainer').innerHTML = '<div class="loading">✨ Добро пожаловать! ✨</div>';
-                    }
-                });
+                .catch(()=>{});
         }
         
-        function renderObjects(objects) {
-            const container = document.getElementById('objectsContainer');
-            container.innerHTML = '';
-            if(objects.length === 0) {
-                container.innerHTML = '<div style="text-align:center;color:#fff;padding:50px;">✨ Здесь будут ваши картинки и текст ✨</div>';
+        function renderObjects(objects){
+            const c=document.getElementById('objectsContainer');
+            c.innerHTML='';
+            if(objects.length===0){
+                c.innerHTML='<div style="text-align:center;color:#fff;padding:50px;">✨ Здесь будут ваши картинки и текст ✨</div>';
                 return;
             }
-            objects.forEach(obj => {
-                if(obj.type === 'image') {
-                    const div = document.createElement('div');
-                    div.className = 'page-object';
-                    div.style.left = (obj.data.x || 50) + 'px';
-                    div.style.top = (obj.data.y || 50) + 'px';
-                    div.innerHTML = `<img src="${API}${obj.data.src}" style="width:${obj.data.width || 200}px; border-radius:${obj.data.border_radius || 10}px;">`;
-                    container.appendChild(div);
-                } else if(obj.type === 'text') {
-                    const div = document.createElement('div');
-                    div.className = 'page-object';
-                    div.style.left = (obj.data.x || 50) + 'px';
-                    div.style.top = (obj.data.y || 100) + 'px';
-                    div.innerHTML = `<div style="font-size:${obj.data.font_size || 16}px; color:${obj.data.color || '#fff'}; background:rgba(0,0,0,0.5); padding:10px; border-radius:10px;">${obj.data.text}</div>`;
-                    container.appendChild(div);
+            objects.forEach(obj=>{
+                const div=document.createElement('div');
+                div.className='page-object';
+                div.style.left=(obj.data.x||50)+'px';
+                div.style.top=(obj.data.y||50)+'px';
+                if(obj.type==='image'){
+                    div.innerHTML=`<img src="${API}${obj.data.src}" style="width:${obj.data.width||200}px; border-radius:${obj.data.border_radius||10}px;">`;
+                }else{
+                    div.innerHTML=`<div style="font-size:${obj.data.font_size||16}px;color:${obj.data.color||'#fff'};background:rgba(0,0,0,0.5);padding:10px;border-radius:10px;">${obj.data.text}</div>`;
                 }
+                c.appendChild(div);
             });
         }
         
-        function changePage(direction) {
-            if(isTransitioning) return;
-            isTransitioning = true;
-            const container = document.getElementById('objectsContainer');
-            const anim = direction === 'next' ? 'trans-left' : 'trans-right';
-            container.classList.add(anim);
-            setTimeout(() => {
-                if(direction === 'next') currentPageIndex = (currentPageIndex + 1) % totalPages;
-                else currentPageIndex = (currentPageIndex - 1 + totalPages) % totalPages;
-                document.getElementById('currentPageNum').textContent = currentPageIndex + 1;
-                fetch(`${API}/data.json`).then(r => r.json()).then(data => {
-                    renderObjects(data.objects);
-                    setTimeout(() => { container.classList.remove(anim); isTransitioning = false; }, 100);
+        function changePage(dir){
+            const c=document.getElementById('objectsContainer');
+            const anim=dir==='next'?'trans-left':'trans-right';
+            c.classList.add(anim);
+            setTimeout(()=>{
+                if(dir==='next') currentPage=(currentPage+1)%totalPages;
+                else currentPage=(currentPage-1+totalPages)%totalPages;
+                document.getElementById('currentPageNum').textContent=currentPage+1;
+                fetch(API+'/data.json').then(r=>r.json()).then(d=>{
+                    renderObjects(d.objects);
+                    setTimeout(()=>c.classList.remove(anim),100);
                 });
-            }, 200);
+            },200);
         }
         
-        loadSiteData();
-        setInterval(loadSiteData, 5000);
+        loadData();
+        setInterval(loadData,3000);
     </script>
 </body>
 </html>
