@@ -3,246 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>Мой сайт</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; min-height: 100vh; transition: all 0.5s ease; }
-        .header { background: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: none; }
-        .header h1 { color: #333; max-width: 1200px; margin: 0 auto; }
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; display: none; }
-        .content { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); min-height: 400px; }
-        .footer { text-align: center; padding: 20px; color: #666; position: fixed; bottom: 0; width: 100%; display: none; }
-        #site-title { color: #333; margin-bottom: 20px; }
-        #site-content { line-height: 1.6; color: #666; }
-        #api-key-storage { display: none; }
-        /* Стили для динамических функций (можно оставить как в исходном) */
-        .chat-container { margin-top: 30px; border-top: 2px solid #e0e0e0; padding-top: 20px; }
-        .chat-messages { max-height: 300px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 5px; padding: 10px; margin-bottom: 10px; }
-        .chat-message { margin-bottom: 10px; padding: 8px; border-radius: 5px; }
-        .user-message { background: #e3f2fd; text-align: right; }
-        .bot-message { background: #f1f1f1; text-align: left; }
-        .chat-input { display: flex; gap: 10px; }
-        .chat-input input { flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; }
-        .chat-input button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .calculator { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
-        .calculator input { width: 100px; padding: 10px; margin: 5px; border: 2px solid #e0e0e0; border-radius: 5px; }
-        .calculator button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
-        .calculator-result { margin-top: 10px; font-size: 18px; font-weight: bold; }
-        .timer { margin-top: 30px; text-align: center; }
-        .timer-display { font-size: 48px; font-weight: bold; color: #333; }
-        .timer button { padding: 10px 20px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
-        .timer-start { background: #28a745; color: white; }
-        .timer-pause { background: #ffc107; color: black; }
-        .timer-reset { background: #dc3545; color: white; }
-        .notes { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
-        .notes textarea { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; margin-bottom: 10px; }
-        .todo { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; }
-        .todo input { width: calc(100% - 100px); padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; }
-        .todo button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .todo-list { margin-top: 10px; list-style: none; }
-        .todo-list li { padding: 8px; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 10px; }
-        .todo-list li input[type="checkbox"] { width: auto; }
-        .todo-list li span { flex: 1; }
-        .todo-list li button { padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; }
-        .media-block { margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 5px; text-align: center; }
-        .media-block img, .media-block video { max-width: 100%; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .blocked {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+        }
+        
+        .blocked h1 {
+            color: #f44336;
+        }
+        
+        .blocked p {
+            color: #d32f2f;
+        }
+        
+        .status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
-    <div id="api-key-storage" data-key="sk-live-9a7b3c1d5e8f2g4h6i8j0k1l2m3n4o5p"></div>
-    
-    <div class="header" id="header">
-        <h1 id="site-title"></h1>
-    </div>
-    
-    <div class="container" id="container">
-        <div class="content" id="main-content">
-            <div id="site-content"></div>
-            <div id="features-container"></div>
+    <div id="content">
+        <!-- Содержимое будет загружено через JavaScript -->
+        <div class="container">
+            <h1>📄 Белая страница</h1>
+            <p>Это простой HTML сайт</p>
+            <p>Ничего лишнего</p>
         </div>
     </div>
-    
-    <div class="footer" id="footer">
-        <p></p>
-    </div>
+    <div class="status" id="status">Статус: проверка...</div>
 
     <script>
-        const API_KEY = document.getElementById('api-key-storage').dataset.key;
-        const header = document.getElementById('header');
-        const container = document.getElementById('container');
-        const footer = document.getElementById('footer');
-        const siteTitle = document.getElementById('site-title');
-        const siteContent = document.getElementById('site-content');
-        let activeFeatures = new Set();
-
-        // Функция для получения параметров из query и hash
-        function getParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (window.location.hash.length > 1) {
-                try {
-                    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                    hashParams.forEach((value, key) => urlParams.set(key, value));
-                } catch (e) {
-                    console.warn('Ошибка парсинга hash:', e);
-                }
-            }
-            return urlParams;
-        }
-
-        // Корректное декодирование base64 в UTF-8
-        function base64ToUtf8(str) {
+        // Проверяем статус сайта через API
+        async function checkStatus() {
             try {
-                const binary = atob(str);
-                const bytes = new Uint8Array(binary.length);
-                for (let i = 0; i < binary.length; i++) {
-                    bytes[i] = binary.charCodeAt(i);
-                }
-                return new TextDecoder('utf-8').decode(bytes);
-            } catch (e) {
-                console.error('Ошибка декодирования base64:', e);
-                return '';
-            }
-        }
-
-        async function updateContent() {
-            try {
-                const urlParams = getParams();
-                const apiKey = urlParams.get('key');
-
-                if (apiKey === API_KEY) {
-                    header.style.display = 'block';
-                    container.style.display = 'block';
-                    footer.style.display = 'block';
-
-                    const title = urlParams.get('title');
-                    const content = urlParams.get('content');
-                    const bgColor = urlParams.get('bgcolor');
-                    const command = urlParams.get('command');
-                    const adds = urlParams.getAll('add');
-                    const removes = urlParams.getAll('remove');
-
-                    if (title) {
-                        siteTitle.textContent = decodeURIComponent(title);
-                        document.title = decodeURIComponent(title);
+                // Запрос к вашему Python серверу
+                const response = await fetch('http://localhost:5000/api/manage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        password: 'secret123',  // Тот же пароль
+                        action: 'status'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    if (data.blocked) {
+                        // Сайт заблокирован
+                        document.getElementById('content').innerHTML = `
+                            <div class="blocked">
+                                <h1>⛔ САЙТ ЗАБЛОКИРОВАН</h1>
+                                <p>${data.message}</p>
+                            </div>
+                        `;
+                        document.getElementById('status').innerHTML = `🔴 Заблокирован: ${data.message}`;
+                    } else {
+                        // Сайт работает
+                        document.getElementById('content').innerHTML = `
+                            <div class="container">
+                                <h1>📄 Белая страница</h1>
+                                <p>Это простой HTML сайт</p>
+                                <p>${data.message}</p>
+                            </div>
+                        `;
+                        document.getElementById('status').innerHTML = `🟢 Сайт работает: ${data.message}`;
                     }
-                    if (content) {
-                        siteContent.innerHTML = decodeURIComponent(content).replace(/\\n/g, '<br>');
-                    }
-                    if (bgColor) {
-                        document.body.style.background = decodeURIComponent(bgColor);
-                    }
-
-                    adds.forEach(feature => addFeatureToSite(decodeURIComponent(feature)));
-                    removes.forEach(feature => removeFeatureFromSite(decodeURIComponent(feature)));
-
-                    if (command === 'reset') {
-                        siteTitle.textContent = '';
-                        siteContent.innerHTML = '';
-                        document.body.style.background = '#f0f0f0';
-                        document.title = '';
-                        document.getElementById('features-container').innerHTML = '';
-                        activeFeatures.clear();
-                        header.style.display = 'none';
-                        container.style.display = 'none';
-                        footer.style.display = 'none';
-                    } else if (command === 'alert') {
-                        alert('Команда выполнена!');
-                    } else if (command === 'hide') {
-                        header.style.display = 'none';
-                        container.style.display = 'none';
-                        footer.style.display = 'none';
-                    } else if (command === 'show') {
-                        header.style.display = 'block';
-                        container.style.display = 'block';
-                        footer.style.display = 'block';
-                    }
-
-                    // Выполнение скрипта из параметра script (base64)
-                    const scriptParam = urlParams.get('script');
-                    if (scriptParam) {
-                        try {
-                            eval(base64ToUtf8(scriptParam));
-                        } catch (e) {
-                            console.error('Ошибка выполнения скрипта:', e);
-                        }
-                    }
-
-                    // Вставка HTML из параметра html (base64)
-                    const htmlParam = urlParams.get('html');
-                    if (htmlParam) {
-                        try {
-                            const decodedHtml = base64ToUtf8(htmlParam);
-                            document.body.insertAdjacentHTML('beforeend', decodedHtml);
-                        } catch (e) {
-                            console.error('Ошибка вставки HTML:', e);
-                        }
-                    }
-
-                } else {
-                    header.style.display = 'none';
-                    container.style.display = 'none';
-                    footer.style.display = 'none';
-                    document.body.style.background = '#f0f0f0';
                 }
             } catch (error) {
-                console.log('Ошибка:', error);
+                console.error('Ошибка:', error);
+                document.getElementById('status').innerHTML = '⚠️ Не удалось подключиться к серверу';
             }
         }
-
-        // Заглушки для функций (можно оставить как в исходном)
-        function addFeatureToSite(featureType) {
-            if (activeFeatures.has(featureType)) return;
-            const container = document.getElementById('features-container');
-            switch(featureType) {
-                case 'chat': addChat(container); break;
-                case 'calculator': addCalculator(container); break;
-                case 'timer': addTimer(container); break;
-                case 'notes': addNotes(container); break;
-                case 'todo': addTodoList(container); break;
-                case 'media': addMedia(container); break;
-                default: addCustomFeature(container, featureType);
-            }
-            activeFeatures.add(featureType);
-        }
-
-        function removeFeatureFromSite(featureType) {
-            const element = document.getElementById(`feature-${featureType}`);
-            if (element) { element.remove(); activeFeatures.delete(featureType); }
-        }
-
-        function addCustomFeature(container, featureName) {
-            const featureDiv = document.createElement('div');
-            featureDiv.id = `feature-${featureName}`;
-            featureDiv.className = 'calculator';
-            featureDiv.innerHTML = `<h3>${featureName}</h3><p>Новая функция "${featureName}" добавлена на сайт!</p><button onclick="alert('Функция ${featureName} в разработке')">Использовать</button>`;
-            container.appendChild(featureDiv);
-        }
-
-        // Пустые функции для остальных (можно добавить при необходимости)
-        function addChat(container) {}
-        function addCalculator(container) {}
-        function addTimer(container) {}
-        function addNotes(container) {}
-        function addTodoList(container) {}
-        function addMedia(container) {
-            const mediaDiv = document.createElement('div');
-            mediaDiv.id = 'feature-media';
-            mediaDiv.className = 'media-block';
-            mediaDiv.innerHTML = '<h3>Медиа</h3>';
-            const mediaUrl = new URLSearchParams(window.location.search).get('media');
-            if (mediaUrl) {
-                const lowerUrl = mediaUrl.toLowerCase();
-                if (lowerUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)(\?.*)?$/)) {
-                    const img = document.createElement('img'); img.src = mediaUrl; img.alt = 'Изображение'; mediaDiv.appendChild(img);
-                } else if (lowerUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/)) {
-                    const video = document.createElement('video'); video.src = mediaUrl; video.controls = true; mediaDiv.appendChild(video);
-                } else { mediaDiv.innerHTML += '<p>Неподдерживаемый формат медиа.</p>'; }
-            } else { mediaDiv.innerHTML += '<p>Ссылка на медиа не указана.</p>'; }
-            container.appendChild(mediaDiv);
-        }
-
-        window.onload = updateContent;
-        window.addEventListener('popstate', updateContent);
+        
+        // Проверяем статус каждые 5 секунд
+        checkStatus();
+        setInterval(checkStatus, 5000);
     </script>
 </body>
 </html>
