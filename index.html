@@ -2,563 +2,497 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>AI Agent Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Granny 3D — Побег из дома</title>
   <style>
-    :root{
-      --bg:#0a0c15;
-      --panel:rgba(15,20,40,0.85);
-      --border:rgba(255,255,255,0.08);
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --accent1:#8b5cf6;
-      --accent2:#3b82f6;
-      --success:#22c55e;
-      --warn:#f59e0b;
-      --danger:#ef4444;
-      --shadow:0 20px 60px rgba(0,0,0,.35);
-      --radius:16px;
-      --sidebar-collapsed:64px;
-      --sidebar-expanded:240px;
-      --topbar:72px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:var(--bg);
-      overflow:hidden;
-    }
-    body::before,body::after,.orb{
-      content:"";
-      position:fixed;
-      inset:auto;
-      pointer-events:none;
-      filter:blur(48px);
-      opacity:.7;
-      z-index:0;
-      animation:float 18s ease-in-out infinite;
-    }
-    .orb1,.orb2,.orb3{
-      width:420px;height:420px;border-radius:50%;
-      position:fixed;pointer-events:none;z-index:0;filter:blur(56px);opacity:.6;
-    }
-    .orb1{left:-80px;top:-60px;background:radial-gradient(circle, rgba(139,92,246,.65), rgba(139,92,246,0) 70%);animation:drift1 24s ease-in-out infinite;}
-    .orb2{right:-120px;top:80px;background:radial-gradient(circle, rgba(59,130,246,.65), rgba(59,130,246,0) 70%);animation:drift2 28s ease-in-out infinite;}
-    .orb3{left:30%;bottom:-160px;background:radial-gradient(circle, rgba(99,102,241,.45), rgba(99,102,241,0) 70%);animation:drift3 32s ease-in-out infinite;}
-    @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,30px)}}
-    @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,40px)}}
-    @keyframes drift3{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; font-family: monospace; touch-action: none; }
+    canvas { display: block; }
 
-    .app{position:relative;z-index:1;height:100%;display:flex}
-    .sidebar{
-      width:var(--sidebar-collapsed);
-      background:rgba(8,10,20,.72);
-      border-right:1px solid var(--border);
-      backdrop-filter:blur(20px);
-      transition:.28s ease;
-      overflow:hidden;
-      display:flex;flex-direction:column;
+    #ui {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
     }
-    .sidebar:hover{width:var(--sidebar-expanded)}
-    .brand{
-      height:72px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--border)
-    }
-    .brand-badge{
-      width:34px;height:34px;border-radius:12px;
-      background:linear-gradient(135deg,var(--accent1),var(--accent2));
-      box-shadow:0 12px 30px rgba(59,130,246,.3);
-      flex:0 0 auto;
-    }
-    .brand-text{white-space:nowrap;opacity:0;transform:translateX(-8px);transition:.25s ease}
-    .sidebar:hover .brand-text{opacity:1;transform:none}
-    .nav{padding:12px 8px;display:flex;flex-direction:column;gap:8px}
-    .nav button{
-      appearance:none;border:0;background:transparent;color:var(--text);
-      height:48px;border-radius:14px;display:flex;align-items:center;gap:12px;
-      padding:0 12px;cursor:pointer;transition:.2s ease;text-align:left
-    }
-    .nav button:hover,.nav button.active{background:rgba(255,255,255,.06)}
-    .nav .ico{width:28px;height:28px;display:grid;place-items:center;border-radius:10px;background:rgba(255,255,255,.05);flex:0 0 auto}
-    .nav .lbl{white-space:nowrap;opacity:0;transform:translateX(-8px);transition:.25s ease}
-    .sidebar:hover .lbl{opacity:1;transform:none}
-    .sidebar-footer{margin-top:auto;padding:12px 8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
-    .sidebar-footer .lbl{opacity:0;transition:.25s ease}
-    .sidebar:hover .sidebar-footer .lbl{opacity:1}
-    .main{flex:1;display:flex;flex-direction:column;min-width:0}
-    .topbar{
-      height:72px;display:flex;align-items:center;justify-content:space-between;
-      padding:0 18px;border-bottom:1px solid var(--border);
-      background:rgba(10,12,21,.35);backdrop-filter:blur(20px)
-    }
-    .topbar h1{margin:0;font-size:18px}
-    .topbar .meta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:13px}
-    .content{flex:1;overflow:auto;padding:18px;scroll-behavior:smooth}
-    .section{display:none;animation:fade .24s ease}
-    .section.active{display:block}
-    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-    .panel{
-      background:var(--panel);backdrop-filter:blur(20px);
-      border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+    .panel {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 18px;
+      padding: 10px 14px;
+      color: #ffd9a6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(8px);
+      font-size: 14px;
     }
-    .toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-    input,select,textarea,button{
-      font:inherit;color:inherit
-    }
-    .input, .select, .textarea{
-      width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
-      border-radius:12px;padding:12px 14px;outline:none;transition:.2s ease;color:var(--text)
-    }
-    .input:focus,.select:focus,.textarea:focus{border-color:rgba(139,92,246,.6);box-shadow:0 0 0 4px rgba(139,92,246,.12)}
-    .btn{
-      border:0;border-radius:12px;padding:12px 14px;cursor:pointer;transition:.2s ease;
-      background:rgba(255,255,255,.06);color:var(--text)
-    }
-    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.09)}
-    .btn.primary{background:linear-gradient(135deg,var(--accent1),var(--accent2));box-shadow:0 14px 30px rgba(59,130,246,.18)}
-    .btn.danger{background:rgba(239,68,68,.14)}
-    .btn.success{background:rgba(34,197,94,.14)}
-    .chips{display:flex;gap:8px;flex-wrap:wrap}
-    .chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);cursor:pointer;border:1px solid transparent}
-    .chip.active{border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.14)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
-    .card{padding:16px;display:flex;flex-direction:column;gap:12px;min-height:220px}
-    .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-    .plat-ico{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:20px;background:rgba(255,255,255,.06)}
-    .name{font-weight:700}
-    .cat{font-size:12px;color:var(--muted)}
-    .desc{font-size:13px;line-height:1.45;color:#cbd5e1;min-height:52px}
-    .status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
-    .dot{width:8px;height:8px;border-radius:50%}
-    .dot.on{background:var(--success);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
-    .dot.off{background:#64748b}
-    .card .btn{margin-top:auto}
 
-    .layout-2{display:grid;grid-template-columns:1.65fr .9fr;gap:14px;min-height:calc(100vh - 126px)}
-    .chat-col,.activity-col,.wf-left,.wf-canvas-wrap,.wf-right{padding:16px}
-    .chat-box{height:calc(100vh - 250px);overflow:auto;padding-right:6px}
-    .msg{max-width:92%;padding:12px 14px;border-radius:16px;margin:10px 0;border:1px solid rgba(255,255,255,.08)}
-    .msg.user{margin-left:auto;background:rgba(59,130,246,.12)}
-    .msg.assistant{background:rgba(255,255,255,.05)}
-    .msg .md p{margin:.4em 0}
-    .msg .md code{background:rgba(255,255,255,.08);padding:2px 5px;border-radius:6px}
-    .msg .md pre{overflow:auto;background:rgba(0,0,0,.25);padding:12px;border-radius:12px}
-    .composer{display:flex;gap:10px;margin-top:12px}
-    .composer textarea{min-height:56px;max-height:140px;resize:vertical}
-    .typing{display:inline-flex;gap:4px;align-items:center}
-    .typing span{width:7px;height:7px;border-radius:50%;background:#cbd5e1;animation:b 1.2s infinite ease-in-out}
-    .typing span:nth-child(2){animation-delay:.15s}
-    .typing span:nth-child(3){animation-delay:.3s}
-    @keyframes b{0%,80%,100%{transform:scale(.7);opacity:.4}40%{transform:scale(1);opacity:1}}
+    .panel.second { top: 66px; }
+    #health-bar {
+      width: 160px;
+      height: 12px;
+      background: #2c0000;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 0 5px #000;
+    }
+    #health-fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #e74c3c, #ff6b5f);
+    }
 
-    .steps{display:flex;flex-direction:column;gap:10px}
-    .step{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center}
-    .step.run{border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.12)}
-    .step.done{background:rgba(34,197,94,.12)}
-    .badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .badge{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:12px}
+    #message {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 20px;
+      border-radius: 18px;
+      border: 2px solid #e74c3c;
+      background: rgba(0,0,0,0.88);
+      color: #ff6b6b;
+      font-size: 18px;
+      display: none;
+      white-space: nowrap;
+      text-align: center;
+    }
 
-    .wf-grid{display:grid;grid-template-columns:260px 1fr 290px;gap:14px;min-height:calc(100vh - 126px)}
-    .wf-list{display:flex;flex-direction:column;gap:10px}
-    .wf-item{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);cursor:pointer}
-    .wf-item.active{background:rgba(139,92,246,.14)}
-    .canvas{
-      position:relative;min-height:720px;overflow:hidden;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(139,92,246,.08), transparent 30%),
-        radial-gradient(circle at 80% 30%, rgba(59,130,246,.08), transparent 25%),
-        rgba(255,255,255,.03);
-      border-radius:16px;border:1px dashed rgba(255,255,255,.1);
+    .joystick-base {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(20,20,30,0.55);
+      border: 2px solid rgba(255,255,255,0.22);
+      z-index: 25;
+      pointer-events: auto;
+      touch-action: none;
+      backdrop-filter: blur(10px);
     }
-    .node{
-      position:absolute;min-width:140px;min-height:62px;padding:12px 14px;border-radius:16px;
-      background:rgba(15,20,40,.94);border:1px solid rgba(255,255,255,.10);
-      cursor:grab;user-select:none;box-shadow:0 16px 40px rgba(0,0,0,.25)
+
+    .joystick-thumb {
+      position: absolute;
+      left: 38px;
+      top: 38px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      box-shadow: 0 0 10px rgba(0,0,0,0.25);
+      transition: transform 0.02s linear;
+      touch-action: none;
     }
-    .node.selected{outline:2px solid rgba(139,92,246,.65)}
-    .node .t{font-weight:700;font-size:13px}
-    .node .s{font-size:12px;color:var(--muted);margin-top:4px}
-    .node.start,.node.end{width:72px;height:72px;border-radius:50%;min-width:72px;text-align:center;display:grid;place-items:center}
-    .node.step{background:rgba(59,130,246,.16)}
-    .node.decision{background:rgba(245,158,11,.16)}
-    .node.connector{background:rgba(168,85,247,.16)}
-    .node.start{background:rgba(34,197,94,.18)}
-    .node.end{background:rgba(239,68,68,.18)}
-    .props .field{margin-bottom:12px}
-    .small{font-size:12px;color:var(--muted)}
-    .modal-backdrop{
-      position:fixed;inset:0;background:rgba(3,6,15,.62);display:none;align-items:center;justify-content:center;z-index:20;padding:18px
+
+    .hint {
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      color: #bbb;
+      font-size: 11px;
+      background: rgba(0,0,0,0.55);
+      padding: 5px 12px;
+      border-radius: 999px;
+      z-index: 25;
+      pointer-events: none;
     }
-    .modal-backdrop.show{display:flex}
-    .modal{width:min(680px,100%);max-height:90vh;overflow:auto;padding:18px}
-    .modal h3{margin:0 0 12px}
-    .modal .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .divider{height:1px;background:rgba(255,255,255,.08);margin:14px 0}
-    .table{width:100%;border-collapse:collapse}
-    .table td{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-    .mobile-nav{display:none}
-    @media (max-width: 980px){
-      body{overflow:auto}
-      .app{display:block}
-      .sidebar{display:none}
-      .mobile-nav{
-        display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;
-        background:rgba(8,10,20,.82);backdrop-filter:blur(20px);border-top:1px solid var(--border);
-      }
-      .mobile-nav button{flex:1;height:64px;background:transparent;border:0;color:var(--text)}
-      .content{padding-bottom:86px}
-      .layout-2,.wf-grid{grid-template-columns:1fr}
-      .chat-box{height:52vh}
-      .canvas{min-height:540px}
-      .modal .row{grid-template-columns:1fr}
+
+    @media (max-width: 768px) {
+      .panel { font-size: 12px; }
+      .joystick-base { width: 96px; height: 96px; }
+      .joystick-thumb { width: 36px; height: 36px; left: 30px; top: 30px; }
+      #health-bar { width: 120px; }
+    }
+
+    .hurt { animation: hurtFlash 0.18s ease-out; }
+    @keyframes hurtFlash {
+      0% { background-color: rgba(255,0,0,0); }
+      40% { background-color: rgba(255,0,0,0.45); }
+      100% { background-color: rgba(255,0,0,0); }
     }
   </style>
 </head>
 <body>
-  <div class="orb1"></div><div class="orb2"></div><div class="orb3"></div>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand"><div class="brand-badge"></div><div class="brand-text">AI Agent Platform</div></div>
-      <nav class="nav" id="nav"></nav>
-      <div class="sidebar-footer"><div class="lbl">Состояние: localStorage · agent_platform_v1</div></div>
-    </aside>
-    <main class="main">
-      <div class="topbar">
-        <h1 id="pageTitle">Коннекторы</h1>
-        <div class="meta"><span id="connCount">0 подключено</span><span>·</span><span id="modelLabel">mistral-large-latest</span></div>
-      </div>
-      <div class="content">
-        <section class="section active" id="page-connectors"></section>
-        <section class="section" id="page-agent"></section>
-        <section class="section" id="page-workflow"></section>
-        <section class="section" id="page-export"></section>
-        <section class="section" id="page-settings"></section>
-      </div>
-    </main>
-  </div>
-  <div class="mobile-nav" id="mobileNav"></div>
-
-  <div class="modal-backdrop" id="modal">
-    <div class="modal panel" id="modalContent"></div>
+  <div id="ui">
+    <div class="panel">
+      <span>❤</span>
+      <div id="health-bar"><div id="health-fill"></div></div>
+    </div>
+    <div class="panel second">
+      <span>🔑</span>
+      <div id="inventory">— нет ключа —</div>
+    </div>
+    <div id="message"></div>
+    <div class="joystick-base" id="joystickBase"><div class="joystick-thumb" id="joystickThumb"></div></div>
+    <div class="hint">Левый джойстик — движение, правую часть экрана свайпом — поворот</div>
   </div>
 
-<script>
-const STORAGE_KEY='agent_platform_v1';
-const defaults={theme:'dark',apiKey:'',model:'mistral-large-latest',temperature:0.7,connectors:{},chat:[],workflows:[],activeWorkflowId:null,activeSection:'connectors'};
-const ls=()=>JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')||structuredClone(defaults);
-let state=ls();
-const save=()=>localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
-const el=id=>document.getElementById(id);
-const sections=[['connectors','КОННЕКТОРЫ','🔌'],['agent','AI АГЕНТ','🤖'],['workflow','WORKFLOW BUILDER','🧩'],['export','ЭКСПОРТ','⬇️'],['settings','НАСТРОЙКИ','⚙️']];
-const platforms=[['mistral','Mistral AI','LLM','Основной чат-движок и оркестрация'],['openai','OpenAI','LLM','Модельные ответы и инструменты'],['claude','Claude','LLM','Длинный контекст и анализ'],['gemini','Gemini','LLM','Мультимодальные сценарии'],['ollama','Ollama','LLM','Локальные модели на сервере'],['telegram','Telegram','Коммуникации','Боты и уведомления'],['slack','Slack','Коммуникации','Командные события и алерты'],['discord','Discord','Коммуникации','Сообщества и вебхуки'],['whatsapp','WhatsApp','Коммуникации','Мессенджер-интеграции'],['github','GitHub','DevOps','Репозитории и API пользователей'],['gitlab','GitLab','DevOps','CI/CD и проекты'],['jira','Jira','PM','Задачи и инциденты'],['dockerhub','Docker Hub','DevOps','Образы и сборки'],['notion','Notion','Документы','Базы знаний и страницы'],['trello','Trello','PM','Доски и карточки'],['airtable','Airtable','Данные','Табличные базы'],['gcal','Google Calendar','Календарь','События и планирование'],['gdrive','Google Drive','Файлы','Документы и доступы'],['dropbox','Dropbox','Файлы','Облачное хранилище'],['s3','AWS S3','Файлы','Объектное хранилище']];
-const icons={mistral:'M',openai:'O',claude:'C',gemini:'G',ollama:'O',telegram:'✈',slack:'S',discord:'D',whatsapp:'W',github:'GH',gitlab:'GL',jira:'J',dockerhub:'D',notion:'N',trello:'T',airtable:'A',gcal:'🗓',gdrive:'📁',dropbox:'⬇',s3:'S3'};
-const conns=()=>Object.values(state.connectors).filter(v=>v.connected).length;
-
-function initNav(){
-  const n=el('nav'), m=el('mobileNav'); n.innerHTML=''; m.innerHTML='';
-  sections.forEach(([id,label,ico])=>{
-    const b=document.createElement('button'); b.className='navbtn'; b.innerHTML=`<div class="ico">${ico}</div><div class="lbl">${label}</div>`;
-    b.onclick=()=>setSection(id); n.appendChild(b.cloneNode(true)); n.lastChild.onclick=()=>setSection(id);
-    const mb=document.createElement('button'); mb.innerHTML=`${ico}<div style="font-size:11px;margin-top:4px">${label.split(' ')[0]}</div>`; mb.onclick=()=>setSection(id); m.appendChild(mb);
-  });
-}
-function setSection(id){
-  state.activeSection=id; save();
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  el('page-'+id).classList.add('active');
-  document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('active',sections[i][0]===id));
-  document.querySelectorAll('#mobileNav button').forEach((b,i)=>b.classList.toggle('active',sections[i][0]===id));
-  el('pageTitle').textContent=sections.find(x=>x[0]===id)[1];
-  render();
-}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function md(t){t=escapeHtml(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>'); return t}
-function connectorsPage(){
-  const known=[...new Set(platforms.map(p=>p[2]))];
-  return `
-    <div class="panel" style="padding:16px;margin-bottom:14px">
-      <div class="toolbar">
-        <input id="connSearch" class="input" placeholder="Поиск платформ..." style="flex:1;min-width:220px">
-        <select id="connFilter" class="select" style="max-width:240px">
-          <option value="">Все категории</option>${known.map(k=>`<option>${k}</option>`).join('')}
-        </select>
-      </div>
-      <div class="chips" id="catChips">${known.map(k=>`<div class="chip" data-cat="${k}">${k}</div>`).join('')}</div>
-    </div>
-    <div class="grid" id="connGrid"></div>`;
-}
-function renderConnectors(){
-  el('page-connectors').innerHTML=connectorsPage();
-  const q=el('connSearch'), f=el('connFilter'), grid=el('connGrid'), chips=[...document.querySelectorAll('.chip')];
-  const draw=()=>{
-    const s=q.value.toLowerCase(), c=f.value;
-    grid.innerHTML=platforms.filter(p=>(!c||p[2]===c)&&(`${p[1]} ${p[2]} ${p[3]}`.toLowerCase().includes(s))).map(([id,name,cat,desc])=>{
-      const conn=state.connectors[id]?.connected;
-      return `<div class="panel card">
-        <div class="card-top">
-          <div style="display:flex;gap:12px;align-items:center">
-            <div class="plat-ico">${icons[id]||'●'}</div>
-            <div><div class="name">${name}</div><div class="cat">${cat}</div></div>
-          </div>
-          <div class="status"><span class="dot ${conn?'on':'off'}"></span>${conn?'Подключено':'Не подключено'}</div>
-        </div>
-        <div class="desc">${desc}</div>
-        <button class="btn primary" onclick="openConnector('${id}')">${conn?'Настроить':'Подключить'}</button>
-      </div>`;
-    }).join('');
-    chips.forEach(ch=>ch.classList.toggle('active',ch.dataset.cat===c));
-  };
-  q.oninput=draw; f.onchange=draw; chips.forEach(ch=>ch.onclick=()=>{f.value=ch.dataset.cat===f.value?'':ch.dataset.cat;draw()}); draw();
-}
-function openConnector(id){
-  const p=platforms.find(x=>x[0]===id);
-  const data=state.connectors[id]||{token:'',connected:false};
-  const tokenField=['github','openai','claude','gemini','mistral','ollama','gitlab','jira','notion','trello','airtable','gcal','gdrive','dropbox','s3','dockerhub','slack','discord','telegram','whatsapp'].includes(id)?'Токен/API ключ':'Токен';
-  el('modalContent').innerHTML=`
-    <h3>${p[1]}</h3>
-    <div class="small">${p[3]}</div>
-    <div class="divider"></div>
-    <div class="field"><label class="small">Токен / API ключ</label><input id="tok" class="input" type="password" value="${escapeHtml(data.token||'')}" placeholder="${tokenField}"></div>
-    <div class="field"><label class="small">Как получить токен</label><div class="panel" style="padding:12px;background:rgba(255,255,255,.04)">${connectorGuide(id)}</div></div>
-    <div class="row">
-      <button class="btn primary" id="testConn">Проверить соединение</button>
-      <button class="btn" id="saveConn">Сохранить</button>
-    </div>
-    <div id="connResult" style="margin-top:12px" class="small"></div>`;
-  showModal(true);
-  el('saveConn').onclick=()=>{state.connectors[id]={token:el('tok').value.trim(),connected:!!state.connectors[id]?.connected,platform:id,name:p[1],category:p[2]};save();render();showModal(false)};
-  el('testConn').onclick=()=>testConnector(id,el('tok').value.trim());
-}
-function connectorGuide(id){return id==='github'?'Создайте Personal Access Token в GitHub Settings → Developer settings → Personal access tokens.':
-  'Откройте настройки интеграции сервиса и создайте API token или access token по инструкции провайдера.'}
-async function testConnector(id,token){
-  const box=el('connResult'); box.textContent='Проверка...';
-  try{
-    if(id==='github'){
-      const r=await fetch('https://api.github.com/user',{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}});
-      box.innerHTML=r.ok?'<span style="color:var(--success)">Соединение с GitHub успешно.</span>':'<span style="color:var(--danger)">Ошибка GitHub: неверный токен или нет доступа.</span>';
-      if(r.ok){state.connectors[id]={...(state.connectors[id]||{}),token,connected:true};save();render();}
-    }else{
-      await new Promise(r=>setTimeout(r,900));
-      const ok=token.length>0;
-      box.innerHTML=ok?'<span style="color:var(--success)">Соединение успешно проверено (симуляция).</span>':'<span style="color:var(--warn)">Введите токен для проверки.</span>';
-      if(ok){state.connectors[id]={...(state.connectors[id]||{}),token,connected:true};save();render();}
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+      }
     }
-  }catch(e){box.innerHTML='<span style="color:var(--danger)">Ошибка соединения.</span>'}
-}
-function agentPage(){
-  return `
-  <div class="layout-2">
-    <div class="panel chat-col">
-      <div class="toolbar">
-        <div style="flex:1">
-          <div style="font-weight:700">Чат с агентом</div>
-          <div class="small">Стриминг ответов Mistral AI · markdown · копирование</div>
-        </div>
-        <button class="btn" onclick="clearChat()">Очистить</button>
-      </div>
-      <div class="chat-box" id="chatBox"></div>
-      <div class="composer">
-        <textarea class="textarea" id="chatInput" placeholder="Введите запрос..."></textarea>
-        <button class="btn primary" onclick="sendChat()">Отправить</button>
-      </div>
-    </div>
-    <div class="panel activity-col">
-      <div style="font-weight:700;margin-bottom:8px">Активность агента</div>
-      <div class="steps" id="steps"></div>
-      <div class="badge-row" id="platformBadges"></div>
-      <div class="divider"></div>
-      <button class="btn" onclick="suggestWorkflow()">Создать workflow?</button>
-      <button class="btn" onclick="downloadLast()">Скачать результат?</button>
-    </div>
-  </div>`;
-}
-function renderChat(){
-  const box=el('chatBox'); if(!box)return;
-  box.innerHTML=state.chat.map((m,i)=>`<div class="msg ${m.role==='user'?'user':'assistant'}"><div class="md">${md(m.content)}</div>${m.role==='assistant'?`<div style="margin-top:10px"><button class="btn" onclick="copyText(${i})">Копировать</button></div>`:''}</div>`).join('');
-  box.scrollTop=box.scrollHeight;
-}
-function renderActivity(){
-  const steps=['Анализ запроса','Поиск коннекторов','Обработка данных','Генерация ответа'];
-  const s=el('steps'); if(!s)return;
-  s.innerHTML=steps.map((x,i)=>`<div class="step ${i<activityStep?'done':i===activityStep?'run':''}"><span>${x}</span><span>${i<activityStep?'✓':i===activityStep?'…':''}</span></div>`).join('');
-  const b=el('platformBadges'); b.innerHTML=Object.values(state.connectors).filter(x=>x.connected).map(x=>`<div class="badge">${x.name}</div>`).join('')||'<div class="small">Нет подключённых платформ</div>';
-}
-let activityStep=0;
-async function sendChat(){
-  const ta=el('chatInput'); const text=ta.value.trim(); if(!text) return;
-  state.chat.push({role:'user',content:text}); save(); ta.value=''; renderChat(); activityStep=0; renderActivity();
-  const sys=`Ты — русскоязычный AI-агент платформы. Ты знаешь о подключённых платформах: ${Object.values(state.connectors).filter(x=>x.connected).map(x=>x.name).join(', ')||'нет'}. Предлагай создавать workflow, если это полезно. Отвечай по-русски.`;
-  const assistant={role:'assistant',content:''}; state.chat.push(assistant); save(); renderChat();
-  const box=el('chatBox'); const tmp=document.createElement('div'); tmp.className='msg assistant'; tmp.innerHTML='<div class="typing"><span></span><span></span><span></span></div>'; box.appendChild(tmp); box.scrollTop=box.scrollHeight;
-  const apiKey=state.apiKey;
-  if(!apiKey){assistant.content='Укажите Mistral API ключ в настройках.'; state.chat[state.chat.length-1]=assistant; tmp.remove(); save(); renderChat(); return;}
-  const msgs=[{role:'system',content:sys},...state.chat.filter(m=>m!==assistant).map(m=>({role:m.role,content:m.content}))];
-  activityStep=1; renderActivity();
-  try{
-    const r=await fetch('https://api.mistral.ai/v1/chat/completions',{
-      method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${apiKey}`},
-      body:JSON.stringify({model:state.model,messages:msgs,temperature:Number(state.temperature),stream:false})
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x090912);
+    scene.fog = new THREE.FogExp2(0x090912, 0.035);
+
+    const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 100);
+    camera.position.set(0, 1.7, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    document.body.appendChild(renderer.domElement);
+
+    const ambient = new THREE.AmbientLight(0x404060, 0.9);
+    scene.add(ambient);
+
+    const dirLight = new THREE.DirectionalLight(0xffe7c2, 1.1);
+    dirLight.position.set(4, 8, 5);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    const fill = new THREE.PointLight(0x8a6bff, 0.45, 18);
+    fill.position.set(0, 2, 0);
+    scene.add(fill);
+
+    const roomMat = new THREE.MeshStandardMaterial({ color: 0xb98f61, roughness: 0.95 });
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 1 });
+
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.1;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const backWall = new THREE.Mesh(new THREE.BoxGeometry(16, 3.5, 0.3), roomMat);
+    backWall.position.set(0, 1.7, -7);
+    scene.add(backWall);
+
+    const leftWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.5, 16), roomMat);
+    leftWall.position.set(-7, 1.7, 0);
+    scene.add(leftWall);
+
+    const rightWall = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.5, 16), roomMat);
+    rightWall.position.set(7, 1.7, 0);
+    scene.add(rightWall);
+
+    const chairMat = new THREE.MeshStandardMaterial({ color: 0xaa8866, roughness: 0.9 });
+    const chair = new THREE.Group();
+    chair.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 0.8), chairMat));
+    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.1), chairMat);
+    chairBack.position.set(0, 0.6, -0.4);
+    chair.add(chairBack);
+    chair.position.set(-3, 0, -3);
+    scene.add(chair);
+
+    const oven = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 1.5, 0.8),
+      new THREE.MeshStandardMaterial({ color: 0xcc8866, roughness: 0.8 })
+    );
+    oven.position.set(4.5, 0.7, -2);
+    scene.add(oven);
+
+    const table = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 0.2, 1.2),
+      new THREE.MeshStandardMaterial({ color: 0xaa8866, roughness: 0.9 })
+    );
+    table.position.set(-4, 0.1, 2);
+    scene.add(table);
+
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 2.2, 0.2),
+      new THREE.MeshStandardMaterial({ color: 0x9b7653, roughness: 0.9 })
+    );
+    door.position.set(6.5, 1.1, -1);
+    scene.add(door);
+
+    const keyMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.24, 0.24, 0.24),
+      new THREE.MeshStandardMaterial({ color: 0xffc533, emissive: 0x332200, metalness: 0.9, roughness: 0.2 })
+    );
+    keyMesh.position.set(-3.8, 0.25, 2.2);
+    scene.add(keyMesh);
+
+    const medGroup = new THREE.Group();
+    const medBox = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.3, 0.3),
+      new THREE.MeshStandardMaterial({ color: 0xdd5555, roughness: 0.7 })
+    );
+    const medH = new THREE.Mesh(
+      new THREE.BoxGeometry(0.32, 0.06, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
+    const medV = new THREE.Mesh(
+      new THREE.BoxGeometry(0.06, 0.32, 0.06),
+      new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
+    medGroup.add(medBox, medH, medV);
+    medGroup.position.set(5, 0.2, -1.5);
+    scene.add(medGroup);
+
+    const granny = new THREE.Group();
+    const grannyBody = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 1.2, 0.5),
+      new THREE.MeshStandardMaterial({ color: 0x664455, roughness: 1 })
+    );
+    grannyBody.position.y = 0.6;
+    const grannyHead = new THREE.Mesh(
+      new THREE.SphereGeometry(0.4, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xddaa88, roughness: 1 })
+    );
+    grannyHead.position.y = 1.25;
+    const broom = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.05, 0.1, 0.8, 8),
+      new THREE.MeshStandardMaterial({ color: 0xaa8866, roughness: 1 })
+    );
+    broom.position.set(0.4, 0.3, 0.2);
+    broom.rotation.z = 0.5;
+    granny.add(grannyBody, grannyHead, broom);
+    granny.position.set(-2, 0, -3);
+    scene.add(granny);
+
+    const uiHealth = document.getElementById('health-fill');
+    const uiInventory = document.getElementById('inventory');
+    const uiMessage = document.getElementById('message');
+    const body = document.body;
+
+    const player = {
+      pos: new THREE.Vector3(0, 0, 2.5),
+      yaw: 0,
+      pitch: 0,
+      health: 100,
+      hasKey: false,
+      dead: false,
+      won: false
+    };
+
+    const collectables = [
+      { mesh: keyMesh, type: 'key', taken: false },
+      { mesh: medGroup, type: 'medkit', taken: false }
+    ];
+
+    function showMessage(text, ms = 1800) {
+      uiMessage.textContent = text;
+      uiMessage.style.display = 'block';
+      clearTimeout(showMessage.timer);
+      showMessage.timer = setTimeout(() => uiMessage.style.display = 'none', ms);
+    }
+
+    function updateUI() {
+      uiHealth.style.width = Math.max(0, player.health) + '%';
+      uiInventory.textContent = player.hasKey ? 'Ключ найден' : '— нет ключа —';
+    }
+
+    const moveInput = { x: 0, y: 0 };
+    const look = { active: false, id: null, lastX: 0, lastY: 0 };
+    const joy = { active: false, id: null, cx: 0, cy: 0 };
+
+    const joyBase = document.getElementById('joystickBase');
+    const joyThumb = document.getElementById('joystickThumb');
+
+    function setThumb(dx, dy) {
+      joyThumb.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+
+    joyBase.addEventListener('pointerdown', e => {
+      joy.active = true;
+      joy.id = e.pointerId;
+      joyBase.setPointerCapture(e.pointerId);
+      const r = joyBase.getBoundingClientRect();
+      joy.cx = r.left + r.width / 2;
+      joy.cy = r.top + r.height / 2;
+      updateJoy(e);
+      e.preventDefault();
     });
-    activityStep=2; renderActivity();
-    const j=await r.json();
-    assistant.content=j.choices?.[0]?.message?.content||'Пустой ответ.';
-    activityStep=3; renderActivity();
-  }catch(e){assistant.content='Ошибка запроса к Mistral API.'}
-  state.chat[state.chat.length-1]=assistant; tmp.remove(); save(); renderChat(); activityStep=4; renderActivity();
-}
-function copyText(i){navigator.clipboard.writeText(state.chat[i].content)}
-function clearChat(){state.chat=[];save();render()}
-function suggestWorkflow(){openWorkflowFromChat()}
-function downloadLast(){
-  const t=state.chat.map(m=>`${m.role==='user'?'Пользователь':'Агент'}: ${m.content}`).join('\n\n');
-  downloadFile('chat-history.txt',t,'text/plain');
-}
-function workflowPage(){
-  return `
-  <div class="wf-grid">
-    <div class="panel wf-left">
-      <div class="toolbar" style="margin-bottom:10px"><div style="font-weight:700">Сохранённые workflow</div></div>
-      <div class="wf-list" id="wfList"></div>
-      <button class="btn primary" onclick="newWorkflow()">Новый workflow</button>
-    </div>
-    <div class="panel wf-canvas-wrap">
-      <div class="toolbar">
-        <div>
-          <div style="font-weight:700">Холст</div>
-          <div class="small">Перетаскивайте узлы и соединяйте их визуально</div>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" onclick="addNode('step')">+ Шаг</button>
-          <button class="btn" onclick="addNode('connector')">+ Коннектор</button>
-          <button class="btn" onclick="createFromChat()">Создать из чата</button>
-          <button class="btn success" onclick="saveWorkflow()">Сохранить</button>
-          <button class="btn" onclick="exportWorkflow()">Экспорт JSON</button>
-        </div>
-      </div>
-      <div class="canvas" id="canvas">
-        <svg id="edges" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg>
-      </div>
-    </div>
-    <div class="panel wf-right props">
-      <div style="font-weight:700;margin-bottom:8px">Свойства узла</div>
-      <div class="small" style="margin-bottom:10px">Выберите узел на холсте</div>
-      <div id="props"></div>
-    </div>
-  </div>`;
-}
-let wf={id:'wf1',name:'Workflow 1',nodes:[],edges:[]}, selNode=null, drag=null;
-function ensureWF(){if(!state.workflows.length) state.workflows=[structuredClone(wf)], state.activeWorkflowId='wf1'; if(!state.activeWorkflowId) state.activeWorkflowId=state.workflows[0].id; wf=state.workflows.find(w=>w.id===state.activeWorkflowId)||state.workflows[0]}
-function newWorkflow(){const id='wf'+Date.now(); state.workflows.push({id,name:'Новый workflow',nodes:[{id:'n1',type:'start',title:'Начало',desc:'Точка входа',x:120,y:120},{id:'n2',type:'end',title:'Конец',desc:'Финал',x:420,y:420}],edges:[{from:'n1',to:'n2'}]}); state.activeWorkflowId=id; save(); render()}
-function addNode(type){const id='n'+Date.now(); const map={step:'Шаг',decision:'Решение',connector:'Коннектор'}; wf.nodes.push({id,type,title:map[type],desc:'Описание',platform:'',x:220+Math.random()*220,y:140+Math.random()*220}); save(); renderWorkflow()}
-function renderWorkflow(){
-  ensureWF(); const list=el('wfList'); if(!list)return;
-  list.innerHTML=state.workflows.map(w=>`<div class="wf-item ${w.id===state.activeWorkflowId?'active':''}" onclick="openWF('${w.id}')"><div style="font-weight:700">${w.name}</div><div class="small">${w.nodes.length} узлов</div></div>`).join('');
-  const c=el('canvas'); c.querySelectorAll('.node').forEach(n=>n.remove());
-  wf.nodes.forEach(n=>{
-    const d=document.createElement('div'); d.className=`node ${n.type}${selNode===n.id?' selected':''}`; d.style.left=n.x+'px'; d.style.top=n.y+'px'; d.innerHTML=`<div class="t">${n.title}</div><div class="s">${n.desc||''}</div>`;
-    d.onmousedown=e=>startDrag(e,n); d.onclick=e=>{e.stopPropagation(); selNode=n.id; renderWorkflow(); renderProps()}; c.appendChild(d);
-  });
-  drawEdges(); renderProps(); renderActivity();
-}
-function drawEdges(){
-  const svg=el('edges'); svg.innerHTML=''; const c=el('canvas').getBoundingClientRect();
-  wf.edges.forEach(e=>{const a=wf.nodes.find(n=>n.id===e.from), b=wf.nodes.find(n=>n.id===e.to); if(!a||!b)return;
-    const x1=a.x+80,y1=a.y+31,x2=b.x+80,y2=b.y+31; const mx=(x1+x2)/2;
-    svg.innerHTML += `<path d="M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" stroke="url(#g)" stroke-width="3" fill="none" marker-end="url(#arr)"/>`;
-  });
-  svg.innerHTML=`<defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%"><stop stop-color="#8b5cf6"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient><marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#3b82f6"/></marker></defs>`+svg.innerHTML;
-}
-function startDrag(e,n){drag={n,ox:e.offsetX,oy:e.offsetY}; document.onmousemove=mv; document.onmouseup=up}
-function mv(e){if(!drag)return; const c=el('canvas').getBoundingClientRect(); drag.n.x=Math.max(10,e.clientX-c.left-drag.ox); drag.n.y=Math.max(10,e.clientY-c.top-drag.oy); renderWorkflow()}
-function up(){drag=null; document.onmousemove=null; document.onmouseup=null}
-function renderProps(){
-  const p=el('props'); if(!p)return;
-  const n=wf.nodes.find(x=>x.id===selNode);
-  if(!n){p.innerHTML='<div class="small">Выберите узел на холсте</div>'; return}
-  p.innerHTML=`
-    <div class="field"><label class="small">Название</label><input class="input" id="pTitle" value="${escapeHtml(n.title)}"></div>
-    <div class="field"><label class="small">Тип</label><select class="select" id="pType">${['start','step','decision','connector','end'].map(t=>`<option ${t===n.type?'selected':''}>${t}</option>`).join('')}</select></div>
-    <div class="field"><label class="small">Описание</label><textarea class="textarea" id="pDesc">${escapeHtml(n.desc||'')}</textarea></div>
-    <div class="field"><label class="small">Платформа</label><select class="select" id="pPlat"><option value="">Не выбрано</option>${Object.values(state.connectors).filter(x=>x.connected).map(x=>`<option ${x.name===n.platform?'selected':''}>${x.name}</option>`).join('')}</select></div>
-    <div class="row"><button class="btn success" onclick="applyProps()">Сохранить</button><button class="btn danger" onclick="deleteNode()">Удалить</button></div>
-  `;
-}
-function applyProps(){const n=wf.nodes.find(x=>x.id===selNode); if(!n)return; n.title=el('pTitle').value; n.type=el('pType').value; n.desc=el('pDesc').value; n.platform=el('pPlat').value; save(); renderWorkflow()}
-function deleteNode(){wf.nodes=wf.nodes.filter(n=>n.id!==selNode); wf.edges=wf.edges.filter(e=>e.from!==selNode&&e.to!==selNode); selNode=null; save(); renderWorkflow()}
-function openWF(id){state.activeWorkflowId=id; save(); render()}
-function saveWorkflow(){save(); alert('Workflow сохранён')}
-function exportWorkflow(){downloadFile('workflow.json',JSON.stringify(wf,null,2),'application/json')}
-function createFromChat(){
-  const last=[...state.chat].reverse().find(m=>m.role==='user')?.content||'';
-  wf.nodes=[{id:'n1',type:'start',title:'Начало',desc:'Вход',x:80,y:120},{id:'n2',type:'step',title:'Анализ',desc:last.slice(0,80)||'По последнему запросу',x:300,y:120},{id:'n3',type:'connector',title:'Коннектор',desc:Object.values(state.connectors).find(x=>x.connected)?.name||'Подключить сервис',x:540,y:120},{id:'n4',type:'end',title:'Конец',desc:'Результат',x:780,y:120}];
-  wf.edges=[{from:'n1',to:'n2'},{from:'n2',to:'n3'},{from:'n3',to:'n4'}]; save(); renderWorkflow()
-}
-function openWorkflowFromChat(){setSection('workflow'); createFromChat()}
-function exportPage(){
-  return `
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(230px,1fr))">
-      <div class="panel card"><div class="name">Экспорт чата</div><div class="desc">Скачать историю диалога в .txt</div><button class="btn primary" onclick="downloadLast()">Скачать .txt</button></div>
-      <div class="panel card"><div class="name">Экспорт workflow</div><div class="desc">Сохранить активный workflow в .json</div><button class="btn primary" onclick="exportWorkflow()">Скачать .json</button></div>
-      <div class="panel card"><div class="name">Весь проект</div><div class="desc">README.md, workflow.json, chat-history.json, connectors-config.json в одном JSON-архиве</div><button class="btn primary" onclick="openProjectModal()">Скачать проект</button></div>
-      <div class="panel card"><div class="name">Конфиг коннекторов</div><div class="desc">Экспорт без секретов</div><button class="btn" onclick="exportConnectors()">Скачать конфиг</button></div>
-    </div>`;
-}
-function exportConnectors(){
-  const data=Object.values(state.connectors).map(({token,...rest})=>rest);
-  downloadFile('connectors-config.json',JSON.stringify(data,null,2),'application/json')
-}
-function openProjectModal(){
-  el('modalContent').innerHTML=`<h3>Экспорт проекта</h3><div class="small">Структура файла:</div><pre class="panel" style="padding:12px;white-space:pre-wrap;background:rgba(255,255,255,.04)">README.md
-workflow.json
-chat-history.json
-connectors-config.json</pre><div class="divider"></div><button class="btn primary" onclick="downloadProject()">Скачать project-export.json</button>`;
-  showModal(true);
-}
-function downloadProject(){
-  const payload={
-    'README.md':'AI Agent Platform export',
-    'workflow.json':wf,
-    'chat-history.json':state.chat,
-    'connectors-config.json':Object.values(state.connectors).map(({token,...rest})=>rest)
-  };
-  downloadFile('project-export.json',JSON.stringify(payload,null,2),'application/json')
-}
-function settingsPage(){
-  return `
-    <div class="panel" style="padding:16px;max-width:760px">
-      <div class="field"><label class="small">Mistral API ключ</label><div style="display:flex;gap:10px"><input id="apiKey" class="input" type="password" value="${escapeHtml(state.apiKey)}" placeholder="sk-..." style="flex:1"><button class="btn" onclick="toggleKey()">Показать/скрыть</button></div></div>
-      <div class="field"><button class="btn primary" onclick="testMistral()">Тест соединения</button></div>
-      <div class="field"><label class="small">Модель</label><select id="modelSel" class="select">
-        ${['mistral-large-latest','mistral-medium-latest','mistral-small-latest','open-mistral-7b'].map(m=>`<option ${m===state.model?'selected':''}>${m}</option>`).join('')}
-      </select></div>
-      <div class="field"><label class="small">Температура: <span id="tempVal">${state.temperature}</span></label><input id="temp" type="range" min="0" max="1" step="0.05" value="${state.temperature}" style="width:100%"></div>
-      <div class="field"><label class="small">Тема</label><select id="themeSel" class="select"><option value="dark">Тёмная</option><option value="dark">Glassmorphism</option></select></div>
-      <div class="field"><button class="btn danger" onclick="clearAll()">Очистить все данные</button></div>
-    </div>`;
-}
-function toggleKey(){const i=el('apiKey'); i.type=i.type==='password'?'text':'password'}
-async function testMistral(){try{const r=await fetch('https://api.mistral.ai/v1/models',{headers:{Authorization:`Bearer ${el('apiKey').value}`}}); alert(r.ok?'Соединение с Mistral успешно':'Ошибка проверки Mistral')}catch(e){alert('Ошибка соединения')}}
-function clearAll(){if(confirm('Удалить все данные?')){localStorage.removeItem(STORAGE_KEY); state=structuredClone(defaults); render()}}
-function downloadFile(name,content,type){const blob=new Blob([content],{type}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); URL.revokeObjectURL(a.href)}
-function showModal(on){el('modal').classList.toggle('show',on)}
-el('modal').onclick=e=>{if(e.target.id==='modal')showModal(false)}
-function renderSettings(){setTimeout(()=>{el('apiKey')&&(el('apiKey').oninput=e=>{state.apiKey=e.target.value; save(); el('modelLabel').textContent=state.model}); el('modelSel').onchange=e=>{state.model=e.target.value; save(); el('modelLabel').textContent=state.model}; el('temp').oninput=e=>{state.temperature=e.target.value; save(); el('tempVal').textContent=state.temperature};},0)}
-function render(){
-  el('connCount').textContent=`${conns()} подключено`; el('modelLabel').textContent=state.model;
-  if(state.activeSection==='connectors') renderConnectors();
-  if(state.activeSection==='agent'){el('page-agent').innerHTML=agentPage(); renderChat(); renderActivity();}
-  if(state.activeSection==='workflow'){el('page-workflow').innerHTML=workflowPage(); renderWorkflow()}
-  if(state.activeSection==='export') el('page-export').innerHTML=exportPage();
-  if(state.activeSection==='settings'){el('page-settings').innerHTML=settingsPage(); renderSettings()}
-  document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('active',sections[i][0]===state.activeSection));
-  document.querySelectorAll('#mobileNav button').forEach((b,i)=>b.classList.toggle('active',sections[i][0]===state.activeSection));
-}
-initNav(); setSection(state.activeSection||'connectors'); render();
-</script>
+
+    window.addEventListener('pointermove', e => {
+      if (joy.active && e.pointerId === joy.id) updateJoy(e);
+      if (look.active && e.pointerId === look.id) {
+        const dx = e.clientX - look.lastX;
+        const dy = e.clientY - look.lastY;
+        player.yaw -= dx * 0.008;
+        player.pitch -= dy * 0.008;
+        player.pitch = Math.max(-0.8, Math.min(0.8, player.pitch));
+        look.lastX = e.clientX;
+        look.lastY = e.clientY;
+      }
+    });
+
+    window.addEventListener('pointerup', e => {
+      if (joy.active && e.pointerId === joy.id) {
+        joy.active = false;
+        joy.id = null;
+        moveInput.x = 0;
+        moveInput.y = 0;
+        setThumb(0, 0);
+      }
+      if (look.active && e.pointerId === look.id) {
+        look.active = false;
+        look.id = null;
+      }
+    });
+
+    window.addEventListener('pointerdown', e => {
+      if (e.target === joyBase) return;
+      if (!look.active) {
+        look.active = true;
+        look.id = e.pointerId;
+        look.lastX = e.clientX;
+        look.lastY = e.clientY;
+      }
+    });
+
+    function updateJoy(e) {
+      const max = 36;
+      let dx = e.clientX - joy.cx;
+      let dy = e.clientY - joy.cy;
+      const dist = Math.hypot(dx, dy);
+      if (dist > max) {
+        dx = dx / dist * max;
+        dy = dy / dist * max;
+      }
+      moveInput.x = dx / max;
+      moveInput.y = dy / max;
+      setThumb(dx, dy);
+    }
+
+    function canMoveTo(x, z) {
+      return Math.abs(x) <= 6.35 && Math.abs(z) <= 5.7;
+    }
+
+    function collectItems() {
+      for (const item of collectables) {
+        if (item.taken) continue;
+        const d = Math.hypot(player.pos.x - item.mesh.position.x, player.pos.z - item.mesh.position.z);
+        if (d < 0.8) {
+          item.taken = true;
+          scene.remove(item.mesh);
+          if (item.type === 'key') {
+            player.hasKey = true;
+            showMessage('Ключ найден!');
+          } else if (item.type === 'medkit') {
+            player.health = Math.min(100, player.health + 30);
+            showMessage('Здоровье +30');
+          }
+          updateUI();
+        }
+      }
+    }
+
+    function updateGranny(dt) {
+      const dx = player.pos.x - granny.position.x;
+      const dz = player.pos.z - granny.position.z;
+      const dist = Math.hypot(dx, dz);
+
+      if (dist < 4.8) {
+        const dirX = dx / Math.max(0.001, dist);
+        const dirZ = dz / Math.max(0.001, dist);
+        granny.position.x += dirX * dt * 0.8;
+        granny.position.z += dirZ * dt * 0.8;
+      } else {
+        granny.position.x += Math.sin(performance.now() * 0.0012) * dt * 0.35;
+      }
+
+      granny.position.x = THREE.MathUtils.clamp(granny.position.x, -5.5, 5.5);
+      granny.position.z = THREE.MathUtils.clamp(granny.position.z, -5.0, 5.0);
+
+      const touchDist = Math.hypot(player.pos.x - granny.position.x, player.pos.z - granny.position.z);
+      if (touchDist < 1.1 && !player.dead && !player.won) {
+        player.health -= 15;
+        body.classList.add('hurt');
+        setTimeout(() => body.classList.remove('hurt'), 180);
+        showMessage('Granny ударила тебя!');
+        updateUI();
+        if (player.health <= 0) {
+          player.dead = true;
+          showMessage('Ты проиграл...', 2500);
+        }
+      }
+    }
+
+    function tryWin() {
+      const d = Math.hypot(player.pos.x - door.position.x, player.pos.z - door.position.z);
+      if (d < 1.2) {
+        if (player.hasKey) {
+          player.won = true;
+          showMessage('Победа! Ты сбежал!', 3000);
+        } else {
+          showMessage('Нужен ключ!');
+        }
+      }
+    }
+
+    let last = performance.now();
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+
+      if (!player.dead && !player.won) {
+        const speed = 2.6;
+        const forward = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
+        const right = new THREE.Vector3(forward.z, 0, -forward.x);
+        const wish = new THREE.Vector3();
+        wish.addScaledVector(right, moveInput.x);
+        wish.addScaledVector(forward, -moveInput.y);
+        if (wish.lengthSq() > 0) wish.normalize();
+
+        const nextX = player.pos.x + wish.x * speed * dt;
+        const nextZ = player.pos.z + wish.z * speed * dt;
+
+        if (canMoveTo(nextX, player.pos.z)) player.pos.x = nextX;
+        if (canMoveTo(player.pos.x, nextZ)) player.pos.z = nextZ;
+
+        collectItems();
+        updateGranny(dt);
+        tryWin();
+      }
+
+      camera.position.set(player.pos.x, 1.7, player.pos.z);
+
+      const target = new THREE.Vector3(
+        player.pos.x + Math.sin(player.yaw) * 1.5,
+        1.7 + player.pitch,
+        player.pos.z + Math.cos(player.yaw) * 1.5
+      );
+      camera.lookAt(target);
+
+      const swing = Math.sin(now * 0.01) * 0.02;
+      keyMesh.rotation.y += 0.03;
+      medGroup.rotation.y += 0.02;
+      granny.rotation.y = Math.atan2(player.pos.x - granny.position.x, player.pos.z - granny.position.z);
+      if (Math.hypot(moveInput.x, moveInput.y) > 0.05 && !player.dead && !player.won) {
+        camera.position.y = 1.7 + Math.sin(now * 0.015) * 0.01 + Math.abs(swing);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    updateUI();
+    showMessage('Найди ключ и открой дверь');
+    requestAnimationFrame(animate);
+  </script>
 </body>
 </html>
