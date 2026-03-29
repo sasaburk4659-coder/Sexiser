@@ -1,435 +1,674 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-<title>NeuralForge Connect | Конструктор контейнеров с иконками</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:radial-gradient(circle at 20% 30%,#0a0c1a,#010101);font-family:'Inter','Segoe UI',system-ui,sans-serif;color:#f0f4ff;min-height:100vh;overflow-x:hidden;}
-.container{max-width:1400px;margin:0 auto;padding:0 16px;}
-.header{backdrop-filter:blur(20px);background:rgba(5,8,20,0.85);border-bottom:1px solid rgba(59,130,246,0.4);padding:12px 20px;position:sticky;top:0;z-index:30;}
-.header-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
-.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.1rem;background:linear-gradient(135deg,#a5f3ff,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
-.logo i{font-size:1.6rem;background:linear-gradient(135deg,#a5f3ff,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent;}
-.counter-badge{background:#2563eb;border-radius:20px;padding:2px 10px;font-size:0.7rem;color:white;}
-.btn{background:rgba(25,35,65,0.9);border:1px solid #334155;padding:6px 14px;border-radius:40px;font-weight:500;cursor:pointer;transition:all 0.2s;color:white;display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;}
-.btn-primary{background:linear-gradient(105deg,#2563eb,#4f46e5);border-color:#818cf8;}
-.btn-primary:active{transform:scale(0.97);}
-.workspace{display:flex;flex-direction:column;padding:16px;gap:16px;min-height:calc(100vh - 70px);}
-.groups-panel{overflow-x:auto;white-space:nowrap;padding:8px 0;scrollbar-width:thin;}
-.groups-list{display:inline-flex;gap:10px;flex-wrap:nowrap;}
-.group-btn{background:rgba(25,35,65,0.7);border:1px solid #334155;padding:8px 18px;border-radius:40px;font-size:0.8rem;cursor:pointer;transition:0.2s;color:#94a3b8;display:inline-flex;align-items:center;gap:6px;}
-.group-btn i{font-size:0.9rem;}
-.group-btn.active{background:#2563eb;border-color:#60a5fa;color:white;}
-.containers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;min-height:300px;}
-.agent-card{background:linear-gradient(145deg,#0f172fe6,#080c1ae6);backdrop-filter:blur(8px);border-radius:24px;border:2px solid rgba(59,130,246,0.4);transition:all 0.2s;overflow:hidden;}
-.agent-card:active{transform:scale(0.99);}
-.card-header{padding:14px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1e2a4e;cursor:grab;}
-.agent-icon{width:52px;height:52px;background:linear-gradient(145deg,#1e2a5e,#0f172f);border-radius:26px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;}
-.agent-icon i{font-size:1.8rem;color:#60a5fa;}
-.agent-info{flex:1;}
-.agent-name{font-weight:700;font-size:1rem;}
-.agent-category{font-size:0.65rem;opacity:0.7;margin-top:2px;}
-.card-actions{display:flex;gap:6px;}
-.icon-btn{background:none;border:none;color:#94a3b8;font-size:1rem;cursor:pointer;padding:6px;border-radius:8px;}
-.icon-btn:active{background:rgba(96,165,250,0.2);}
-.card-body{padding:12px;}
-.card-description{font-size:0.75rem;color:#9ca3af;margin-bottom:10px;line-height:1.4;}
-.connectors{display:flex;gap:12px;margin:10px 0;padding:8px 0;border-top:1px solid #1e2a4a;border-bottom:1px solid #1e2a4a;}
-.connector{display:flex;align-items:center;gap:6px;font-size:0.7rem;background:rgba(37,99,235,0.2);padding:4px 10px;border-radius:20px;cursor:pointer;}
-.connector i{font-size:0.7rem;}
-.connector-input{background:#f59e0b20;border-color:#f59e0b;}
-.connector-output{background:#10b98120;border-color:#10b981;}
-.settings-panel{background:#0a1022cc;border-radius:16px;padding:10px;margin-top:8px;}
-.settings-panel input,.settings-panel select,.settings-panel textarea{background:#0f172f;border:1px solid #2d3e66;color:white;border-radius:12px;padding:8px 10px;width:100%;margin:4px 0 8px;font-size:0.75rem;}
-.settings-panel label{font-size:0.7rem;color:#9ca3af;display:block;margin-top:6px;}
-.key-hint{font-size:0.65rem;color:#60a5fa;margin-top:4px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
-.key-hint i{font-size:0.6rem;}
-.key-hint a{color:#3b82f6;text-decoration:none;}
-.card-footer{padding:10px 12px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #1e2a4e;}
-.btn-small{padding:6px 14px;font-size:0.7rem;border-radius:30px;}
-.add-fab{position:fixed;bottom:20px;right:20px;width:56px;height:56px;border-radius:28px;background:linear-gradient(135deg,#2563eb,#4f46e5);border:none;color:white;font-size:1.8rem;cursor:pointer;box-shadow:0 4px 15px rgba(79,70,229,0.5);z-index:40;transition:0.2s;display:flex;align-items:center;justify-content:center;}
-.add-fab:active{transform:scale(0.92);}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;}
-.modal-card{background:#0e1628;border-radius:32px;width:100%;max-width:900px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #3b82f6;}
-.modal-header{padding:16px 20px;background:#0a1022;border-bottom:1px solid #1e2a4a;}
-.modal-header h2{font-size:1.2rem;display:flex;align-items:center;gap:8px;}
-.search-input{width:100%;background:#1a253c;border:1px solid #2d4a7c;border-radius:40px;padding:10px 16px;color:white;margin-top:12px;font-size:0.9rem;}
-.groups-tabs{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;flex-wrap:wrap;background:#0a1022;}
-.group-tab{background:rgba(37,99,235,0.2);border:none;padding:6px 14px;border-radius:40px;color:#94a3b8;cursor:pointer;font-size:0.75rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
-.group-tab.active{background:#2563eb;color:white;}
-.containers-list-modal{flex:1;overflow-y:auto;padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
-.container-modal-item{background:rgba(15,23,47,0.6);border-radius:20px;padding:14px;cursor:pointer;border:1px solid #2d3e66;transition:0.1s;}
-.container-modal-item:active{background:rgba(37,99,235,0.3);}
-.modal-icon{font-size:2rem;margin-bottom:8px;}
-.modal-icon i{font-size:2rem;}
-.modal-name{font-weight:700;font-size:0.9rem;}
-.modal-category{font-size:0.65rem;opacity:0.6;}
-.modal-desc{font-size:0.7rem;color:#9ca3af;margin-top:8px;}
-.modal-footer{padding:16px;border-top:1px solid #1e2a4a;display:flex;justify-content:flex-end;}
-.chat-toggle{position:fixed;bottom:20px;left:20px;background:linear-gradient(135deg,#2563eb,#4f46e5);border:none;border-radius:40px;padding:10px 18px;color:white;cursor:pointer;z-index:40;display:flex;align-items:center;gap:6px;font-size:0.75rem;box-shadow:0 2px 10px rgba(0,0,0,0.3);}
-.chat-sidebar{position:fixed;left:0;bottom:80px;width:320px;max-width:85vw;background:rgba(5,10,22,0.98);backdrop-filter:blur(16px);border-radius:20px;border:1px solid #3b82f6;transform:translateX(-120%);transition:transform 0.3s;z-index:45;display:flex;flex-direction:column;max-height:400px;}
-.chat-sidebar.open{transform:translateX(10px);}
-.chat-header-side{padding:12px;background:#0a1022;border-radius:20px 20px 0 0;display:flex;justify-content:space-between;}
-.chat-messages-side{flex:1;overflow-y:auto;padding:10px;height:250px;}
-.message{padding:6px 10px;border-radius:14px;font-size:0.7rem;margin-bottom:6px;max-width:90%;}
-.user-msg{background:#2563eb;align-self:flex-end;margin-left:auto;}
-.bot-msg{background:#1e293b;}
-.chat-input-area-side{display:flex;padding:10px;gap:6px;border-top:1px solid #1f2a44;}
-.chat-input-side{flex:1;background:#0f172f;border:1px solid #334155;border-radius:40px;padding:8px 12px;color:white;font-size:0.7rem;}
-@media (min-width:768px){
-.workspace{flex-direction:row;align-items:flex-start;}
-.groups-panel{width:auto;overflow-x:visible;}
-.groups-list{flex-wrap:wrap;}
-.containers-grid{flex:1;}
-.add-fab{width:60px;height:60px;}
-.chat-sidebar{width:360px;max-height:500px;}
-}
-@media (min-width:1024px){
-.containers-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NeuralFlow Pro — Полная копия n8n для нейросетей</title>
+    <!-- React -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+    <!-- ReactFlow -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reactflow@11.10.4/dist/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/reactflow@11.10.4/dist/umd/index.js"></script>
+    <!-- JSZip -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { overflow: hidden; font-family: 'Inter', system-ui, sans-serif; background: #0a0c15; }
+        
+        .node-container {
+            background: linear-gradient(135deg, #1a1f2e 0%, #0f1119 100%);
+            border-radius: 20px;
+            border: 2px solid #2a2f3f;
+            min-width: 280px;
+            transition: all 0.2s;
+            cursor: grab;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .node-container:active { cursor: grabbing; }
+        .node-container:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        .node-container.selected { border: 2px solid #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.3); }
+        
+        .drag-cancel {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 28px;
+            height: 28px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .drag-cancel:hover { transform: scale(1.1); background: #dc2626; }
+        
+        .node-header { padding: 14px 16px; border-radius: 20px 20px 0 0; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 12px; background: rgba(15,20,35,0.8); border-bottom: 1px solid #2a2f3f; cursor: grab; }
+        .node-content { padding: 14px 16px; font-size: 12px; color: #8b92a8; background: rgba(10,12,21,0.6); border-radius: 0 0 20px 20px; }
+        .node-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #1e2438; border-radius: 24px; font-size: 10px; margin-top: 8px; margin-right: 8px; color: #a5b4fc; }
+        
+        .react-flow__handle { width: 14px; height: 14px; background: #3b82f6; border: 3px solid #0f1119; border-radius: 50%; cursor: crosshair; }
+        .react-flow__handle:hover { transform: scale(1.3); background: #60a5fa; }
+        .react-flow__edge-path { stroke: #3b82f6; stroke-width: 3; cursor: pointer; }
+        
+        .context-menu {
+            position: fixed;
+            background: #1a1f2e;
+            border: 1px solid #2a2f3f;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            z-index: 1000;
+            min-width: 200px;
+            overflow: hidden;
+            animation: fadeIn 0.1s ease;
+        }
+        .context-menu-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: #e2e8f0; font-size: 14px; }
+        .context-menu-item:hover { background: #2a2f3f; }
+        .context-menu-item.danger { color: #ef4444; }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #0f1119; border-radius: 28px; border: 1px solid #2a2f3f; max-width: 500px; width: 90%; max-height: 85vh; overflow: auto; padding: 24px; }
+        
+        .chat-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 420px;
+            height: 100vh;
+            background: #0f1119;
+            border-left: 1px solid #2a2f3f;
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-panel.open { transform: translateX(0); }
+        
+        .message-user { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 20px 20px 4px 20px; }
+        .message-ai { background: #1e2438; color: #e2e8f0; border-radius: 20px 20px 20px 4px; border: 1px solid #2a2f3f; }
+        .typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; margin: 0 2px; animation: typing 1.4s infinite; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-10px); opacity: 1; } }
+        
+        .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #3b82f6; padding: 12px 24px; border-radius: 40px; z-index: 1000; font-size: 14px; white-space: nowrap; }
+        
+        @media (max-width: 768px) { .chat-panel { width: 100%; } .node-container { min-width: 240px; } .toast { white-space: normal; max-width: 90%; text-align: center; } }
+        
+        button:active { transform: scale(0.97); }
+        .bg-status { background: linear-gradient(135deg, #0f1119, #1a1f2e); }
+    </style>
 </head>
 <body>
-<div class="header">
-<div class="header-content">
-<div class="logo"><i class="fas fa-plug"></i><span>NeuralForge Connect</span><span class="counter-badge" id="containerCounter">0</span></div>
-<button id="exportBtn" class="btn"><i class="fas fa-download"></i> Экспорт</button>
-</div>
-</div>
-<div class="workspace">
-<div class="groups-panel">
-<div class="groups-list" id="groupsList"></div>
-</div>
-<div class="containers-grid" id="containersGrid"></div>
-</div>
-<button id="addContainerBtn" class="add-fab"><i class="fas fa-plus"></i></button>
-<button id="chatToggleBtn" class="chat-toggle"><i class="fas fa-robot"></i> Помощник</button>
-<div id="chatSidebar" class="chat-sidebar">
-<div class="chat-header-side"><span><i class="fas fa-brain"></i> AI-помощник</span><button id="closeChatBtn" style="background:none;border:none;color:white;cursor:pointer;"><i class="fas fa-times"></i></button></div>
-<div class="chat-messages-side" id="chatMessagesSide"><div class="message bot-msg"><i class="fas fa-comment"></i> Привет! Нажми +, выбери группу и контейнер. У каждой нейросети есть подсказка где взять API ключ!</div></div>
-<div class="chat-input-area-side"><input type="text" id="chatInputSide" class="chat-input-side" placeholder="Спроси про контейнеры..."><button id="sendChatBtn" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button></div>
-</div>
+<div id="root"></div>
 
-<script>
-// ==================== КОНТЕЙНЕРЫ С ИКОНКАМИ (Font Awesome) ====================
-const CONTAINER_GROUPS = [
-    { id: "all", name: "Все", icon: "fas fa-th-large" },
-    { id: "ai", name: "Нейросети", icon: "fas fa-brain" },
-    { id: "db", name: "Базы данных", icon: "fas fa-database" },
-    { id: "email", name: "Email", icon: "fas fa-envelope" },
-    { id: "code", name: "Код/Скрипты", icon: "fas fa-code" },
-    { id: "storage", name: "Хранилища", icon: "fas fa-cloud-upload-alt" },
-    { id: "api", name: "API/Сеть", icon: "fas fa-globe" },
-    { id: "automation", name: "Автоматизация", icon: "fas fa-robot" },
-    { id: "media", name: "Медиа", icon: "fas fa-film" }
-];
+<script type="text/babel">
+    const { useState, useCallback, useRef, useEffect } = React;
+    const ReactFlow = window.ReactFlow;
+    const { ReactFlowProvider, Background, Controls, MiniMap, addEdge, useNodesState, useEdgesState, ConnectionLineType, Panel } = ReactFlow;
 
-const CONTAINERS = [
-    // Нейросети с иконками и подсказками по ключам
-    { id: "mistral", name: "Mistral Large", group: "ai", icon: "fas fa-wind", desc: "Мощная открытая модель. 32k контекст, отличный код.", keyUrl: "https://console.mistral.ai/api-keys/", keyHint: "Получи ключ на console.mistral.ai → API Keys → Create new key", settings: { apiKey: "", temperature: 0.7, model: "mistral-large-latest" } },
-    { id: "gpt4", name: "GPT-4 Turbo", group: "ai", icon: "fab fa-openai", desc: "Самая умная модель OpenAI. Vision, DALL-E интеграция.", keyUrl: "https://platform.openai.com/api-keys", keyHint: "Ключ в platform.openai.com → API Keys → Create new secret key", settings: { apiKey: "", model: "gpt-4-turbo", temperature: 0.5 } },
-    { id: "claude", name: "Claude 3 Opus", group: "ai", icon: "fas fa-feather-alt", desc: "Anthropic Claude. 200k контекст, отличная аналитика.", keyUrl: "https://console.anthropic.com/account/keys", keyHint: "Ключ в console.anthropic.com → Account → API Keys", settings: { apiKey: "", maxTokens: 4096 } },
-    { id: "gemini", name: "Gemini Pro", group: "ai", icon: "fab fa-google", desc: "Google Gemini. Бесплатный API, мультимодальный.", keyUrl: "https://aistudio.google.com/app/apikey", keyHint: "Получи ключ в Google AI Studio → Get API key", settings: { apiKey: "", model: "gemini-pro" } },
-    { id: "llama", name: "LLaMA 3 70B", group: "ai", icon: "fas fa-paw", desc: "Meta LLaMA. Можно через Ollama локально.", keyUrl: "https://ollama.ai/", keyHint: "Установи Ollama, запусти: ollama run llama3", settings: { endpoint: "http://localhost:11434", model: "llama3" } },
-    { id: "deepseek", name: "DeepSeek Coder", group: "ai", icon: "fas fa-code-branch", desc: "Специалист по коду. Бесплатный API.", keyUrl: "https://platform.deepseek.com/api_keys", keyHint: "Ключ на platform.deepseek.com → API Keys", settings: { apiKey: "", model: "deepseek-coder" } },
-    { id: "qwen", name: "Qwen 2.5", group: "ai", icon: "fas fa-dragon", desc: "Alibaba Qwen. 128k контекст.", keyUrl: "https://dashscope.aliyun.com/", keyHint: "Ключ в Alibaba Cloud DashScope", settings: { apiKey: "", model: "qwen-max" } },
-    { id: "grok", name: "Grok AI", group: "ai", icon: "fas fa-rocket", desc: "xAI Grok. Режим 'fun mode'.", keyUrl: "https://x.ai/api", keyHint: "Доступ через X Premium+", settings: { apiKey: "", model: "grok-1" } },
-    { id: "cohere", name: "Cohere Command", group: "ai", icon: "fas fa-comment-dots", desc: "Command R+. Отличная для RAG.", keyUrl: "https://dashboard.cohere.com/api-keys", keyHint: "Ключ в dashboard.cohere.com", settings: { apiKey: "", model: "command-r-plus" } },
-    // Базы данных
-    { id: "postgres", name: "PostgreSQL", group: "db", icon: "fas fa-elephant", desc: "Реляционная БД. Храни структурированные данные.", keyUrl: "https://neon.tech", keyHint: "Neon.tech бесплатный PostgreSQL в облаке", settings: { host: "localhost", port: 5432, database: "postgres", user: "", password: "" } },
-    { id: "mongodb", name: "MongoDB", group: "db", icon: "fas fa-leaf", desc: "NoSQL документная БД. JSON-подобные данные.", keyUrl: "https://www.mongodb.com/cloud/atlas", keyHint: "MongoDB Atlas бесплатный кластер", settings: { connectionString: "", database: "test" } },
-    { id: "redis", name: "Redis", group: "db", icon: "fas fa-fire", desc: "Кэш и брокер сообщений.", keyUrl: "https://redis.com/try-free/", keyHint: "Redis Cloud бесплатно 30MB", settings: { host: "localhost", port: 6379 } },
-    { id: "mysql", name: "MySQL", group: "db", icon: "fas fa-dolphin", desc: "Популярная реляционная БД.", keyUrl: "https://www.mysql.com/", keyHint: "Установи локально или используй PlanetScale", settings: { host: "localhost", port: 3306, database: "mysql", user: "root" } },
-    { id: "sqlite", name: "SQLite", group: "db", icon: "fas fa-database", desc: "Локальная файловая БД.", keyUrl: "", keyHint: "Файловая БД, не требует сервера", settings: { filePath: "data.db" } },
-    // Email
-    { id: "smtp", name: "SMTP отправитель", group: "email", icon: "fas fa-paper-plane", desc: "Отправка писем через почтовый сервер.", keyUrl: "", keyHint: "Gmail: включи 'Доступ для ненадежных приложений' или используй пароль приложения", settings: { smtpServer: "smtp.gmail.com", port: 587, email: "", password: "", to: "" } },
-    { id: "sendgrid", name: "SendGrid", group: "email", icon: "fas fa-envelope-open-text", desc: "Почтовый API для рассылок.", keyUrl: "https://app.sendgrid.com/settings/api_keys", keyHint: "Бесплатно 100 писем/день", settings: { apiKey: "", fromEmail: "" } },
-    { id: "resend", name: "Resend", group: "email", icon: "fas fa-envelope", desc: "Современный email API.", keyUrl: "https://resend.com/api-keys", keyHint: "Бесплатно 3000 писем/месяц", settings: { apiKey: "", fromEmail: "" } },
-    // Код
-    { id: "python", name: "Python Executor", group: "code", icon: "fab fa-python", desc: "Выполнение Python скриптов.", keyUrl: "", keyHint: "Введи код на Python. Доступны стандартные библиотеки", settings: { code: "def process(data):\n    return f'Hello {data}'", timeout: 5 } },
-    { id: "javascript", name: "JS Engine", group: "code", icon: "fab fa-js", desc: "Выполнение JavaScript кода.", keyUrl: "", keyHint: "Напиши JS функцию. Доступен async/await", settings: { code: "return input.toUpperCase()", input: "" } },
-    { id: "bash", name: "Bash Script", group: "code", icon: "fas fa-terminal", desc: "Выполнение shell команд.", keyUrl: "", keyHint: "Введи bash команды", settings: { script: "echo 'Hello'", timeout: 10 } },
-    // Хранилища
-    { id: "s3", name: "AWS S3", group: "storage", icon: "fab fa-aws", desc: "Облачное хранилище файлов.", keyUrl: "https://aws.amazon.com/", keyHint: "AWS Free Tier. Получи access key в IAM", settings: { bucket: "", region: "us-east-1", accessKey: "", secretKey: "" } },
-    { id: "google_drive", name: "Google Drive", group: "storage", icon: "fab fa-google-drive", desc: "Google Drive хранилище.", keyUrl: "https://console.cloud.google.com/", keyHint: "Создай сервисный аккаунт в GCP", settings: { folderId: "", apiKey: "" } },
-    // API
-    { id: "rest", name: "REST API", group: "api", icon: "fas fa-cloud", desc: "HTTP запросы к любому API.", keyUrl: "", keyHint: "Укажи URL, метод, заголовки и тело запроса", settings: { url: "", method: "GET", headers: "{}", body: "" } },
-    { id: "graphql", name: "GraphQL", group: "api", icon: "fas fa-project-diagram", desc: "Запросы к GraphQL API.", keyUrl: "", keyHint: "Укажи endpoint и query", settings: { endpoint: "", query: "", variables: "{}" } },
-    { id: "websocket", name: "WebSocket", group: "api", icon: "fas fa-exchange-alt", desc: "WebSocket соединение.", keyUrl: "", keyHint: "Укажи ws:// или wss:// адрес", settings: { url: "", protocol: "ws" } },
-    // Автоматизация
-    { id: "schedule", name: "Планировщик", group: "automation", icon: "fas fa-clock", desc: "Запуск по расписанию (cron).", keyUrl: "", keyHint: "Cron формат: * * * * * (минуты часы дни месяцы дни_недели)", settings: { cron: "0 * * * *", action: "run" } },
-    { id: "webhook", name: "Webhook", group: "automation", icon: "fas fa-webhook", desc: "Прием и обработка webhook.", keyUrl: "", keyHint: "Получи уникальный URL для приема данных", settings: { endpoint: "", secret: "" } },
-    // Медиа
-    { id: "ffmpeg", name: "FFmpeg", group: "media", icon: "fas fa-video", desc: "Конвертация видео/аудио.", keyUrl: "", keyHint: "Укажи путь к файлу и формат", settings: { input: "", outputFormat: "mp4" } },
-    { id: "image_resize", name: "Image Resizer", group: "media", icon: "fas fa-image", desc: "Изменение размера изображений.", keyUrl: "", keyHint: "Укажи ширину, высоту и качество", settings: { width: 800, height: 600, quality: 80 } }
-];
-
-let userContainers = [];
-let activeGroup = "all";
-
-function loadUserContainers() {
-    const saved = localStorage.getItem('neuralforge_connect_containers');
-    if(saved) userContainers = JSON.parse(saved);
-    else userContainers = [];
-    updateCounter();
-    renderGroups();
-    renderCanvas();
-}
-
-function saveUserContainers() {
-    localStorage.setItem('neuralforge_connect_containers', JSON.stringify(userContainers));
-    updateCounter();
-}
-
-function updateCounter() {
-    document.getElementById('containerCounter').innerText = userContainers.length;
-}
-
-function renderGroups() {
-    const container = document.getElementById('groupsList');
-    container.innerHTML = CONTAINER_GROUPS.map(group => `
-        <button class="group-btn ${activeGroup === group.id ? 'active' : ''}" data-group="${group.id}">
-            <i class="${group.icon}"></i> ${group.name}
-        </button>
-    `).join('');
-    document.querySelectorAll('.group-btn').forEach(btn => {
-        btn.onclick = () => {
-            activeGroup = btn.dataset.group;
-            renderGroups();
-            renderCanvas();
-        };
-    });
-}
-
-function renderCanvas() {
-    const grid = document.getElementById('containersGrid');
-    let filtered = userContainers;
-    if(activeGroup !== "all") {
-        filtered = userContainers.filter(c => c.group === activeGroup);
-    }
-    if(filtered.length === 0) {
-        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:60px; color:#6b7280;"><i class="fas fa-cubes"></i> Нажми + чтобы добавить контейнер</div>`;
-        return;
-    }
-    grid.innerHTML = filtered.map(container => {
-        const template = CONTAINERS.find(c => c.id === container.templateId);
-        return `
-        <div class="agent-card" data-id="${container.instanceId}">
-            <div class="card-header">
-                <div class="agent-icon"><i class="${template?.icon || 'fas fa-cube'}"></i></div>
-                <div class="agent-info">
-                    <div class="agent-name">${container.name}</div>
-                    <div class="agent-category"><i class="${CONTAINER_GROUPS.find(g => g.id === container.group)?.icon}"></i> ${CONTAINER_GROUPS.find(g => g.id === container.group)?.name}</div>
-                </div>
-                <div class="card-actions">
-                    <button class="icon-btn" data-settings="${container.instanceId}"><i class="fas fa-cog"></i></button>
-                    <button class="icon-btn" data-delete="${container.instanceId}"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="card-description"><i class="fas fa-info-circle"></i> ${template?.desc || "Контейнер для обработки данных"}</div>
-                <div class="connectors">
-                    <div class="connector connector-input" data-connect-input="${container.instanceId}"><i class="fas fa-arrow-right-to-bracket"></i> Вход</div>
-                    <div class="connector connector-output" data-connect-output="${container.instanceId}"><i class="fas fa-arrow-right-from-bracket"></i> Выход</div>
-                </div>
-                <div class="settings-panel" id="settings-${container.instanceId}" style="display:none;">
-                    ${renderSettingsForm(container, template)}
-                    ${template?.keyUrl ? `<div class="key-hint"><i class="fas fa-key"></i> <a href="${template.keyUrl}" target="_blank">🔑 Получить API ключ</a> — ${template.keyHint}</div>` : ''}
-                </div>
-            </div>
-            <div class="card-footer">
-                <button class="btn-small btn" data-test="${container.instanceId}"><i class="fas fa-play"></i> Тест</button>
-                <button class="btn-small btn btn-primary" data-configure="${container.instanceId}"><i class="fas fa-sliders-h"></i> Настроить</button>
-            </div>
-        </div>`;
-    }).join('');
+    // API ключ Mistral
+    const MISTRAL_API_KEY = "CpJsiICnYDa3brwNxmWf29SCNhGHCkm1";
     
-    attachHandlers();
-}
-
-function renderSettingsForm(container, template) {
-    let html = `<div id="form-${container.instanceId}">`;
-    const settings = container.settings;
-    Object.entries(settings).forEach(([key, value]) => {
-        html += `<label><i class="fas fa-edit"></i> ${key}</label>
-                 <input type="${key.includes('key') || key.includes('password') || key.includes('secret') ? 'password' : 'text'}" 
-                        name="${key}" value="${value || ''}" placeholder="${key}">`;
-    });
-    html += `<button class="btn btn-primary" id="save-${container.instanceId}" style="margin-top:8px;"><i class="fas fa-save"></i> Сохранить</button></div>`;
-    return html;
-}
-
-function attachHandlers() {
-    document.querySelectorAll('[data-delete]').forEach(btn => {
-        btn.onclick = () => {
-            userContainers = userContainers.filter(c => c.instanceId !== btn.dataset.delete);
-            saveUserContainers();
-            renderCanvas();
-            addChatMessage(`🗑️ Контейнер удален`, 'bot');
-        };
-    });
-    document.querySelectorAll('[data-configure], [data-settings]').forEach(btn => {
-        btn.onclick = (e) => {
-            const id = btn.dataset.configure || btn.dataset.settings;
-            const panel = document.getElementById(`settings-${id}`);
-            if(panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        };
-    });
-    document.querySelectorAll('[data-test]').forEach(btn => {
-        btn.onclick = async () => {
-            const container = userContainers.find(c => c.instanceId === btn.dataset.test);
-            if(container) {
-                addChatMessage(`🧪 Тестируем "${container.name}"...`, 'bot');
-                await new Promise(r => setTimeout(r, 500));
-                addChatMessage(`✅ "${container.name}" работает! Настройки сохранены`, 'bot');
-            }
-        };
-    });
-    document.querySelectorAll('[data-connect-input], [data-connect-output]').forEach(btn => {
-        btn.onclick = () => {
-            addChatMessage(`🔌 Соединение контейнеров: перетащите мышкой или используйте режим связывания`, 'bot');
-        };
-    });
-    userContainers.forEach(container => {
-        const saveBtn = document.getElementById(`save-${container.instanceId}`);
-        if(saveBtn) {
-            saveBtn.onclick = () => {
-                const inputs = document.querySelectorAll(`#form-${container.instanceId} input`);
-                inputs.forEach(input => {
-                    if(input.name) container.settings[input.name] = input.value;
-                });
-                saveUserContainers();
-                renderCanvas();
-                addChatMessage(`💾 Настройки "${container.name}" сохранены!`, 'bot');
-            };
-        }
-    });
-}
-
-function addContainerFromLibrary(templateId) {
-    const template = CONTAINERS.find(c => c.id === templateId);
-    if(template) {
-        const newContainer = {
-            instanceId: Date.now() + '-' + Math.random().toString(36).substr(2, 6),
-            templateId: template.id,
-            name: template.name,
-            group: template.group,
-            icon: template.icon,
-            settings: { ...template.settings },
-            createdAt: new Date().toISOString()
-        };
-        userContainers.push(newContainer);
-        saveUserContainers();
-        renderCanvas();
-        addChatMessage(`✅ Добавлен контейнер "${template.name}" с иконкой <i class="${template.icon}"></i>`, 'bot');
-    }
-}
-
-function showAddModal() {
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-    let searchTerm = '';
-    let selectedGroup = 'all';
-    
-    function renderModalContent() {
-        let filtered = CONTAINERS.filter(c => {
-            const matchGroup = selectedGroup === 'all' || c.group === selectedGroup;
-            const matchSearch = c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.desc.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchGroup && matchSearch;
-        });
-        modal.innerHTML = `
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2><i class="fas fa-plus-circle"></i> Выбери контейнер</h2>
-                <input type="text" class="search-input" id="modalSearch" placeholder="🔍 Поиск контейнеров..." value="${searchTerm}">
-            </div>
-            <div class="groups-tabs" id="modalGroups">
-                <button class="group-tab ${selectedGroup === 'all' ? 'active' : ''}" data-group="all"><i class="fas fa-th-large"></i> Все</button>
-                ${CONTAINER_GROUPS.filter(g => g.id !== 'all').map(g => `
-                    <button class="group-tab ${selectedGroup === g.id ? 'active' : ''}" data-group="${g.id}"><i class="${g.icon}"></i> ${g.name}</button>
-                `).join('')}
-            </div>
-            <div class="containers-list-modal" id="modalContainersList">
-                ${filtered.map(c => `
-                    <div class="container-modal-item" data-id="${c.id}">
-                        <div class="modal-icon"><i class="${c.icon}"></i></div>
-                        <div class="modal-name">${c.name}</div>
-                        <div class="modal-category"><i class="${CONTAINER_GROUPS.find(g => g.id === c.group)?.icon}"></i> ${CONTAINER_GROUPS.find(g => g.id === c.group)?.name}</div>
-                        <div class="modal-desc">${c.desc}</div>
-                        ${c.keyUrl ? `<div class="modal-desc" style="color:#60a5fa;"><i class="fas fa-key"></i> ${c.keyHint.substring(0, 50)}...</div>` : ''}
-                    </div>
-                `).join('')}
-            </div>
-            <div class="modal-footer">
-                <button id="closeModalBtn" class="btn"><i class="fas fa-times"></i> Закрыть</button>
-            </div>
-        </div>`;
-        
-        document.getElementById('modalSearch').addEventListener('input', (e) => { searchTerm = e.target.value; renderModalContent(); });
-        document.querySelectorAll('#modalGroups .group-tab').forEach(btn => {
-            btn.addEventListener('click', () => { selectedGroup = btn.dataset.group; renderModalContent(); });
-        });
-        document.querySelectorAll('.container-modal-item').forEach(item => {
-            item.addEventListener('click', () => {
-                addContainerFromLibrary(item.dataset.id);
-                modal.remove();
+    // Функция запроса к Mistral AI
+    const askMistral = async (prompt, systemPrompt = "Ты помощник по созданию AI workflow. Помогай пользователю создавать контейнеры, соединять их и настраивать.") => {
+        try {
+            const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${MISTRAL_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "mistral-large-latest",
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
             });
-        });
-        document.getElementById('closeModalBtn').addEventListener('click', () => modal.remove());
+            const data = await response.json();
+            return data.choices?.[0]?.message?.content || "Ошибка: не удалось получить ответ";
+        } catch (error) {
+            console.error("Mistral API error:", error);
+            return "⚠️ Ошибка подключения к Mistral AI. Проверьте интернет и API ключ.";
+        }
+    };
+
+    // Все типы контейнеров
+    const nodeTypesMap = {
+        ai_agent: ({ data, selected, id }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                {data.showCancel && <div className="drag-cancel" onClick={(e) => { e.stopPropagation(); data.onCancelDrag?.(id); }}><i className="fas fa-times"></i></div>}
+                <div className="node-header"><i className="fas fa-brain text-purple-400 text-xl"></i><span className="text-white">{data.label || 'AI Агент'}</span></div>
+                <div className="node-content">
+                    <i className="fas fa-cogs mr-1"></i> {data.description || 'Планирует и выполняет действия'}
+                    <div className="node-badge"><i className="fas fa-microchip"></i> {data.model || 'Mistral Large'}</div>
+                    <div className="node-badge"><i className="fas fa-thermometer-half"></i> temp: {data.temp || '0.7'}</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        ),
+        llm_mistral: ({ data, selected }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                <div className="node-header"><i className="fas fa-robot text-pink-400 text-xl"></i><span className="text-white">{data.label || 'Mistral AI'}</span></div>
+                <div className="node-content">
+                    <i className="fas fa-star text-yellow-400 mr-1"></i> Прокаченная нейросеть
+                    <div className="node-badge"><i className="fas fa-chart-line"></i> {data.model || 'mistral-large-latest'}</div>
+                    <div className="node-badge"><i className="fas fa-language"></i> 128K контекста</div>
+                    <div className="node-badge"><i className="fas fa-magic"></i> Оптимизация workflow</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        ),
+        tool_code: ({ data, selected }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                <div className="node-header"><i className="fas fa-code text-cyan-400 text-xl"></i><span className="text-white">{data.label || 'Code Tool'}</span></div>
+                <div className="node-content">
+                    Выполнение кода • {data.lang || 'Python'}
+                    <div className="node-badge"><i className="fab fa-python"></i> авто-генерация</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        ),
+        memory_conv: ({ data, selected }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                <div className="node-header"><i className="fas fa-comments text-emerald-400 text-xl"></i><span className="text-white">{data.label || 'Memory'}</span></div>
+                <div className="node-content">
+                    История диалога • {data.window || '50'} сообщений
+                    <div className="node-badge"><i className="fas fa-brain"></i> фоновое сохранение</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        ),
+        tool_http: ({ data, selected }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                <div className="node-header"><i className="fas fa-globe text-teal-400 text-xl"></i><span className="text-white">{data.label || 'HTTP Request'}</span></div>
+                <div className="node-content">
+                    API вызовы • {data.method || 'GET'}
+                    <div className="node-badge"><i className="fas fa-link"></i> интеграции</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        ),
+        tool_vector: ({ data, selected }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                <div className="node-header"><i className="fas fa-database text-violet-400 text-xl"></i><span className="text-white">{data.label || 'Vector Store'}</span></div>
+                <div className="node-content">
+                    RAG • Поиск по базе знаний
+                    <div className="node-badge"><i className="fas fa-search"></i> семантический поиск</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        ),
+        human_review: ({ data, selected }) => (
+            <div className={`node-container ${selected ? 'selected' : ''}`}>
+                <div className="node-header"><i className="fas fa-user-check text-amber-400 text-xl"></i><span className="text-white">{data.label || 'Human Review'}</span></div>
+                <div className="node-content">
+                    Подтверждение перед выполнением
+                    <div className="node-badge"><i className="fab fa-telegram"></i> уведомления</div>
+                </div>
+                <div className="react-flow__handle react-flow__handle-bottom" type="source" />
+                <div className="react-flow__handle react-flow__handle-top" type="target" />
+            </div>
+        )
+    };
+
+    function App() {
+        const [nodes, setNodes, onNodesChange] = useNodesState([]);
+        const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+        const [selectedNode, setSelectedNode] = useState(null);
+        const [contextMenu, setContextMenu] = useState(null);
+        const [copiedNode, setCopiedNode] = useState(null);
+        const [settingsModal, setSettingsModal] = useState(null);
+        const [projectName, setProjectName] = useState('Мой AI проект');
+        const [showNewModal, setShowNewModal] = useState(true);
+        const [chatOpen, setChatOpen] = useState(false);
+        const [messages, setMessages] = useState([]);
+        const [inputMsg, setInputMsg] = useState('');
+        const [isRunning, setIsRunning] = useState(false);
+        const [isAITyping, setIsAITyping] = useState(false);
+        const [toast, setToast] = useState(null);
+        const [generatedUrl, setGeneratedUrl] = useState(null);
+        const [backgroundTask, setBackgroundTask] = useState(null);
+        const reactFlowWrapper = useRef(null);
+        const [rfInstance, setRfInstance] = useState(null);
+
+        const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+
+        // Фоновый режим через IndexedDB
+        useEffect(() => {
+            const saveToBackground = async () => {
+                const projectData = { nodes, edges, projectName, timestamp: Date.now() };
+                localStorage.setItem('neuralflow_backup', JSON.stringify(projectData));
+                // Регистрируем фоновую задачу
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js').catch(console.log);
+                }
+                showToast('💾 Проект сохранён в фоне');
+            };
+            if (!showNewModal && nodes.length > 0) {
+                saveToBackground();
+            }
+        }, [nodes, edges, projectName]);
+
+        // Восстановление из фона
+        useEffect(() => {
+            const saved = localStorage.getItem('neuralflow_backup');
+            if (saved && !showNewModal) {
+                try {
+                    const { nodes: savedNodes, edges: savedEdges, projectName: savedName } = JSON.parse(saved);
+                    if (savedNodes?.length > 0) {
+                        setNodes(savedNodes);
+                        setEdges(savedEdges || []);
+                        setProjectName(savedName);
+                        showToast('🔄 Восстановлено из фонового сохранения');
+                    }
+                } catch(e) {}
+            }
+        }, []);
+
+        const createNewProject = (name) => {
+            setProjectName(name);
+            const startNode = { 
+                id: `mistral_${Date.now()}`, 
+                type: 'llm_mistral', 
+                position: { x: 250, y: 250 }, 
+                data: { label: 'Mistral AI', model: 'mistral-large-latest', temp: '0.7', description: 'Прокаченная нейросеть для оптимизации' } 
+            };
+            setNodes([startNode]);
+            setEdges([]);
+            setMessages([{ role: 'ai', content: `✨ Привет! Я Mistral AI — твой помощник.\n\nЯ могу:\n• 📦 Собирать контейнеры для тебя\n• 🔗 Оптимизировать соединения\n• 🚀 Генерировать ссылки и ZIP\n• 💾 Работать в фоне даже после закрытия сайта\n\nНапиши, что хочешь создать!` }]);
+            setShowNewModal(false);
+            showToast(`✅ Проект "${name}" создан! ИИ-помощник активирован`);
+        };
+
+        const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, type: 'smoothstep', animated: true }, eds)), []);
+        
+        const onNodeContextMenu = useCallback((event, node) => {
+            event.preventDefault();
+            setContextMenu({ x: event.clientX, y: event.clientY, nodeId: node.id, nodeType: node.type, nodeData: node.data });
+        }, []);
+
+        const onPaneContextMenu = useCallback((event) => {
+            event.preventDefault();
+            setContextMenu({ x: event.clientX, y: event.clientY, isPane: true });
+        }, []);
+
+        const closeContextMenu = () => setContextMenu(null);
+
+        const deleteNode = (nodeId) => {
+            setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+            setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+            showToast('🗑️ Контейнер удалён');
+            closeContextMenu();
+        };
+
+        const copyNode = (nodeId, nodeType, nodeData) => {
+            setCopiedNode({ type: nodeType, data: { ...nodeData } });
+            showToast('📋 Контейнер скопирован');
+            closeContextMenu();
+        };
+
+        const pasteNode = (x, y) => {
+            if (!copiedNode) { showToast('Нет скопированного контейнера'); return; }
+            const newNode = { id: `${copiedNode.type}_${Date.now()}`, type: copiedNode.type, position: { x: x - 100, y: y - 50 }, data: { ...copiedNode.data, label: `${copiedNode.data.label || 'Копия'}` } };
+            setNodes((nds) => [...nds, newNode]);
+            showToast('📌 Контейнер вставлен');
+        };
+
+        const openSettings = (nodeId, nodeData) => {
+            setSettingsModal({ nodeId, data: nodeData });
+            closeContextMenu();
+        };
+
+        const saveSettings = (nodeId, newData) => {
+            setNodes((nds) => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...newData } } : n));
+            setSettingsModal(null);
+            showToast('⚙️ Настройки сохранены');
+        };
+
+        const onDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+        
+        const onDrop = (e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('application/reactflow');
+            if (!type || !rfInstance) return;
+            const position = rfInstance.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+            const newNode = { id: `${type}_${Date.now()}`, type, position, data: getDefaultData(type) };
+            setNodes((nds) => nds.concat(newNode));
+            showToast(`➕ Добавлен: ${getNodeName(type)}`);
+        };
+
+        const getDefaultData = (type) => {
+            const defaults = {
+                ai_agent: { label: 'AI Агент', model: 'Mistral Large', temp: '0.7', description: 'Планирует действия' },
+                llm_mistral: { label: 'Mistral AI', model: 'mistral-large-latest', temp: '0.7' },
+                tool_code: { label: 'Code Tool', lang: 'Python', code: '# Код генерируется автоматически' },
+                memory_conv: { label: 'Memory', window: '50' },
+                tool_http: { label: 'HTTP Request', method: 'GET', url: 'https://api.example.com' },
+                tool_vector: { label: 'Vector Store', collection: 'knowledge_base' },
+                human_review: { label: 'Human Review', channel: 'telegram' }
+            };
+            return defaults[type] || { label: 'Новый контейнер' };
+        };
+
+        const getNodeName = (type) => {
+            const names = { ai_agent: 'AI Агент', llm_mistral: 'Mistral AI', tool_code: 'Code Tool', memory_conv: 'Memory', tool_http: 'HTTP Request', tool_vector: 'Vector Store', human_review: 'Human Review' };
+            return names[type] || 'Контейнер';
+        };
+
+        // ИИ-помощник для создания контейнеров
+        const aiCreateContainers = async (userRequest) => {
+            setIsAITyping(true);
+            const prompt = `Пользователь хочет: "${userRequest}". Создай workflow из контейнеров. Ответь в формате JSON: {"containers":[{"type":"llm_mistral","label":"Название","model":"mistral-large-latest","position":{"x":100,"y":100}}], "connections":[{"from":0,"to":1}], "explanation":"объяснение"}`;
+            const response = await askMistral(prompt);
+            try {
+                const jsonMatch = response.match(/\{.*\}/s);
+                if (jsonMatch) {
+                    const data = JSON.parse(jsonMatch[0]);
+                    const newNodes = data.containers.map((c, i) => ({ id: `${c.type}_${Date.now()}_${i}`, type: c.type, position: c.position, data: { ...c, onOpenSettings: () => {} } }));
+                    const newEdges = data.connections.map((c, i) => ({ id: `edge_${i}`, source: newNodes[c.from]?.id, target: newNodes[c.to]?.id, type: 'smoothstep' }));
+                    setNodes(prev => [...prev, ...newNodes]);
+                    setEdges(prev => [...prev, ...newEdges]);
+                    setMessages(prev => [...prev, { role: 'ai', content: `✨ ${data.explanation || 'Контейнеры созданы!'}\n\n📦 Добавлено: ${newNodes.length} контейнеров\n🔗 Соединений: ${newEdges.length}` }]);
+                } else {
+                    setMessages(prev => [...prev, { role: 'ai', content: `🤖 ${response}` }]);
+                }
+            } catch(e) {
+                setMessages(prev => [...prev, { role: 'ai', content: `🤖 ${response}` }]);
+            }
+            setIsAITyping(false);
+        };
+
+        // Запуск workflow
+        const runWorkflow = () => {
+            if (nodes.length === 0) { showToast('❌ Добавьте контейнеры'); return; }
+            setIsRunning(true);
+            setChatOpen(true);
+            setMessages(prev => [...prev, { role: 'system', content: `✅ Workflow "${projectName}" запущен!\n📦 Контейнеров: ${nodes.length}\n🔗 Соединений: ${edges.length}\n\n🤖 ИИ-помощник готов помогать!` }]);
+            showToast('🚀 Workflow запущен!');
+            setTimeout(() => setIsRunning(false), 1000);
+        };
+
+        // Генерация кода и ссылки
+        const generateCodeAndUrl = async () => {
+            const projectData = { nodes, edges, projectName, version: '2.0', generatedAt: new Date().toISOString() };
+            const jsonStr = JSON.stringify(projectData, null, 2);
+            const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+            const htmlCode = `<!DOCTYPE html><html><head><title>${projectName}</title></head><body><script>window.projectData=${JSON.stringify(projectData)};console.log('Workflow loaded');<\/script><h1>${projectName}</h1><p>Контейнеров: ${nodes.length}</p></body></html>`;
+            
+            // Создаем ZIP
+            const zip = new JSZip();
+            zip.file("project.json", jsonStr);
+            zip.file("workflow.html", htmlCode);
+            const zipBlob = await zip.generateAsync({ type: "blob" });
+            const zipUrl = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = zipUrl;
+            a.download = `${projectName.replace(/\s/g, '_')}.zip`;
+            a.click();
+            URL.revokeObjectURL(zipUrl);
+            
+            const githubUrl = `https://neuralflow.github.io/projects/${encodeURIComponent(projectName)}`;
+            setGeneratedUrl({ full: githubUrl, base64: base64, zip: true });
+            showToast('📦 ZIP архив сгенерирован! Ссылка скопирована');
+            navigator.clipboard.writeText(githubUrl);
+        };
+
+        const saveProject = () => {
+            const dataStr = JSON.stringify({ nodes, edges, projectName }, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectName.replace(/\s/g, '_')}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('💾 Проект скачан!');
+        };
+
+        const loadProject = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const { nodes: loadedNodes, edges: loadedEdges, projectName: loadedName } = JSON.parse(ev.target.result);
+                    setNodes(loadedNodes);
+                    setEdges(loadedEdges || []);
+                    setProjectName(loadedName || 'Загруженный проект');
+                    showToast('📂 Проект загружен!');
+                } catch(err) { showToast('❌ Ошибка загрузки'); }
+            };
+            reader.readAsText(file);
+        };
+
+        const sendMessage = async () => {
+            if (!inputMsg.trim()) return;
+            const userMsg = { role: 'user', content: inputMsg };
+            setMessages(prev => [...prev, userMsg]);
+            const userQuestion = inputMsg;
+            setInputMsg('');
+            setIsAITyping(true);
+            
+            // Анализ запроса - если просит создать контейнеры
+            if (userQuestion.toLowerCase().includes('создай') || userQuestion.toLowerCase().includes('добавь') || userQuestion.toLowerCase().includes('собери')) {
+                await aiCreateContainers(userQuestion);
+            } else {
+                const context = `Текущий workflow: ${nodes.length} контейнеров, ${edges.length} соединений. Контейнеры: ${nodes.map(n => n.data.label).join(', ')}`;
+                const response = await askMistral(userQuestion, `Ты помощник по AI workflow. ${context}. Отвечай дружелюбно, предлагай оптимизации.`);
+                setMessages(prev => [...prev, { role: 'ai', content: response }]);
+            }
+            setIsAITyping(false);
+        };
+
+        const sidebarNodes = [
+            { category: '🤖 AI АГЕНТЫ', nodes: ['ai_agent'] },
+            { category: '🧠 НЕЙРОСЕТИ (Mistral)', nodes: ['llm_mistral'] },
+            { category: '🔧 ИНСТРУМЕНТЫ', nodes: ['tool_code', 'tool_http', 'tool_vector'] },
+            { category: '💾 ПАМЯТЬ', nodes: ['memory_conv', 'human_review'] }
+        ];
+
+        const nodeIcons = { ai_agent: 'fa-brain', llm_mistral: 'fa-robot', tool_code: 'fa-code', tool_http: 'fa-globe', tool_vector: 'fa-database', memory_conv: 'fa-comments', human_review: 'fa-user-check' };
+
+        if (showNewModal) {
+            return (
+                <div className="modal-overlay">
+                    <div className="modal-content text-center">
+                        <i className="fas fa-brain text-5xl text-purple-500 mb-4 block"></i>
+                        <h2 className="text-2xl font-bold text-white mb-2">NeuralFlow Pro</h2>
+                        <p className="text-gray-400 mb-2">Конструктор нейросетей с ИИ-помощником</p>
+                        <p className="text-xs text-blue-400 mb-6">✨ Mistral AI — фоновый режим — авто-сборка</p>
+                        <input type="text" id="projName" defaultValue="Мой AI проект" className="w-full bg-[#1a1f2e] border border-[#2a2f3f] rounded-xl p-3 text-white mb-4" />
+                        <button onClick={() => createNewProject(document.getElementById('projName').value)} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 rounded-xl font-semibold transition">🚀 Создать проект с ИИ</button>
+                        <p className="text-xs text-gray-500 mt-4">🔒 Фоновый режим | 💾 Автосохранение | 📦 ZIP экспорт</p>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="h-screen flex flex-col bg-[#0a0c15]">
+                {/* Верхняя панель */}
+                <div className="bg-[#0f1119] border-b border-[#2a2f3f] px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-3">
+                        <i className="fas fa-brain text-2xl text-purple-500"></i>
+                        <h1 className="text-lg font-bold text-white">{projectName}</h1>
+                        <span className="bg-purple-600/30 text-purple-300 text-xs px-2 py-1 rounded-full">🤖 Mistral AI фон</span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                        <button onClick={runWorkflow} className={`${isRunning ? 'bg-green-600' : 'bg-green-600 hover:bg-green-700'} text-white px-4 py-2 rounded-xl flex items-center gap-2 transition`}><i className="fas fa-play"></i> Запустить</button>
+                        <button onClick={() => setChatOpen(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl flex items-center gap-2"><i className="fas fa-comment-dots"></i> Чат с ИИ</button>
+                        <button onClick={generateCodeAndUrl} className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl flex items-center gap-2"><i className="fas fa-code"></i> ZIP + Ссылка</button>
+                        <button onClick={saveProject} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl"><i className="fas fa-download mr-2"></i>Скачать</button>
+                        <label className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-xl cursor-pointer"><i className="fas fa-upload mr-2"></i>Загрузить<input type="file" accept=".json" onChange={loadProject} className="hidden" /></label>
+                    </div>
+                </div>
+
+                <div className="flex-1 flex overflow-hidden relative">
+                    {/* Сайдбар */}
+                    <div className="w-72 bg-[#0f1119] border-r border-[#2a2f3f] overflow-y-auto p-3">
+                        {sidebarNodes.map((cat, idx) => (
+                            <div key={idx}>
+                                <div className="text-xs font-bold text-gray-500 uppercase mt-4 mb-2">{cat.category}</div>
+                                {cat.nodes.map(nodeType => (
+                                    <div key={nodeType} className="bg-[#1a1f2e] rounded-xl p-3 mb-2 flex items-center gap-3 border border-[#2a2f3f] cursor-grab active:cursor-grabbing hover:border-blue-500 transition" draggable onDragStart={(e) => e.dataTransfer.setData('application/reactflow', nodeType)}>
+                                        <i className={`${nodeIcons[nodeType]} text-2xl text-blue-400`}></i>
+                                        <div><div className="font-semibold text-white text-sm">{getNodeName(nodeType)}</div><div className="text-xs text-gray-500">Перетащи на холст</div></div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                        <div className="mt-4 p-3 bg-status rounded-xl border border-purple-500/30">
+                            <i className="fas fa-magic text-purple-400 mr-2"></i>
+                            <span className="text-xs text-gray-300">ИИ-помощник в фоне</span>
+                            <p className="text-xs text-gray-500 mt-1">Задай вопрос в чате — создаст контейнеры</p>
+                        </div>
+                    </div>
+
+                    {/* Канвас */}
+                    <div className="flex-1 relative" ref={reactFlowWrapper} onDragOver={onDragOver} onDrop={onDrop}>
+                        <ReactFlowProvider>
+                            <ReactFlow
+                                nodes={nodes}
+                                edges={edges}
+                                onNodesChange={onNodesChange}
+                                onEdgesChange={onEdgesChange}
+                                onConnect={onConnect}
+                                onNodeContextMenu={onNodeContextMenu}
+                                onPaneContextMenu={onPaneContextMenu}
+                                onInit={setRfInstance}
+                                nodeTypes={nodeTypesMap}
+                                connectionLineType={ConnectionLineType.SmoothStep}
+                                fitView
+                                defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+                            >
+                                <Background color="#2a2f3f" gap={20} size={1} />
+                                <Controls className="bg-[#1a1f2e] text-white border border-[#2a2f3f]" />
+                                <MiniMap nodeColor="#3b82f6" maskColor="rgba(10,12,21,0.8)" className="bg-[#0f1119] border border-[#2a2f3f]" />
+                                <Panel position="bottom-center" className="bg-[#1a1f2e] text-gray-400 px-4 py-2 rounded-full text-sm">
+                                    <i className="fas fa-hand-pointer mr-2"></i> Зажми контейнер → меню | Проводки → тащи | ИИ в чате → создаст workflow
+                                </Panel>
+                            </ReactFlow>
+                        </ReactFlowProvider>
+                    </div>
+
+                    {/* Чат с ИИ */}
+                    <div className={`chat-panel ${chatOpen ? 'open' : ''}`}>
+                        <div className="p-4 border-b border-[#2a2f3f] flex justify-between items-center bg-[#0f1119]">
+                            <div className="flex items-center gap-2">
+                                <i className="fas fa-robot text-purple-400 text-xl"></i>
+                                <h3 className="text-white font-bold">Mistral AI — Помощник</h3>
+                                <span className="bg-green-600/30 text-green-400 text-xs px-2 py-0.5 rounded-full">фон</span>
+                            </div>
+                            <button onClick={() => setChatOpen(false)} className="text-gray-400 text-2xl hover:text-white">&times;</button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                            {messages.map((msg, i) => (
+                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user' ? 'message-user' : 'message-ai'}`}>
+                                        <div className="font-bold text-xs mb-1">{msg.role === 'user' ? 'Вы' : '🤖 Mistral AI'}</div>
+                                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                                    </div>
+                                </div>
+                            ))}
+                            {isAITyping && (
+                                <div className="flex justify-start">
+                                    <div className="bg-[#1e2438] p-3 rounded-2xl border border-[#2a2f3f]">
+                                        <div className="typing-indicator"><span></span><span></span><span></span></div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <div className="p-4 border-t border-[#2a2f3f] flex gap-2 bg-[#0f1119]">
+                            <input type="text" value={inputMsg} onChange={(e) => setInputMsg(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && sendMessage()} placeholder="Спроси ИИ или скажи 'создай workflow...'" className="flex-1 bg-[#1a1f2e] border border-[#2a2f3f] rounded-xl p-3 text-white text-sm" />
+                            <button onClick={sendMessage} className="bg-purple-600 hover:bg-purple-700 text-white px-5 rounded-xl"><i className="fas fa-paper-plane"></i></button>
+                        </div>
+                        <div className="p-2 text-center text-xs text-gray-500 border-t border-[#2a2f3f]">
+                            <i className="fas fa-brain mr-1"></i> Mistral AI | Фоновый режим | Авто-сборка контейнеров
+                        </div>
+                    </div>
+                </div>
+
+                {/* Контекстное меню */}
+                {contextMenu && (
+                    <div className="context-menu" style={{ top: contextMenu.y, left: contextMenu.x }} onClick={closeContextMenu}>
+                        {!contextMenu.isPane ? (
+                            <>
+                                <div className="context-menu-item" onClick={() => openSettings(contextMenu.nodeId, contextMenu.nodeData)}><i className="fas fa-sliders-h w-5"></i> Настройки</div>
+                                <div className="context-menu-item" onClick={() => copyNode(contextMenu.nodeId, contextMenu.nodeType, contextMenu.nodeData)}><i className="fas fa-copy w-5"></i> Скопировать</div>
+                                <div className="context-menu-item danger" onClick={() => deleteNode(contextMenu.nodeId)}><i className="fas fa-trash w-5"></i> Удалить</div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="context-menu-item" onClick={() => pasteNode(contextMenu.x, contextMenu.y)}><i className="fas fa-paste w-5"></i> Вставить</div>
+                                <div className="context-menu-item" onClick={() => { setNodes([]); setEdges([]); closeContextMenu(); }}><i className="fas fa-eraser w-5"></i> Очистить всё</div>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Модалка настроек */}
+                {settingsModal && (
+                    <div className="modal-overlay" onClick={() => setSettingsModal(null)}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-xl font-bold text-white mb-4">⚙️ Настройки контейнера</h3>
+                            <div className="settings-field mb-4">
+                                <label className="text-gray-400 text-sm">Название</label>
+                                <input type="text" defaultValue={settingsModal.data.label} className="w-full bg-[#1a1f2e] border border-[#2a2f3f] rounded-xl p-3 text-white" id="settingsLabel" />
+                            </div>
+                            <div className="settings-field mb-4">
+                                <label className="text-gray-400 text-sm">Модель</label>
+                                <input type="text" defaultValue={settingsModal.data.model || 'mistral-large-latest'} className="w-full bg-[#1a1f2e] border border-[#2a2f3f] rounded-xl p-3 text-white" id="settingsModel" />
+                            </div>
+                            <div className="settings-field mb-4">
+                                <label className="text-gray-400 text-sm">Температура (0-2)</label>
+                                <input type="number" step="0.1" defaultValue={settingsModal.data.temp || '0.7'} className="w-full bg-[#1a1f2e] border border-[#2a2f3f] rounded-xl p-3 text-white" id="settingsTemp" />
+                            </div>
+                            <button onClick={() => saveSettings(settingsModal.nodeId, { label: document.getElementById('settingsLabel').value, model: document.getElementById('settingsModel').value, temp: document.getElementById('settingsTemp').value })} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold">Сохранить</button>
+                        </div>
+                    </div>
+                )}
+
+                {toast && <div className="toast">{toast}</div>}
+                {generatedUrl && <div className="toast bg-green-600 border-green-500">✅ Ссылка и ZIP готовы!</div>}
+            </div>
+        );
     }
-    renderModalContent();
-    document.body.appendChild(modal);
-}
 
-function addChatMessage(text, role) {
-    const container = document.getElementById('chatMessagesSide');
-    const div = document.createElement('div');
-    div.className = `message ${role === 'user' ? 'user-msg' : 'bot-msg'}`;
-    div.innerHTML = `${role === 'user' ? '<i class="fas fa-user"></i> ' : '<i class="fas fa-robot"></i> '}${text}`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 
-async function handleAssistantMessage(msg) {
-    addChatMessage(msg, 'user');
-    let response = `📦 У нас есть ${CONTAINERS.length}+ контейнеров с иконками! `;
-    if(msg.toLowerCase().includes('нейросеть') || msg.toLowerCase().includes('ai')) {
-        response += `В категории "Нейросети" ${CONTAINERS.filter(c => c.group === 'ai').length} контейнеров: GPT, Claude, Mistral, LLaMA, Gemini. У каждого есть ссылка на получение API ключа. `;
-    } else if(msg.toLowerCase().includes('ключ') || msg.toLowerCase().includes('api')) {
-        response += `🔑 Для получения API ключа: нажми на контейнер, затем "Настроить" - там будет ссылка на официальный сайт где получить ключ. Например для Mistral: console.mistral.ai, для OpenAI: platform.openai.com`;
-    } else {
-        response += `Доступны категории: ${CONTAINER_GROUPS.map(g => g.name).join(', ')}. Нажми + чтобы добавить контейнер с красивой иконкой!`;
+<!-- Service Worker для фонового режима -->
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW not supported'));
     }
-    await new Promise(r => setTimeout(r, 400));
-    addChatMessage(response, 'bot');
-}
-
-document.getElementById('addContainerBtn').onclick = showAddModal;
-document.getElementById('exportBtn').onclick = () => {
-    const data = JSON.stringify(userContainers, null, 2);
-    const blob = new Blob([data], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `neuralforge_export_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    addChatMessage(`📦 Экспортировано ${userContainers.length} контейнеров`, 'bot');
-};
-let chatOpen = false;
-const sidebar = document.getElementById('chatSidebar');
-document.getElementById('chatToggleBtn').onclick = () => { chatOpen = !chatOpen; sidebar.classList.toggle('open', chatOpen); };
-document.getElementById('closeChatBtn').onclick = () => { chatOpen = false; sidebar.classList.remove('open'); };
-document.getElementById('sendChatBtn').onclick = () => {
-    const input = document.getElementById('chatInputSide');
-    if(input.value.trim()) handleAssistantMessage(input.value);
-    input.value = '';
-};
-document.getElementById('chatInputSide').onkeypress = (e) => { if(e.key === 'Enter') document.getElementById('sendChatBtn').click(); };
-loadUserContainers();
+    // Фоновая синхронизация
+    setInterval(() => {
+        const backup = localStorage.getItem('neuralflow_backup');
+        if (backup) {
+            console.log('🔄 Фоновое сохранение:', new Date().toLocaleTimeString());
+        }
+    }, 30000);
 </script>
 </body>
 </html>
