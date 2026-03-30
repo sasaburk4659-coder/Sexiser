@@ -1,784 +1,437 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Granny 3D — Complete Escape</title>
-  <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-      font-family: monospace;
-      touch-action: none;
-    }
-    canvas { display: block; }
-
-    #ui {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 20;
-    }
-
-    .panel {
-      position: absolute;
-      left: 14px;
-      background: rgba(0,0,0,0.72);
-      border: 1px solid rgba(255,255,255,0.22);
-      border-radius: 18px;
-      padding: 10px 14px;
-      color: #ffd9a6;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      backdrop-filter: blur(8px);
-      font-size: 14px;
-      white-space: nowrap;
-    }
-
-    .panel.p1 { top: 14px; }
-    .panel.p2 { top: 66px; }
-    .panel.p3 { top: 118px; }
-    .panel.p4 { top: 170px; }
-
-    #health-bar {
-      width: 160px;
-      height: 12px;
-      background: #2c0000;
-      border-radius: 999px;
-      overflow: hidden;
-      box-shadow: inset 0 0 5px #000;
-    }
-    #health-fill {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #e74c3c, #ff6b5f);
-      transition: width 0.15s linear;
-    }
-
-    #message {
-      position: absolute;
-      top: 30%;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 14px 20px;
-      border-radius: 18px;
-      border: 2px solid #e74c3c;
-      background: rgba(0,0,0,0.88);
-      color: #ff6b6b;
-      font-size: 18px;
-      display: none;
-      white-space: nowrap;
-      text-align: center;
-      z-index: 30;
-    }
-
-    .btn {
-      position: absolute;
-      right: 16px;
-      bottom: 26px;
-      width: 110px;
-      height: 54px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.14);
-      border: 1px solid rgba(255,255,255,0.25);
-      color: #fff;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: auto;
-      touch-action: none;
-      backdrop-filter: blur(8px);
-    }
-
-    .btn2 {
-      bottom: 88px;
-    }
-
-    .joystick-base {
-      position: absolute;
-      left: 24px;
-      bottom: 24px;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: rgba(20,20,30,0.55);
-      border: 2px solid rgba(255,255,255,0.22);
-      z-index: 25;
-      pointer-events: auto;
-      touch-action: none;
-      backdrop-filter: blur(10px);
-    }
-
-    .joystick-thumb {
-      position: absolute;
-      left: 38px;
-      top: 38px;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.9);
-      box-shadow: 0 0 10px rgba(0,0,0,0.25);
-      transition: transform 0.02s linear;
-      touch-action: none;
-    }
-
-    .hint {
-      position: absolute;
-      left: 50%;
-      bottom: 12px;
-      transform: translateX(-50%);
-      color: #bbb;
-      font-size: 11px;
-      background: rgba(0,0,0,0.55);
-      padding: 5px 12px;
-      border-radius: 999px;
-      z-index: 25;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-
-    @media (max-width: 768px) {
-      .panel { font-size: 12px; }
-      .joystick-base { width: 96px; height: 96px; }
-      .joystick-thumb { width: 36px; height: 36px; left: 30px; top: 30px; }
-      #health-bar { width: 120px; }
-      .btn { width: 94px; height: 48px; font-size: 12px; }
-    }
-
-    .hurt { animation: hurtFlash 0.18s ease-out; }
-    @keyframes hurtFlash {
-      0% { background-color: rgba(255,0,0,0); }
-      40% { background-color: rgba(255,0,0,0.45); }
-      100% { background-color: rgba(255,0,0,0); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Террариум | 2D Игра</title>
+    <style>
+        * {
+            user-select: none;
+            touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: radial-gradient(circle at 20% 30%, #1b3b2b, #0a1f1a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+        }
+        .game-container {
+            background: #1f2a1b;
+            border-radius: 48px;
+            padding: 15px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+            border-radius: 24px;
+            box-shadow: 0 0 0 3px #aa8e54;
+            width: 100%;
+            height: auto;
+        }
+        .info-panel {
+            margin-top: 15px;
+            background: #0f1f12d9;
+            border-radius: 28px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px;
+            color: #f9e2a1;
+        }
+        .stat {
+            background: #241f12;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        button {
+            background: #6b4c2c;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 55px);
+            grid-template-rows: repeat(3, 55px);
+            gap: 5px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 70px;
+            padding: 10px;
+        }
+        .dpad-btn {
+            background: #3a2a1f;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #1a1208;
+        }
+        .dpad-btn:active { transform: translateY(2px); }
+        .action-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #5f4a2e;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2f2a1a;
+        }
+        .joystick-area { display: flex; justify-content: space-between; margin-top: 15px; flex-wrap: wrap; gap: 15px; }
+        .server-status {
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #1f3a2a;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .loading-box {
+            background: #2a2a1c;
+            border-radius: 48px;
+            padding: 40px;
+            text-align: center;
+            width: 300px;
+        }
+        .error-msg { color: #ff8888; font-size: 0.9rem; margin-top: 15px; }
+        .retry-btn {
+            margin-top: 20px;
+            background: #6b4c2c;
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+        }
+        .hidden { display: none; }
+        @media (max-width: 700px) {
+            .dpad { transform: scale(0.7); margin: -10px; }
+            .stat { font-size: 0.65rem; }
+            .action-btn { width: 55px; height: 55px; font-size: 24px; }
+        }
+    </style>
 </head>
 <body>
-  <div id="ui">
-    <div class="panel p1"><span>❤</span><div id="health-bar"><div id="health-fill"></div></div></div>
-    <div class="panel p2"><span>🔑</span><div id="inventory">— нет ключа —</div></div>
-    <div class="panel p3"><span>🗡</span><div id="weapon-info">Оружие: нет</div></div>
-    <div class="panel p4"><span>🕶</span><div id="state-info">Стоит</div></div>
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+        <h2>🌍 ТЕРРАРИУМ</h2>
+        <div id="loadingStatus" style="margin: 20px 0;">🔄 Подключение к движку...</div>
+        <div id="errorMessage" class="error-msg hidden"></div>
+        <div id="retryButton" class="retry-btn hidden" onclick="retryConnect()">🔄 ПОВТОРИТЬ</div>
+    </div>
+</div>
 
-    <div id="message"></div>
-    <div class="joystick-base" id="joystickBase"><div class="joystick-thumb" id="joystickThumb"></div></div>
+<div id="gameUI" class="hidden">
+    <div class="game-container">
+        <canvas id="gameCanvas" width="900" height="550"></canvas>
+        <div class="info-panel">
+            <div class="stat">🧙 <span id="playerName">---</span></div>
+            <div class="stat">💰 <span id="goldAmount">0</span></div>
+            <div class="stat">🪨 <span id="oreAmount">0</span></div>
+            <div class="stat">🌱 <span id="seedAmount">0</span></div>
+            <div class="stat">💎 <span id="crystalAmount">0</span></div>
+            <button id="mineBtn">⛏️ Копать</button>
+        </div>
+        <div class="joystick-area">
+            <div class="dpad">
+                <div></div><div class="dpad-btn" data-dir="up">▲</div><div></div>
+                <div class="dpad-btn" data-dir="left">◀</div><div></div><div class="dpad-btn" data-dir="right">▶</div>
+                <div></div><div class="dpad-btn" data-dir="down">▼</div><div></div>
+            </div>
+            <div class="action-btn" id="interactBtn">🤝</div>
+        </div>
+        <div class="server-status" id="serverStatus">🟢 Игра активна</div>
+    </div>
+</div>
 
-    <div class="btn" id="btnInteract">E / 👆</div>
-    <div class="btn btn2" id="btnCrouch">CROUCH</div>
-    <div class="hint">Левый джойстик — движение, правая часть экрана — поворот камеры</div>
-  </div>
-
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
-      }
+<script>
+    // ========== ПОДКЛЮЧЕНИЕ К ДВИЖКУ ==========
+    const ENGINE_URL = "https://sasaburk4659-coder.github.io/-/";
+    const PLAYER_NAME = "Искатель_" + Math.floor(Math.random() * 1000);
+    
+    let sessionId = null;
+    let playerData = null;
+    let playerX = 450, playerY = 300;
+    let targetX = 450, targetY = 300;
+    let otherPlayers = [];
+    let reconnectTimer = null;
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Загрузка движка в iframe (для доступа к localStorage API)
+    let engineFrame = null;
+    
+    function initEngine() {
+        return new Promise((resolve, reject) => {
+            engineFrame = document.createElement('iframe');
+            engineFrame.src = ENGINE_URL;
+            engineFrame.style.display = 'none';
+            document.body.appendChild(engineFrame);
+            
+            engineFrame.onload = () => {
+                setTimeout(() => {
+                    try {
+                        const engineAPI = engineFrame.contentWindow.TerraEngine;
+                        if (engineAPI) {
+                            resolve(engineAPI);
+                        } else {
+                            reject(new Error("Engine API not found"));
+                        }
+                    } catch(e) {
+                        reject(e);
+                    }
+                }, 500);
+            };
+            
+            setTimeout(() => reject(new Error("Timeout")), 5000);
+        });
     }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'three';
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x080810);
-    scene.fog = new THREE.FogExp2(0x080810, 0.028);
-
-    const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 100);
-    camera.position.set(0, 1.7, 0);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(innerWidth, innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.outputEncoding = THREE.sRGBEncoding;
-    document.body.appendChild(renderer.domElement);
-
-    const listener = new THREE.AudioListener();
-    camera.add(listener);
-
-    const audioLoader = new THREE.AudioLoader();
-    const sounds = {};
-    const soundUrls = {
-      pickup: 'sounds/pickup.mp3',
-      steps: 'sounds/steps.mp3',
-      grannySteps: 'sounds/granny_steps.mp3',
-      hit: 'sounds/hit.mp3',
-      death: 'sounds/death.mp3',
-      win: 'sounds/win.mp3',
-      door: 'sounds/door.mp3'
-    };
-
-    for (const [k, url] of Object.entries(soundUrls)) {
-      sounds[k] = new THREE.Audio(listener);
-      audioLoader.load(url, buffer => {
-        sounds[k].setBuffer(buffer);
-        sounds[k].setVolume(0.6);
-      });
-    }
-
-    function playSound(name, volume = 0.6) {
-      const s = sounds[name];
-      if (!s || !s.buffer) return;
-      if (s.isPlaying) s.stop();
-      s.setVolume(volume);
-      s.play();
-    }
-
-    const ambient = new THREE.AmbientLight(0x3e3e58, 0.85);
-    scene.add(ambient);
-
-    const dirLight = new THREE.DirectionalLight(0xffebcf, 1.1);
-    dirLight.position.set(5, 10, 6);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    const ghostLight = new THREE.PointLight(0x8b6bff, 0.55, 20);
-    ghostLight.position.set(0, 2, 0);
-    scene.add(ghostLight);
-
-    function makeCanvasTexture(drawFn, size = 256) {
-      const c = document.createElement('canvas');
-      c.width = c.height = size;
-      const ctx = c.getContext('2d');
-      drawFn(ctx, size);
-      const tex = new THREE.CanvasTexture(c);
-      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.needsUpdate = true;
-      return tex;
-    }
-
-    const floorTex = makeCanvasTexture((ctx, s) => {
-      ctx.fillStyle = '#7f532a';
-      ctx.fillRect(0, 0, s, s);
-      for (let y = 0; y < 16; y++) {
-        for (let x = 0; x < 16; x++) {
-          ctx.fillStyle = (x + y) % 2 === 0 ? '#8a5b30' : '#6f4522';
-          ctx.fillRect(x * s / 16, y * s / 16, s / 16, s / 16);
+    
+    let engineAPI = null;
+    
+    async function startGame() {
+        const loadingStatus = document.getElementById('loadingStatus');
+        const errorMessage = document.getElementById('errorMessage');
+        const retryBtn = document.getElementById('retryButton');
+        
+        loadingStatus.innerHTML = "🔄 Подключение к движку...";
+        
+        try {
+            if (!engineAPI) {
+                engineAPI = await initEngine();
+            }
+            
+            const status = engineAPI.getStatus();
+            
+            if (!status.running) {
+                loadingStatus.innerHTML = "⛔ ДВИЖОК ОСТАНОВЛЕН!";
+                errorMessage.innerHTML = "Игровой движок остановлен администратором.<br>Игра временно недоступна.";
+                errorMessage.classList.remove('hidden');
+                retryBtn.classList.remove('hidden');
+                return;
+            }
+            
+            loadingStatus.innerHTML = "🔌 Вход в игровой мир...";
+            
+            const joinResult = engineAPI.join(PLAYER_NAME);
+            
+            if (joinResult.success) {
+                sessionId = joinResult.sessionId;
+                playerData = joinResult.playerData;
+                playerX = playerData.x;
+                playerY = playerData.y;
+                targetX = playerX;
+                targetY = playerY;
+                
+                updateUI();
+                
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('gameUI').classList.remove('hidden');
+                
+                // Запускаем игровые циклы
+                setInterval(() => updatePosition(), 50);
+                setInterval(() => fetchOtherPlayers(), 200);
+                setInterval(() => syncPlayerData(), 3000);
+                
+                drawGame();
+            } else {
+                loadingStatus.innerHTML = "❌ Ошибка подключения!";
+                errorMessage.innerHTML = "Не удалось подключиться к движку.";
+                errorMessage.classList.remove('hidden');
+                retryBtn.classList.remove('hidden');
+            }
+        } catch(e) {
+            console.error("Connection error:", e);
+            loadingStatus.innerHTML = "❌ Не удалось подключиться к движку!";
+            errorMessage.innerHTML = "Движок недоступен. Проверьте URL и интернет.";
+            errorMessage.classList.remove('hidden');
+            retryBtn.classList.remove('hidden');
         }
-      }
-    });
-    floorTex.repeat.set(4, 4);
-
-    const wallTex = makeCanvasTexture((ctx, s) => {
-      ctx.fillStyle = '#b08b60';
-      ctx.fillRect(0, 0, s, s);
-      for (let i = 0; i < 2000; i++) {
-        ctx.fillStyle = `rgba(80,50,30,${Math.random() * 0.12})`;
-        ctx.fillRect(Math.random() * s, Math.random() * s, 2, 2);
-      }
-    });
-
-    const metalTex = makeCanvasTexture((ctx, s) => {
-      ctx.fillStyle = '#666';
-      ctx.fillRect(0, 0, s, s);
-      for (let y = 0; y < s; y += 8) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(s, y);
-        ctx.stroke();
-      }
-    });
-
-    const clothTex = makeCanvasTexture((ctx, s) => {
-      ctx.fillStyle = '#5b4655';
-      ctx.fillRect(0, 0, s, s);
-      for (let i = 0; i < 1000; i++) {
-        ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.05})`;
-        ctx.fillRect(Math.random() * s, Math.random() * s, 2, 2);
-      }
-    });
-
-    const fleshTex = makeCanvasTexture((ctx, s) => {
-      ctx.fillStyle = '#ddb08c';
-      ctx.fillRect(0, 0, s, s);
-      ctx.fillStyle = 'rgba(120,70,50,0.08)';
-      for (let i = 0; i < 1800; i++) ctx.fillRect(Math.random() * s, Math.random() * s, 2, 2);
-    });
-
-    const floorMat = new THREE.MeshStandardMaterial({ map: floorTex, roughness: 1 });
-    const wallMat = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 0.95 });
-    const furnitureMat = new THREE.MeshStandardMaterial({ map: clothTex, roughness: 0.92 });
-    const metalMat = new THREE.MeshStandardMaterial({ map: metalTex, roughness: 0.55, metalness: 0.6 });
-
-    const roomWidth = 34;
-    const roomDepth = 34;
-
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomWidth, roomDepth), floorMat);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.1;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    function addWall(w, h, d, x, y, z) {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
-      m.position.set(x, y, z);
-      m.castShadow = true;
-      m.receiveShadow = true;
-      scene.add(m);
-      return m;
     }
-
-    addWall(roomWidth, 3.5, 0.3, 0, 1.7, -roomDepth / 2 + 0.15);
-    addWall(roomWidth, 3.5, 0.3, 0, 1.7, roomDepth / 2 - 0.15);
-    addWall(0.3, 3.5, roomDepth, -roomWidth / 2 + 0.15, 1.7, 0);
-    addWall(0.3, 3.5, roomDepth, roomWidth / 2 - 0.15, 1.7, 0);
-
-    addWall(0.3, 3.5, 16, -8, 1.7, -4);
-    addWall(0.3, 3.5, 12, 2, 1.7, 4);
-    addWall(12, 3.5, 0.3, -2, 1.7, 8);
-    addWall(10, 3.5, 0.3, 7, 1.7, -7);
-
-    function addFurnitureBox(w, h, d, x, y, z, color = 0xaa8866) {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color, roughness: 0.9 }));
-      m.position.set(x, y, z);
-      scene.add(m);
-      return m;
+    
+    function syncPlayerData() {
+        if (!sessionId || !playerData || !engineAPI) return;
+        const result = engineAPI.sync(sessionId, playerData);
+        if (result.success) playerData = result.playerData;
+        updateUI();
     }
-
-    const bed = addFurnitureBox(3.2, 0.6, 1.8, -12, 0.2, -10);
-    const table = addFurnitureBox(2.8, 0.2, 1.4, -10, 0.8, 8);
-    const chair = addFurnitureBox(0.9, 1.1, 0.9, -12, 0.55, 7.5);
-    const cabinet = addFurnitureBox(1.6, 2.4, 0.9, 11, 1.1, -9);
-    const oven = addFurnitureBox(1.5, 1.7, 1.0, 11, 0.75, 6.5, 0x888888);
-    const sofa = addFurnitureBox(3.6, 1.1, 1.4, -2, 0.45, 12);
-    const crate1 = addFurnitureBox(1.0, 1.0, 1.0, 4, 0.5, -11, 0x777777);
-    const crate2 = addFurnitureBox(1.0, 1.0, 1.0, 5.4, 0.5, -11.2, 0x777777);
-
-    const door = new THREE.Mesh(
-      new THREE.BoxGeometry(1.6, 2.8, 0.25),
-      new THREE.MeshStandardMaterial({ color: 0x8a6345, roughness: 0.95 })
-    );
-    door.position.set(roomWidth / 2 - 1.1, 1.4, -2);
-    scene.add(door);
-
-    function createPickup(color, x, y, z, sx = 0.3, sy = 0.3, sz = 0.3) {
-      const g = new THREE.Group();
-      const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), new THREE.MeshStandardMaterial({ color, roughness: 0.5, metalness: 0.2 }));
-      m.castShadow = true;
-      g.add(m);
-      g.position.set(x, y, z);
-      scene.add(g);
-      return g;
+    
+    function updatePosition() {
+        if (!sessionId || !engineAPI) return;
+        playerX += (targetX - playerX) * 0.3;
+        playerY += (targetY - playerY) * 0.3;
+        engineAPI.move(sessionId, playerX, playerY);
     }
-
-    const interactables = [
-      { type: 'container', kind: 'drawer', mesh: table, hasItem: true, itemType: 'key', opened: false, itemMesh: null },
-      { type: 'container', kind: 'cabinet', mesh: cabinet, hasItem: true, itemType: 'medkit', opened: false, itemMesh: null },
-      { type: 'container', kind: 'crate', mesh: crate1, hasItem: true, itemType: 'knife', opened: false, itemMesh: null },
-      { type: 'container', kind: 'crate', mesh: crate2, hasItem: true, itemType: 'hammer', opened: false, itemMesh: null },
-      { type: 'container', kind: 'oven', mesh: oven, hasItem: true, itemType: 'flashlight', opened: false, itemMesh: null },
-      { type: 'container', kind: 'sofa', mesh: sofa, hasItem: true, itemType: 'ammo', opened: false, itemMesh: null }
-    ];
-
-    const keyMesh = createPickup(0xffc533, -13, 0.25, 9, 0.24, 0.24, 0.24);
-    const medGroup = createPickup(0xdd5555, 12, 0.2, -5, 0.32, 0.32, 0.32);
-    const knifeMesh = createPickup(0xbfc7d5, -6, 0.18, -12, 0.08, 0.55, 0.14);
-    const hammerMesh = createPickup(0x777777, 8, 0.18, 11, 0.14, 0.5, 0.14);
-    const flashlightMesh = createPickup(0x333333, -1, 0.16, 11, 0.18, 0.45, 0.18);
-    const ammoMesh = createPickup(0xffdd55, 9, 0.16, 9, 0.22, 0.14, 0.22);
-
-    const itemMap = {
-      key: keyMesh,
-      medkit: medGroup,
-      knife: knifeMesh,
-      hammer: hammerMesh,
-      flashlight: flashlightMesh,
-      ammo: ammoMesh
-    };
-
-    Object.values(itemMap).forEach(m => m.visible = false);
-
-    const granny = new THREE.Group();
-    const grannyDress = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 1.5, 8), new THREE.MeshStandardMaterial({ map: clothTex, color: 0x4f3b4a, roughness: 1 }));
-    grannyDress.position.y = 0.75;
-    const grannyBody = new THREE.Mesh(new THREE.CapsuleGeometry(0.48, 0.8, 4, 8), new THREE.MeshStandardMaterial({ map: clothTex, color: 0x61505d, roughness: 1 }));
-    grannyBody.position.y = 1.05;
-    const grannyHead = new THREE.Mesh(new THREE.SphereGeometry(0.46, 18, 18), new THREE.MeshStandardMaterial({ map: fleshTex, color: 0xe0b08d, roughness: 1 }));
-    grannyHead.position.y = 1.9;
-    const hair = new THREE.Mesh(new THREE.SphereGeometry(0.49, 18, 18, 0, Math.PI * 2, 0, Math.PI * 0.5), new THREE.MeshStandardMaterial({ color: 0xdedede, roughness: 1 }));
-    hair.position.y = 2.0;
-    hair.scale.set(1.02, 0.7, 1.02);
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 1 });
-    const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), eyeMat);
-    eyeL.position.set(-0.12, 1.93, 0.38);
-    const eyeR = eyeL.clone(); eyeR.position.x = 0.12;
-    const armMat = new THREE.MeshStandardMaterial({ map: fleshTex, color: 0xe0b08d, roughness: 1 });
-    const armL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.0, 8), armMat);
-    armL.position.set(-0.78, 1.2, 0); armL.rotation.z = 0.45;
-    const armR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.0, 8), armMat);
-    armR.position.set(0.78, 1.2, 0); armR.rotation.z = -0.45;
-    const legMat = new THREE.MeshStandardMaterial({ color: 0x2f2530, roughness: 1 });
-    const legL = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 1.0, 8), legMat);
-    legL.position.set(-0.24, 0.05, 0);
-    const legR = legL.clone(); legR.position.x = 0.24;
-    const broom = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.08, 1.0, 8), new THREE.MeshStandardMaterial({ map: metalTex, color: 0xaa8866, roughness: 1 }));
-    broom.position.set(0.62, 0.55, 0.2); broom.rotation.z = 0.55;
-    granny.add(grannyDress, grannyBody, grannyHead, hair, eyeL, eyeR, armL, armR, legL, legR, broom);
-    granny.position.set(-4, 0, -5);
-    granny.scale.set(1.45, 1.45, 1.45);
-    scene.add(granny);
-
-    const uiHealth = document.getElementById('health-fill');
-    const uiInventory = document.getElementById('inventory');
-    const uiWeapon = document.getElementById('weapon-info');
-    const uiState = document.getElementById('state-info');
-    const uiMessage = document.getElementById('message');
-    const body = document.body;
-
-    const player = {
-      pos: new THREE.Vector3(0, 0, 10),
-      yaw: 0,
-      pitch: 0,
-      health: 100,
-      hasKey: false,
-      dead: false,
-      won: false,
-      weapon: 'none',
-      ammo: 0,
-      crouch: false,
-      hiding: false,
-      hiddenType: null
-    };
-
-    function showMessage(text, ms = 1800) {
-      uiMessage.textContent = text;
-      uiMessage.style.display = 'block';
-      clearTimeout(showMessage.timer);
-      showMessage.timer = setTimeout(() => uiMessage.style.display = 'none', ms);
+    
+    function fetchOtherPlayers() {
+        if (!sessionId || !engineAPI) return;
+        const result = engineAPI.getPlayers();
+        if (result && !result.error) {
+            otherPlayers = result.filter(p => p.id !== sessionId);
+        }
     }
-
+    
     function updateUI() {
-      uiHealth.style.width = Math.max(0, player.health) + '%';
-      uiInventory.textContent = player.hasKey ? 'Ключ найден' : '— нет ключа —';
-      let weaponText = 'Оружие: нет';
-      if (player.weapon === 'knife') weaponText = 'Оружие: нож';
-      if (player.weapon === 'hammer') weaponText = 'Оружие: молоток';
-      if (player.weapon === 'flashlight') weaponText = 'Оружие: фонарик';
-      uiWeapon.textContent = weaponText + (player.ammo > 0 ? ` | патроны: ${player.ammo}` : '');
-      uiState.textContent = player.hiding ? `Спрятан: ${player.hiddenType}` : (player.crouch ? 'Присел' : 'Стоит');
-    }
-
-    const moveInput = { x: 0, y: 0 };
-    const look = { active: false, id: null, lastX: 0, lastY: 0 };
-    const joy = { active: false, id: null, cx: 0, cy: 0 };
-
-    const joyBase = document.getElementById('joystickBase');
-    const joyThumb = document.getElementById('joystickThumb');
-    const btnInteract = document.getElementById('btnInteract');
-    const btnCrouch = document.getElementById('btnCrouch');
-
-    function setThumb(dx, dy) {
-      joyThumb.style.transform = `translate(${dx}px, ${dy}px)`;
-    }
-
-    function updateJoy(e) {
-      const max = 36;
-      let dx = e.clientX - joy.cx;
-      let dy = e.clientY - joy.cy;
-      const dist = Math.hypot(dx, dy);
-      if (dist > max) { dx = dx / dist * max; dy = dy / dist * max; }
-      moveInput.x = dx / max;
-      moveInput.y = dy / max;
-      setThumb(dx, dy);
-    }
-
-    joyBase.addEventListener('pointerdown', e => {
-      joy.active = true;
-      joy.id = e.pointerId;
-      joyBase.setPointerCapture(e.pointerId);
-      const r = joyBase.getBoundingClientRect();
-      joy.cx = r.left + r.width / 2;
-      joy.cy = r.top + r.height / 2;
-      updateJoy(e);
-      e.preventDefault();
-    });
-
-    window.addEventListener('pointermove', e => {
-      if (joy.active && e.pointerId === joy.id) updateJoy(e);
-      if (look.active && e.pointerId === look.id) {
-        const dx = e.clientX - look.lastX;
-        const dy = e.clientY - look.lastY;
-        player.yaw -= dx * 0.008;
-        player.pitch -= dy * 0.008;
-        player.pitch = Math.max(-0.8, Math.min(0.8, player.pitch));
-        look.lastX = e.clientX;
-        look.lastY = e.clientY;
-      }
-    });
-
-    window.addEventListener('pointerup', e => {
-      if (joy.active && e.pointerId === joy.id) {
-        joy.active = false;
-        joy.id = null;
-        moveInput.x = 0;
-        moveInput.y = 0;
-        setThumb(0, 0);
-      }
-      if (look.active && e.pointerId === look.id) {
-        look.active = false;
-        look.id = null;
-      }
-    });
-
-    window.addEventListener('pointerdown', e => {
-      if (e.target === joyBase || e.target === btnInteract || e.target === btnCrouch) return;
-      if (!look.active) {
-        look.active = true;
-        look.id = e.pointerId;
-        look.lastX = e.clientX;
-        look.lastY = e.clientY;
-      }
-    });
-
-    function canMoveTo(x, z) {
-      return Math.abs(x) <= roomWidth / 2 - 1.0 && Math.abs(z) <= roomDepth / 2 - 1.0;
-    }
-
-    function revealItem(type) {
-      const mesh = itemMap[type];
-      if (!mesh || mesh.visible) return;
-      mesh.visible = true;
-      scene.add(mesh);
-    }
-
-    function spawnFromContainer(container) {
-      if (!container.hasItem || container.opened) return;
-      container.opened = true;
-      revealItem(container.itemType);
-      container.itemMesh = itemMap[container.itemType];
-      if (container.itemMesh) {
-        container.itemMesh.position.copy(container.mesh.position).add(new THREE.Vector3(0, 0.6, 0));
-      }
-      showMessage(`Найден предмет: ${container.itemType}`);
-      playSound('pickup', 0.6);
-    }
-
-    function openOrUseContainer() {
-      for (const c of interactables) {
-        const d = Math.hypot(player.pos.x - c.mesh.position.x, player.pos.z - c.mesh.position.z);
-        if (d < 1.8) {
-          spawnFromContainer(c);
-          return true;
+        if (playerData) {
+            document.getElementById('playerName').innerText = playerData.name;
+            document.getElementById('goldAmount').innerText = playerData.gold;
+            document.getElementById('oreAmount').innerText = playerData.ore;
+            document.getElementById('seedAmount').innerText = playerData.seeds;
+            document.getElementById('crystalAmount').innerText = playerData.crystals || 12;
         }
-      }
-      return false;
     }
-
-    function tryPickupLooseItem() {
-      for (const [type, mesh] of Object.entries(itemMap)) {
-        if (!mesh.visible) continue;
-        const d = Math.hypot(player.pos.x - mesh.position.x, player.pos.z - mesh.position.z);
-        if (d < 0.9) {
-          mesh.visible = false;
-          if (type === 'key') { player.hasKey = true; showMessage('Ключ найден!'); }
-          if (type === 'medkit') { player.health = Math.min(100, player.health + 30); showMessage('Здоровье +30'); }
-          if (type === 'knife') { player.weapon = 'knife'; showMessage('Нож подобран'); }
-          if (type === 'hammer') { player.weapon = 'hammer'; showMessage('Молоток подобран'); }
-          if (type === 'flashlight') { player.weapon = 'flashlight'; showMessage('Фонарик подобран'); }
-          if (type === 'ammo') { player.ammo += 6; showMessage('Патроны +6'); }
-          playSound('pickup', 0.7);
-          updateUI();
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function interact() {
-      if (player.dead || player.won) return;
-      if (player.hiding) {
-        player.hiding = false;
-        player.hiddenType = null;
-        showMessage('Вышел из укрытия');
+    
+    function mineResources() {
+        if (!playerData) return;
+        const goldGain = Math.floor(Math.random() * 40) + 15;
+        const oreGain = Math.floor(Math.random() * 20) + 8;
+        playerData.gold += goldGain;
+        playerData.ore += oreGain;
         updateUI();
-        return;
-      }
-      if (tryPickupLooseItem()) return;
-      if (openOrUseContainer()) return;
-      const bedDist = Math.hypot(player.pos.x - bed.position.x, player.pos.z - bed.position.z);
-      if (bedDist < 1.8) {
-        player.hiding = true;
-        player.hiddenType = 'под кроватью';
-        showMessage('Спрятался под кроватью');
-        updateUI();
-        return;
-      }
-      const cabinetDist = Math.hypot(player.pos.x - cabinet.position.x, player.pos.z - cabinet.position.z);
-      if (cabinetDist < 1.8) {
-        player.hiding = true;
-        player.hiddenType = 'в шкафу';
-        showMessage('Спрятался в шкафу');
-        updateUI();
-        return;
-      }
-      const doorDist = Math.hypot(player.pos.x - door.position.x, player.pos.z - door.position.z);
-      if (doorDist < 1.4) {
-        if (player.hasKey) {
-          player.won = true;
-          showMessage('Победа! Ты сбежал!', 3000);
-          playSound('win', 0.8);
-        } else {
-          showMessage('Нужен ключ!');
+        syncPlayerData();
+        
+        const msg = document.createElement('div');
+        msg.style.position = 'fixed';
+        msg.style.bottom = '100px';
+        msg.style.left = '50%';
+        msg.style.transform = 'translateX(-50%)';
+        msg.style.background = '#ffaa44';
+        msg.style.color = '#2a2a1a';
+        msg.style.padding = '8px 16px';
+        msg.style.borderRadius = '40px';
+        msg.innerHTML = `+${goldGain}💰 +${oreGain}🪨`;
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 1500);
+    }
+    
+    function drawGame() {
+        if (!ctx) return;
+        
+        const grad = ctx.createLinearGradient(0, 0, 0, 400);
+        grad.addColorStop(0, "#527a3b");
+        grad.addColorStop(1, "#3a5a2a");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = "#735e3a";
+        ctx.fillRect(0, 380, canvas.width, 170);
+        
+        ctx.fillStyle = "#5d8c48";
+        for(let i = 0; i < 30; i++) ctx.fillRect(i * 35, 370, 8, 15);
+        
+        otherPlayers.forEach(p => {
+            ctx.fillStyle = "#88aaff";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y - 18, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 10px monospace";
+            ctx.fillText(p.name, p.x - 20, p.y - 28);
+        });
+        
+        ctx.fillStyle = "#ffaa66";
+        ctx.beginPath();
+        ctx.arc(playerX, playerY - 18, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#3a2a1a";
+        ctx.fillRect(playerX - 6, playerY - 15, 12, 10);
+        ctx.fillStyle = "white";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText(playerData?.name || "Вы", playerX - 20, playerY - 32);
+        
+        ctx.fillStyle = "#aa8866";
+        ctx.fillRect(playerX + 12, playerY - 22, 18, 5);
+        
+        requestAnimationFrame(drawGame);
+    }
+    
+    window.retryConnect = function() {
+        const errorMessage = document.getElementById('errorMessage');
+        const retryBtn = document.getElementById('retryButton');
+        document.getElementById('loadingStatus').innerHTML = "🔄 Повторное подключение...";
+        errorMessage.classList.add('hidden');
+        retryBtn.classList.add('hidden');
+        
+        if (engineFrame) {
+            engineFrame.remove();
+            engineFrame = null;
+            engineAPI = null;
         }
-      }
-    }
-
-    function attackGranny() {
-      if (player.dead || player.won) return;
-      const d = Math.hypot(player.pos.x - granny.position.x, player.pos.z - granny.position.z);
-      if (d > 2.0) { showMessage('Слишком далеко'); return; }
-      if (player.weapon === 'knife' || player.weapon === 'hammer') {
-        showMessage('Удар по Granny!');
-        granny.position.x -= Math.sin(player.yaw) * 1.5;
-        granny.position.z -= Math.cos(player.yaw) * 1.5;
-        playSound('hit', 0.8);
-      } else if (player.weapon === 'flashlight') {
-        if (player.ammo > 0) {
-          player.ammo -= 1;
-          granny.position.x -= Math.sin(player.yaw) * 2.0;
-          granny.position.z -= Math.cos(player.yaw) * 2.0;
-          showMessage('Свет отпугнул Granny!');
-          playSound('hit', 0.8);
-          updateUI();
-        } else showMessage('Нет заряда');
-      } else {
-        showMessage('Нечем атаковать');
-      }
-    }
-
-    function toggleCrouch() {
-      if (player.dead || player.won) return;
-      player.crouch = !player.crouch;
-      showMessage(player.crouch ? 'Присел' : 'Встал');
-      updateUI();
-    }
-
-    btnInteract.addEventListener('pointerdown', e => { e.preventDefault(); interact(); });
-    btnCrouch.addEventListener('pointerdown', e => { e.preventDefault(); toggleCrouch(); });
-    window.addEventListener('keydown', e => {
-      if (e.key === 'e' || e.key === 'E') interact();
-      if (e.key === 'c' || e.key === 'C') toggleCrouch();
-      if (e.key === 'f' || e.key === 'F') attackGranny();
+        startGame();
+    };
+    
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const dir = btn.dataset.dir;
+            const speed = 18;
+            if(dir === 'up') targetY = Math.max(70, targetY - speed);
+            if(dir === 'down') targetY = Math.min(530, targetY + speed);
+            if(dir === 'left') targetX = Math.max(70, targetX - speed);
+            if(dir === 'right') targetX = Math.min(830, targetX + speed);
+        });
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const dir = btn.dataset.dir;
+            const speed = 18;
+            if(dir === 'up') targetY = Math.max(70, targetY - speed);
+            if(dir === 'down') targetY = Math.min(530, targetY + speed);
+            if(dir === 'left') targetX = Math.max(70, targetX - speed);
+            if(dir === 'right') targetX = Math.min(830, targetX + speed);
+        });
     });
-
-    function updateGranny(dt) {
-      if (player.hiding) return;
-
-      const dx = player.pos.x - granny.position.x;
-      const dz = player.pos.z - granny.position.z;
-      const dist = Math.hypot(dx, dz);
-
-      if (dist < 10) {
-        const dirX = dx / Math.max(0.001, dist);
-        const dirZ = dz / Math.max(0.001, dist);
-        granny.position.x += dirX * dt * 1.35;
-        granny.position.z += dirZ * dt * 1.35;
-      } else {
-        granny.position.x += Math.sin(performance.now() * 0.0009) * dt * 0.2;
-      }
-
-      granny.position.x = THREE.MathUtils.clamp(granny.position.x, -15.5, 15.5);
-      granny.position.z = THREE.MathUtils.clamp(granny.position.z, -15.5, 15.5);
-
-      const touchDist = Math.hypot(player.pos.x - granny.position.x, player.pos.z - granny.position.z);
-      if (touchDist < 1.25 && !player.dead && !player.won) {
-        player.health -= 14;
-        body.classList.add('hurt');
-        setTimeout(() => body.classList.remove('hurt'), 180);
-        playSound('hit', 0.85);
-        showMessage('Granny ударила тебя!');
-        updateUI();
-        if (player.health <= 0) {
-          player.dead = true;
-          showMessage('Ты умер...', 2500);
-          playSound('death', 0.9);
-        }
-      }
-
-      granny.rotation.y = Math.atan2(player.pos.x - granny.position.x, player.pos.z - granny.position.z);
-    }
-
-    function updateFootsteps(moving) {
-      if (!moving || player.dead || player.won) return;
-      if (!sounds.steps || !sounds.steps.buffer || sounds.steps.isPlaying) return;
-      playSound('steps', 0.25);
-    }
-
-    function updateGrannySteps() {
-      if (player.dead || player.won) return;
-      if (!sounds.grannySteps || !sounds.grannySteps.buffer || sounds.grannySteps.isPlaying) return;
-      const d = Math.hypot(player.pos.x - granny.position.x, player.pos.z - granny.position.z);
-      if (d < 16) playSound('grannySteps', 0.22);
-    }
-
-    let last = performance.now();
-    let stepTimer = 0;
-    let grannyStepTimer = 0;
-
-    function animate(now) {
-      requestAnimationFrame(animate);
-      const dt = Math.min(0.033, (now - last) / 1000);
-      last = now;
-
-      const moving = Math.hypot(moveInput.x, moveInput.y) > 0.05;
-
-      if (!player.dead && !player.won && !player.hiding) {
-        const baseSpeed = player.crouch ? 1.35 : 2.5;
-        const forward = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
-        const right = new THREE.Vector3(forward.z, 0, -forward.x);
-
-        const wish = new THREE.Vector3();
-        wish.addScaledVector(right, moveInput.x);
-        wish.addScaledVector(forward, -moveInput.y);
-        if (wish.lengthSq() > 0) wish.normalize();
-
-        const nextX = player.pos.x + wish.x * baseSpeed * dt;
-        const nextZ = player.pos.z + wish.z * baseSpeed * dt;
-
-        if (canMoveTo(nextX, player.pos.z)) player.pos.x = nextX;
-        if (canMoveTo(player.pos.x, nextZ)) player.pos.z = nextZ;
-
-        stepTimer += dt;
-        if (moving && stepTimer > (player.crouch ? 0.55 : 0.35)) {
-          stepTimer = 0;
-          updateFootsteps(true);
-        }
-
-        collectLoose = tryPickupLooseItem();
-        updateGranny(dt);
-      }
-
-      if (!player.dead && !player.won) updateGrannySteps();
-
-      camera.position.set(player.pos.x, player.crouch ? 1.35 : 1.7, player.pos.z);
-      const target = new THREE.Vector3(
-        player.pos.x + Math.sin(player.yaw) * 1.5,
-        (player.crouch ? 1.35 : 1.7) + player.pitch,
-        player.pos.z + Math.cos(player.yaw) * 1.5
-      );
-      camera.lookAt(target);
-
-      Object.values(itemMap).forEach(mesh => {
-        if (mesh.visible) mesh.rotation.y += 0.03;
-      });
-
-      renderer.render(scene, camera);
-    }
-
-    window.addEventListener('resize', () => {
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(innerWidth, innerHeight);
+    
+    document.getElementById('mineBtn').onclick = () => mineResources();
+    document.getElementById('interactBtn').onclick = () => {
+        syncPlayerData();
+        const msg = document.createElement('div');
+        msg.style.position = 'fixed';
+        msg.style.bottom = '100px';
+        msg.style.left = '50%';
+        msg.style.transform = 'translateX(-50%)';
+        msg.style.background = '#44aaff';
+        msg.style.color = 'white';
+        msg.style.padding = '8px 16px';
+        msg.style.borderRadius = '40px';
+        msg.innerHTML = "🤝 Синхронизация...";
+        document.body.appendChild(msg);
+        setTimeout(() => msg.remove(), 1000);
+    };
+    
+    window.addEventListener('beforeunload', () => {
+        if (sessionId && engineAPI) engineAPI.leave(sessionId);
     });
-
-    updateUI();
-    showMessage('Найди предметы, спрячься и выберись живым');
-    requestAnimationFrame(animate);
-  </script>
+    
+    startGame();
+</script>
 </body>
 </html>
