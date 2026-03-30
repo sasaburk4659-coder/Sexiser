@@ -2,607 +2,284 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>🚀 3D SERVER | Space Nexus Core</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
-            overflow: hidden;
-            font-family: 'Courier New', 'Segoe UI', monospace;
-            background: #000;
+            padding: 20px;
+            color: #fff;
         }
-        
-        #server-ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            z-index: 100;
-            pointer-events: none;
-        }
-        
-        .server-panel {
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 16px;
-            border: 2px solid #00ffcc;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
-            pointer-events: auto;
-            max-width: 100%;
-        }
-        
-        .server-title {
-            color: #0ff;
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px cyan;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .server-url {
-            color: #88ffaa;
-            font-size: 0.65rem;
-            word-break: break-all;
-            margin-bottom: 12px;
-            opacity: 0.8;
-        }
-        
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        
-        .stat-card {
-            background: rgba(0, 20, 40, 0.8);
-            border-radius: 12px;
-            padding: 8px;
-            text-align: center;
-            border-left: 2px solid #0ff;
-        }
-        
-        .stat-label {
-            color: #8aaaff;
-            font-size: 0.6rem;
-            text-transform: uppercase;
-        }
-        
-        .stat-value {
-            color: #0ff;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-        
-        .log-console {
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 12px;
-            padding: 10px;
-            height: 180px;
-            overflow-y: auto;
-            font-size: 0.65rem;
-            font-family: monospace;
-            margin-top: 12px;
-        }
-        
-        .log-entry {
-            color: #aaffdd;
-            border-left: 2px solid #0ff;
-            padding-left: 8px;
-            margin: 4px 0;
-            word-break: break-word;
-        }
-        
-        .online-badge {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #0f0;
-            border-radius: 50%;
-            box-shadow: 0 0 8px lime;
-            animation: pulse 1s infinite;
-            margin-right: 6px;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 0.5; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
-        
-        .footer-info {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            padding: 5px 12px;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            color: #0ff;
-            font-size: 0.6rem;
-            pointer-events: none;
-            font-family: monospace;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
-        
-        @media (max-width: 600px) {
-            .server-panel { padding: 12px; }
-            .stat-card { padding: 5px; }
-            .stat-value { font-size: 0.85rem; }
-            .log-console { height: 140px; }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .connection-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .connected {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid #4caf50;
+        }
+        .disconnected {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid #f44336;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        button {
+            background: #4caf50;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .message-area {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .message.sent {
+            background: rgba(76, 175, 80, 0.3);
+            text-align: right;
+        }
+        .message.received {
+            background: rgba(33, 150, 243, 0.3);
+        }
+        .timestamp {
+            font-size: 0.8em;
+            color: #ccc;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .server-select {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-    <div id="server-ui">
-        <div class="server-panel">
-            <div class="server-title">
-                <span class="online-badge"></span> 3D GAME SERVER v3.0
-                <span style="font-size: 0.7rem; margin-left: auto;">🎮 АКТИВЕН</span>
+    <div class="container">
+        <h1>🔌 WebSocket Client</h1>
+        
+        <div class="connection-panel">
+            <h3>Server Connection</h3>
+            <div class="input-group">
+                <input type="text" id="serverUrl" placeholder="ws://localhost:8080 or wss://your-server.com" value="ws://localhost:8080">
+                <button onclick="connect()" id="connectBtn">Connect</button>
+                <button onclick="disconnect()" id="disconnectBtn" disabled>Disconnect</button>
             </div>
-            <div class="server-url">
-                🔗 https://sasaburk4659-coder.github.io/-/ | ПОРТ: 8443 | WebSocket Ready
-            </div>
-            <div class="stat-grid">
-                <div class="stat-card"><div class="stat-label">👥 КЛИЕНТЫ</div><div class="stat-value" id="clientsCount">0</div></div>
-                <div class="stat-card"><div class="stat-label">🎮 СТАТУС</div><div class="stat-value" id="gameStatus">RUNNING</div></div>
-                <div class="stat-card"><div class="stat-label">💠 ЭНЕРГИЯ</div><div class="stat-value" id="coreEnergy">100</div></div>
-                <div class="stat-card"><div class="stat-label">⚙️ НАНОБОТЫ</div><div class="stat-value" id="nanoBots">350</div></div>
-                <div class="stat-card"><div class="stat-label">🛡️ ЩИТ</div><div class="stat-value" id="shieldStatus">OFF</div></div>
-                <div class="stat-card"><div class="stat-label">🏆 СЧЁТ</div><div class="stat-value" id="score">0</div></div>
-            </div>
-            <div class="log-console" id="serverLogs">
-                <div class="log-entry">🚀 [СЕРВЕР] Запуск 3D движка Space Nexus...</div>
-                <div class="log-entry">🎮 Симулятор: Защита серверного ядра в 3D</div>
-                <div class="log-entry">📱 Поддержка мобильных устройств</div>
-                <div class="log-entry">🌐 Сервер готов к подключению клиентов</div>
-                <div class="log-entry">💡 Клик/тап по врагу - атака наноботами</div>
+            <div id="status" class="status disconnected">
+                Status: Disconnected
             </div>
         </div>
-        <div class="footer-info">
-            📡 API: /api/state | WebSocket: ws://localhost:8443
+
+        <div class="message-area">
+            <h3>💬 Messages</h3>
+            <div id="messages" class="messages"></div>
+            <div class="input-group">
+                <input type="text" id="messageInput" placeholder="Type your message..." disabled>
+                <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+            </div>
+        </div>
+
+        <div class="connection-panel">
+            <h3>📊 Connection Info</h3>
+            <div id="connectionInfo">
+                <p>Client ID: <span id="clientId">Not connected</span></p>
+                <p>Server: <span id="serverInfo">Not connected</span></p>
+                <p>Protocol: <span id="protocol">-</span></p>
+            </div>
         </div>
     </div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
-            }
-        }
-    </script>
+    <script>
+        let ws = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
 
-    <script type="module">
-        import * as THREE from 'three';
-        
-        // ==================== СЕРВЕРНЫЙ ИГРОВОЙ ДВИЖОК ====================
-        class GameServerEngine {
-            constructor() {
-                this.gameState = {
-                    coreEnergy: 100,
-                    nanoBots: 350,
-                    serverPower: 580,
-                    shieldsActive: false,
-                    enemies: [],
-                    score: 0,
-                    gameOver: false,
-                    wave: 1
+        function addMessage(text, type = 'received') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${text}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateUI(connected) {
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const statusDiv = document.getElementById('status');
+            
+            if (connected) {
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                statusDiv.className = 'status connected';
+                statusDiv.innerHTML = 'Status: ✅ Connected';
+            } else {
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                messageInput.disabled = true;
+                sendBtn.disabled = true;
+                statusDiv.className = 'status disconnected';
+                statusDiv.innerHTML = 'Status: ❌ Disconnected';
+                document.getElementById('clientId').textContent = 'Not connected';
+            }
+        }
+
+        function connect() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            
+            if (!serverUrl) {
+                addMessage('Please enter a server URL', 'sent');
+                return;
+            }
+            
+            try {
+                ws = new WebSocket(serverUrl);
+                
+                ws.onopen = () => {
+                    addMessage(`Connected to ${serverUrl}`, 'received');
+                    updateUI(true);
+                    reconnectAttempts = 0;
+                    
+                    // Send initial message
+                    ws.send('Client connected to server');
                 };
                 
-                this.clients = new Map();
-                this.eventLogs = [];
-                this.nextClientId = 1;
-                
-                this.startServerProcesses();
-                this.init3DVisualization();
-                this.addLog("💾 3D движок инициализирован");
-                this.addLog("🎮 Сюжет: 2150 год — Атака цифровых захватчиков");
-                this.addLog("🛡️ Защитите центральное ядро!");
-            }
-            
-            addLog(msg) {
-                const time = new Date().toLocaleTimeString();
-                const logMsg = `[${time}] ${msg}`;
-                this.eventLogs.unshift(logMsg);
-                if (this.eventLogs.length > 35) this.eventLogs.pop();
-                
-                const logContainer = document.getElementById('serverLogs');
-                const logDiv = document.createElement('div');
-                logDiv.className = 'log-entry';
-                logDiv.textContent = logMsg;
-                logContainer.prepend(logDiv);
-                if (logContainer.children.length > 35) logContainer.removeChild(logContainer.lastChild);
-                
-                this.updateServerUI();
-            }
-            
-            updateServerUI() {
-                document.getElementById('clientsCount').innerText = this.clients.size;
-                document.getElementById('coreEnergy').innerText = Math.floor(this.gameState.coreEnergy);
-                document.getElementById('nanoBots').innerText = Math.floor(this.gameState.nanoBots);
-                document.getElementById('gameStatus').innerText = this.gameState.gameOver ? 'GAME OVER' : 'RUNNING';
-                document.getElementById('shieldStatus').innerText = this.gameState.shieldsActive ? 'ACTIVE' : 'OFF';
-                document.getElementById('score').innerText = this.gameState.score;
-            }
-            
-            startServerProcesses() {
-                // Регенерация ресурсов
-                setInterval(() => {
-                    if (this.gameState.gameOver) return;
+                ws.onmessage = (event) => {
+                    addMessage(`Server: ${event.data}`, 'received');
                     
-                    const regenBonus = Math.floor(this.gameState.serverPower / 150);
-                    const nanoGain = 5 + regenBonus;
-                    this.gameState.nanoBots = Math.min(700, this.gameState.nanoBots + nanoGain);
-                    this.addLog(`⚙️ Регенерация: +${nanoGain} наноботов`);
-                    
-                    if (this.gameState.coreEnergy < 100) {
-                        const energyRegen = 0.8 + (this.gameState.serverPower / 600);
-                        this.gameState.coreEnergy = Math.min(100, this.gameState.coreEnergy + energyRegen);
+                    // Try to extract client ID from welcome message
+                    const match = event.data.match(/client #(\d+)/);
+                    if (match) {
+                        document.getElementById('clientId').textContent = match[1];
                     }
-                    
-                    this.broadcastToAllClients();
-                }, 2800);
-                
-                // Спавн врагов
-                setInterval(() => {
-                    if (this.gameState.gameOver) return;
-                    if (this.gameState.enemies.length < 8 && this.gameState.coreEnergy > 8) {
-                        this.spawnEnemy();
-                    }
-                }, 3500);
-            }
-            
-            spawnEnemy() {
-                const enemyTypes = [
-                    { name: "🦠 Хакер-Дрон", hp: 42, damage: 11, color: 0xff5577, size: 0.8 },
-                    { name: "🐍 Вирус-Червь", hp: 28, damage: 8, color: 0xaa66ff, size: 0.65 },
-                    { name: "👻 Призрак Данных", hp: 62, damage: 16, color: 0xffaa33, size: 0.95 },
-                    { name: "🤖 Кибер-Страж", hp: 52, damage: 13, color: 0xff8844, size: 0.85 }
-                ];
-                
-                const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-                const angle = Math.random() * Math.PI * 2;
-                const radius = 7 + Math.random() * 6;
-                const x = Math.cos(angle) * radius;
-                const z = Math.sin(angle) * radius;
-                const y = 0.5 + Math.random() * 2.5;
-                
-                const newEnemy = {
-                    id: Date.now() + Math.random() * 100000,
-                    x: x, y: y, z: z,
-                    hp: type.hp,
-                    maxHp: type.hp,
-                    name: type.name,
-                    damage: type.damage,
-                    color: type.color,
-                    size: type.size
+                    document.getElementById('serverInfo').textContent = serverUrl;
+                    document.getElementById('protocol').textContent = 'WebSocket';
                 };
                 
-                this.gameState.enemies.push(newEnemy);
-                this.addLog(`⚠️ [ВТОРЖЕНИЕ] ${type.name} появился! HP: ${type.hp}`);
-                this.broadcastToAllClients();
-                this.addEnemyTo3D(newEnemy);
-            }
-            
-            attackEnemy(enemyId, clientId) {
-                if (this.gameState.gameOver) return { success: false, reason: "GAME_OVER" };
-                
-                const enemyIndex = this.gameState.enemies.findIndex(e => e.id == enemyId);
-                if (enemyIndex === -1) return { success: false, reason: "ENEMY_NOT_FOUND" };
-                
-                const enemy = this.gameState.enemies[enemyIndex];
-                const attackCost = 20;
-                
-                if (this.gameState.nanoBots < attackCost) {
-                    return { success: false, reason: "LOW_NANOBOTS", needed: attackCost };
-                }
-                
-                let damage = 28 + Math.floor(this.gameState.serverPower / 100);
-                if (this.gameState.shieldsActive) damage += 18;
-                
-                this.gameState.nanoBots -= attackCost;
-                enemy.hp -= damage;
-                
-                this.addLog(`💥 Атака на ${enemy.name}: -${damage} HP (осталось: ${Math.max(0, enemy.hp)})`);
-                
-                if (enemy.hp <= 0) {
-                    this.gameState.enemies.splice(enemyIndex, 1);
-                    const reward = 45 + Math.floor(Math.random() * 40);
-                    this.gameState.nanoBots += reward;
-                    this.gameState.score++;
-                    
-                    if (this.gameState.score % 5 === 0) {
-                        this.gameState.wave++;
-                        this.addLog(`🌟 ВОЛНА ${this.gameState.wave}! Увеличена сложность`);
-                    }
-                    
-                    this.addLog(`✨ ${enemy.name} УНИЧТОЖЕН! +${reward} наноботов | Счёт: ${this.gameState.score}`);
-                    this.removeEnemyFrom3D(enemy.id);
-                    
-                    if (Math.random() < 0.35) {
-                        this.gameState.coreEnergy = Math.min(100, this.gameState.coreEnergy + 5);
-                        this.addLog(`💚 Ядро восстановило +5% энергии!`);
-                    }
-                    
-                    this.broadcastToAllClients();
-                    return { success: true, killed: true, reward, score: this.gameState.score };
-                } else {
-                    let finalDamage = enemy.damage;
-                    if (this.gameState.shieldsActive) {
-                        finalDamage = Math.max(2, Math.floor(enemy.damage * 0.35));
-                        this.addLog(`🛡️ Щит снизил урон до ${finalDamage}`);
-                    }
-                    
-                    this.gameState.coreEnergy = Math.max(0, this.gameState.coreEnergy - finalDamage);
-                    this.addLog(`💢 Контратака! Ядро получает ${finalDamage} урона (осталось: ${Math.floor(this.gameState.coreEnergy)}%)`);
-                    
-                    if (this.gameState.coreEnergy <= 0) {
-                        this.gameState.gameOver = true;
-                        this.addLog(`💀💀💀 СЕРВЕР ПАЛ! ИГРА ОКОНЧЕНА 💀💀💀`);
-                        this.broadcastToAllClients();
-                        return { success: false, reason: "CORE_DESTROYED", gameOver: true };
-                    }
-                    
-                    this.broadcastToAllClients();
-                    return { success: true, killed: false, damageReceived: finalDamage };
-                }
-            }
-            
-            upgradeMemory(clientId) {
-                if (this.gameState.gameOver) return { success: false };
-                const cost = 100;
-                if (this.gameState.nanoBots >= cost) {
-                    this.gameState.nanoBots -= cost;
-                    this.gameState.serverPower += 70;
-                    this.addLog(`🚀 Апгрейд памяти! Мощность: ${this.gameState.serverPower} MHz`);
-                    this.broadcastToAllClients();
-                    return { success: true, newPower: this.gameState.serverPower };
-                }
-                return { success: false, needed: cost };
-            }
-            
-            activateShield(clientId) {
-                if (this.gameState.gameOver) return { success: false };
-                const cost = 55;
-                if (this.gameState.nanoBots >= cost && !this.gameState.shieldsActive) {
-                    this.gameState.nanoBots -= cost;
-                    this.gameState.shieldsActive = true;
-                    this.addLog(`🛡️ ЗАЩИТНОЕ ПОЛЕ АКТИВИРОВАНО!`);
-                    
-                    setTimeout(() => {
-                        if (this.gameState.shieldsActive) {
-                            this.gameState.shieldsActive = false;
-                            this.addLog(`🔻 Защитное поле разрядилось`);
-                            this.broadcastToAllClients();
-                        }
-                    }, 10000);
-                    
-                    this.broadcastToAllClients();
-                    return { success: true };
-                }
-                return { success: false };
-            }
-            
-            restoreNanobots(clientId) {
-                if (this.gameState.gameOver) return false;
-                const costEnergy = 15;
-                if (this.gameState.coreEnergy >= costEnergy) {
-                    this.gameState.coreEnergy -= costEnergy;
-                    const gain = 80 + Math.floor(Math.random() * 60);
-                    this.gameState.nanoBots += gain;
-                    this.addLog(`🔧 Восстановление: +${gain} наноботов`);
-                    this.broadcastToAllClients();
-                    return true;
-                }
-                return false;
-            }
-            
-            resetGame(clientId) {
-                this.gameState = {
-                    coreEnergy: 100,
-                    nanoBots: 350,
-                    serverPower: 580,
-                    shieldsActive: false,
-                    enemies: [],
-                    score: 0,
-                    gameOver: false,
-                    wave: 1
+                ws.onerror = (error) => {
+                    addMessage(`WebSocket Error: ${error.message || 'Connection error'}`, 'received');
+                    console.error('WebSocket error:', error);
                 };
-                this.clearAllEnemies3D();
-                this.addLog(`🌀 ПЕРЕЗАПУСК ВСЕЛЕННОЙ! Все параметры восстановлены`);
-                this.broadcastToAllClients();
-                return { success: true };
-            }
-            
-            registerClient() {
-                const clientId = this.nextClientId++;
-                this.clients.set(clientId, { connected: true, lastSeen: Date.now() });
-                this.addLog(`🔌 Новый клиент #${clientId} подключился | Всего: ${this.clients.size}`);
-                this.updateServerUI();
-                return clientId;
-            }
-            
-            unregisterClient(clientId) {
-                this.clients.delete(clientId);
-                this.addLog(`❌ Клиент #${clientId} отключился | Осталось: ${this.clients.size}`);
-                this.updateServerUI();
-            }
-            
-            getFullState() {
-                return {
-                    coreEnergy: Math.floor(this.gameState.coreEnergy),
-                    nanoBots: Math.floor(this.gameState.nanoBots),
-                    serverPower: this.gameState.serverPower,
-                    shieldsActive: this.gameState.shieldsActive,
-                    enemies: this.gameState.enemies,
-                    score: this.gameState.score,
-                    gameOver: this.gameState.gameOver,
-                    wave: this.gameState.wave
+                
+                ws.onclose = () => {
+                    addMessage('Disconnected from server', 'received');
+                    updateUI(false);
+                    
+                    // Auto reconnect
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        addMessage(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`, 'received');
+                        setTimeout(connect, 3000);
+                    } else {
+                        addMessage('Max reconnection attempts reached. Please reconnect manually.', 'received');
+                    }
                 };
-            }
-            
-            broadcastToAllClients() {
-                const state = this.getFullState();
-                this.clients.forEach((_, id) => {
-                    if (window.clientCallbacks && window.clientCallbacks[id]) {
-                        window.clientCallbacks[id](state);
-                    }
-                });
-            }
-            
-            // 3D визуализация
-            init3DVisualization() {
-                this.scene = new THREE.Scene();
-                this.scene.background = new THREE.Color(0x010118);
-                this.scene.fog = new THREE.FogExp2(0x010118, 0.01);
                 
-                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.set(12, 8, 15);
-                this.camera.lookAt(0, 0, 0);
-                
-                this.renderer = new THREE.WebGLRenderer({ antialias: true });
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.shadowMap.enabled = true;
-                document.body.appendChild(this.renderer.domElement);
-                
-                // Освещение
-                const ambientLight = new THREE.AmbientLight(0x404060);
-                this.scene.add(ambientLight);
-                const mainLight = new THREE.DirectionalLight(0xffffff, 1);
-                mainLight.position.set(5, 10, 7);
-                mainLight.castShadow = true;
-                this.scene.add(mainLight);
-                const backLight = new THREE.PointLight(0x3366ff, 0.5);
-                backLight.position.set(-3, 2, -5);
-                this.scene.add(backLight);
-                
-                // Пол
-                const gridHelper = new THREE.GridHelper(30, 20, 0x00ffcc, 0x3366aa);
-                gridHelper.position.y = -0.5;
-                this.scene.add(gridHelper);
-                
-                // Центральное ядро
-                const coreGeometry = new THREE.SphereGeometry(1.2, 64, 64);
-                const coreMaterial = new THREE.MeshStandardMaterial({ color: 0x33aaff, emissive: 0x1166aa, emissiveIntensity: 0.8 });
-                this.coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
-                this.coreMesh.castShadow = true;
-                this.scene.add(this.coreMesh);
-                
-                // Аура ядра
-                const auraGeometry = new THREE.SphereGeometry(1.6, 32, 32);
-                const auraMaterial = new THREE.MeshBasicMaterial({ color: 0x33aaff, transparent: true, opacity: 0.2 });
-                this.auraMesh = new THREE.Mesh(auraGeometry, auraMaterial);
-                this.scene.add(this.auraMesh);
-                
-                // Враги 3D объекты
-                this.enemyMeshes = new Map();
-                
-                // Анимация
-                this.animate();
-                
-                window.addEventListener('resize', () => this.onWindowResize());
-            }
-            
-            addEnemyTo3D(enemy) {
-                const geometry = new THREE.BoxGeometry(enemy.size, enemy.size, enemy.size);
-                const material = new THREE.MeshStandardMaterial({ color: enemy.color, emissive: 0x442200 });
-                const mesh = new THREE.Mesh(geometry, material);
-                mesh.position.set(enemy.x, enemy.y, enemy.z);
-                mesh.castShadow = true;
-                mesh.userData = { enemyId: enemy.id };
-                this.scene.add(mesh);
-                this.enemyMeshes.set(enemy.id, mesh);
-            }
-            
-            removeEnemyFrom3D(enemyId) {
-                const mesh = this.enemyMeshes.get(enemyId);
-                if (mesh) {
-                    this.scene.remove(mesh);
-                    this.enemyMeshes.delete(enemyId);
-                }
-            }
-            
-            clearAllEnemies3D() {
-                this.enemyMeshes.forEach(mesh => this.scene.remove(mesh));
-                this.enemyMeshes.clear();
-            }
-            
-            update3DEnemies() {
-                // Синхронизация позиций
-                this.gameState.enemies.forEach(enemy => {
-                    let mesh = this.enemyMeshes.get(enemy.id);
-                    if (mesh) {
-                        mesh.position.set(enemy.x, enemy.y, enemy.z);
-                        // Пульсация при низком HP
-                        const hpPercent = enemy.hp / enemy.maxHp;
-                        mesh.material.emissiveIntensity = (1 - hpPercent) * 0.5;
-                    }
-                });
-                
-                // Обновление ядра
-                const energyPercent = this.gameState.coreEnergy / 100;
-                this.coreMesh.material.emissiveIntensity = 0.5 + energyPercent * 0.8;
-                this.auraMesh.scale.setScalar(1 + Math.sin(Date.now() * 0.005) * 0.1);
-                
-                if (this.gameState.shieldsActive) {
-                    this.auraMesh.material.opacity = 0.5;
-                    this.auraMesh.material.color.setHex(0x88ffaa);
-                } else {
-                    this.auraMesh.material.opacity = 0.2;
-                    this.auraMesh.material.color.setHex(0x33aaff);
-                }
-            }
-            
-            animate() {
-                requestAnimationFrame(() => this.animate());
-                this.update3DEnemies();
-                
-                // Вращение камеры
-                if (this.camera) {
-                    const time = Date.now() * 0.001;
-                    this.camera.position.x = 12 * Math.sin(time * 0.1);
-                    this.camera.position.z = 12 * Math.cos(time * 0.1);
-                    this.camera.lookAt(0, 0, 0);
-                }
-                
-                if (this.renderer && this.scene && this.camera) {
-                    this.renderer.render(this.scene, this.camera);
-                }
-            }
-            
-            onWindowResize() {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            } catch (error) {
+                addMessage(`Failed to connect: ${error.message}`, 'received');
             }
         }
         
-        // Инициализация сервера
-        const gameServer = new GameServerEngine();
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+                updateUI(false);
+                addMessage('Manually disconnected', 'received');
+            }
+        }
         
-        // Глобальный API для клиентов
-        window.clientCallbacks = {};
-        window.gameServerAPI = {
-            registerClient: () => gameServer.registerClient(),
-            unregisterClient: (id) => gameServer.unregisterClient(id),
-            attackEnemy: (enemyId, clientId) => gameServer.attackEnemy(enemyId, clientId),
-            upgradeMemory: (clientId) => gameServer.upgradeMemory(clientId),
-            activateShield: (clientId) => gameServer.activateShield(clientId),
-            restoreNanobots: (clientId) => gameServer.restoreNanobots(clientId),
-            resetGame: (clientId) => gameServer.resetGame(clientId),
-            subscribe: (clientId, callback) => { window.clientCallbacks[clientId] = callback; },
-            getState: () => gameServer.getFullState()
-        };
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                addMessage('Please enter a message', 'sent');
+                return;
+            }
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(message);
+                addMessage(`You: ${message}`, 'sent');
+                input.value = '';
+            } else {
+                addMessage('Not connected to server', 'received');
+            }
+        }
         
-        console.log("✅ 3D Сервер запущен! Ожидание подключения клиентов...");
+        // Handle Enter key
+        document.getElementById('messageInput').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        addMessage('Client ready. Enter server URL and click Connect to start.', 'received');
     </script>
 </body>
 </html>
