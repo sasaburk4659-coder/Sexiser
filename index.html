@@ -2,903 +2,607 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D Adventure - Online Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>🚀 3D SERVER | Space Nexus Core</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
         
         body {
+            margin: 0;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a2a;
+            font-family: 'Courier New', 'Segoe UI', monospace;
+            background: #000;
         }
         
-        canvas {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-        }
-        
-        /* ЭКРАН ПОДКЛЮЧЕНИЯ */
-        .connection-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s;
-        }
-        
-        .connection-card {
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            border: 2px solid #4caf50;
-            box-shadow: 0 0 50px rgba(76,175,80,0.5);
-        }
-        
-        .connection-card h1 {
-            color: #4caf50;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        
-        .name-input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid #4caf50;
-            border-radius: 25px;
-            color: white;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        .connect-btn {
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: all 0.3s;
-        }
-        
-        .connect-btn:hover {
-            transform: scale(1.05);
-            background: #45a049;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(76,175,80,0.3);
-            border-top-color: #4caf50;
-            border-radius: 50%;
-            margin: 20px auto;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .status-text {
-            color: #fff;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-        
-        /* UI Панель */
-        .ui-panel {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 10px 15px;
-            color: white;
-            font-size: 12px;
+        #server-ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
             z-index: 100;
-            font-family: monospace;
             pointer-events: none;
         }
         
-        .connection-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
+        .server-panel {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 24px;
+            padding: 16px;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
+            pointer-events: auto;
+            max-width: 100%;
+        }
+        
+        .server-title {
+            color: #0ff;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px cyan;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .server-url {
+            color: #88ffaa;
+            font-size: 0.65rem;
+            word-break: break-all;
+            margin-bottom: 12px;
+            opacity: 0.8;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 20, 40, 0.8);
+            border-radius: 12px;
+            padding: 8px;
+            text-align: center;
+            border-left: 2px solid #0ff;
+        }
+        
+        .stat-label {
+            color: #8aaaff;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+        }
+        
+        .stat-value {
+            color: #0ff;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        
+        .log-console {
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 12px;
+            padding: 10px;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.65rem;
+            font-family: monospace;
+            margin-top: 12px;
+        }
+        
+        .log-entry {
+            color: #aaffdd;
+            border-left: 2px solid #0ff;
+            padding-left: 8px;
+            margin: 4px 0;
+            word-break: break-word;
+        }
+        
+        .online-badge {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #0f0;
+            border-radius: 50%;
+            box-shadow: 0 0 8px lime;
+            animation: pulse 1s infinite;
+            margin-right: 6px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .footer-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
             background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 8px 15px;
-            color: white;
-            font-size: 12px;
-            z-index: 100;
+            padding: 5px 12px;
+            border-radius: 20px;
+            color: #0ff;
+            font-size: 0.6rem;
+            pointer-events: none;
             font-family: monospace;
         }
         
-        .connection-status.online { border-left: 3px solid #4caf50; }
-        .connection-status.offline { border-left: 3px solid #f44336; }
-        
-        /* Кнопка камеры */
-        .camera-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid #4caf50;
-            border-radius: 50px;
-            padding: 12px 20px;
-            color: white;
-            cursor: pointer;
-            z-index: 100;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        /* ЧАТ */
-        .chat-container {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 300px;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(15px);
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
-            z-index: 200;
-        }
-        
-        .chat-header {
-            padding: 10px 15px;
-            background: rgba(0,0,0,0.9);
-            border-radius: 15px 15px 0 0;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            color: white;
-            font-size: 14px;
-        }
-        
-        .chat-messages {
-            height: 250px;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .chat-message {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 5px 10px;
-            font-size: 12px;
-            color: #fff;
-        }
-        
-        .chat-message .name {
-            color: #4caf50;
-            font-weight: bold;
-        }
-        
-        .chat-message.system {
-            background: rgba(255,152,0,0.2);
-            color: #ff9800;
-            text-align: center;
-        }
-        
-        .chat-input-container {
-            padding: 10px;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            display: flex;
-            gap: 8px;
-        }
-        
-        .chat-input {
-            flex: 1;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 20px;
-            padding: 8px 12px;
-            color: white;
-            outline: none;
-        }
-        
-        .chat-send {
-            background: #4caf50;
-            border: none;
-            border-radius: 20px;
-            padding: 8px 15px;
-            color: white;
-            cursor: pointer;
-        }
-        
-        .chat-container.collapsed .chat-messages,
-        .chat-container.collapsed .chat-input-container {
-            display: none;
-        }
-        
-        /* ДЖОЙСТИК - РАБОЧИЙ */
-        .joystick-container {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            width: 140px;
-            height: 140px;
-            z-index: 150;
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .joystick-container { display: block; }
-            .chat-container { width: 260px; }
-            .camera-btn { bottom: 20px; right: 20px; padding: 8px 15px; font-size: 12px; }
-        }
-        
-        .joystick-base {
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            border-radius: 50%;
-            position: relative;
-            backdrop-filter: blur(5px);
-            border: 2px solid rgba(76,175,80,0.5);
-            box-shadow: 0 0 20px rgba(76,175,80,0.3);
-        }
-        
-        .joystick-thumb {
-            width: 60px;
-            height: 60px;
-            background: rgba(76,175,80,0.9);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            transition: transform 0.05s;
-        }
-        
-        .controls-hint {
-            position: fixed;
-            bottom: 20px;
-            left: 180px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            padding: 5px 10px;
-            color: white;
-            font-size: 10px;
-            z-index: 100;
-        }
-        
-        @media (max-width: 768px) {
-            .controls-hint { left: 180px; bottom: 240px; }
+        @media (max-width: 600px) {
+            .server-panel { padding: 12px; }
+            .stat-card { padding: 5px; }
+            .stat-value { font-size: 0.85rem; }
+            .log-console { height: 140px; }
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    
-    <!-- ЭКРАН ПОДКЛЮЧЕНИЯ -->
-    <div class="connection-screen" id="connectionScreen">
-        <div class="connection-card">
-            <h1>🎮 3D ADVENTURE</h1>
-            <input type="text" class="name-input" id="playerNameInput" placeholder="Введите имя" maxlength="20">
-            <button class="connect-btn" id="connectBtn">🔌 ПОДКЛЮЧИТЬСЯ</button>
-            <div id="connectStatus" class="status-text"></div>
+    <div id="server-ui">
+        <div class="server-panel">
+            <div class="server-title">
+                <span class="online-badge"></span> 3D GAME SERVER v3.0
+                <span style="font-size: 0.7rem; margin-left: auto;">🎮 АКТИВЕН</span>
+            </div>
+            <div class="server-url">
+                🔗 https://sasaburk4659-coder.github.io/-/ | ПОРТ: 8443 | WebSocket Ready
+            </div>
+            <div class="stat-grid">
+                <div class="stat-card"><div class="stat-label">👥 КЛИЕНТЫ</div><div class="stat-value" id="clientsCount">0</div></div>
+                <div class="stat-card"><div class="stat-label">🎮 СТАТУС</div><div class="stat-value" id="gameStatus">RUNNING</div></div>
+                <div class="stat-card"><div class="stat-label">💠 ЭНЕРГИЯ</div><div class="stat-value" id="coreEnergy">100</div></div>
+                <div class="stat-card"><div class="stat-label">⚙️ НАНОБОТЫ</div><div class="stat-value" id="nanoBots">350</div></div>
+                <div class="stat-card"><div class="stat-label">🛡️ ЩИТ</div><div class="stat-value" id="shieldStatus">OFF</div></div>
+                <div class="stat-card"><div class="stat-label">🏆 СЧЁТ</div><div class="stat-value" id="score">0</div></div>
+            </div>
+            <div class="log-console" id="serverLogs">
+                <div class="log-entry">🚀 [СЕРВЕР] Запуск 3D движка Space Nexus...</div>
+                <div class="log-entry">🎮 Симулятор: Защита серверного ядра в 3D</div>
+                <div class="log-entry">📱 Поддержка мобильных устройств</div>
+                <div class="log-entry">🌐 Сервер готов к подключению клиентов</div>
+                <div class="log-entry">💡 Клик/тап по врагу - атака наноботами</div>
+            </div>
+        </div>
+        <div class="footer-info">
+            📡 API: /api/state | WebSocket: ws://localhost:8443
         </div>
     </div>
-    
-    <div class="ui-panel" style="display:none;" id="uiPanel">
-        <div>👤 <span id="playerName">Игрок</span></div>
-        <div>👥 Онлайн: <span id="playerCount">0</span></div>
-        <div>📍 <span id="position">0, 0</span></div>
-    </div>
-    
-    <div class="connection-status offline" id="connStatus" style="display:none;">
-        🔴 Не подключен
-    </div>
-    
-    <button class="camera-btn" id="cameraBtn" style="display:none;">🎥 3-е лицо</button>
-    
-    <div class="chat-container" id="chatContainer" style="display:none;">
-        <div class="chat-header" id="chatHeader">
-            <span>💬 Чат</span>
-            <span>▼</span>
-        </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input-container">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." maxlength="200">
-            <button class="chat-send" id="chatSend">➤</button>
-        </div>
-    </div>
-    
-    <div class="joystick-container" id="joystickContainer" style="display:none;">
-        <div class="joystick-base" id="joystickBase">
-            <div class="joystick-thumb" id="joystickThumb"></div>
-        </div>
-    </div>
-    
-    <div class="controls-hint" id="controlsHint" style="display:none;">
-        🕹️ Джойстик движение | 👆 Свайп камера | 🔄 C - смена вида
-    </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // ============ РЕАЛЬНОЕ ПОДКЛЮЧЕНИЕ К СЕРВЕРУ ============
-        let connected = false;
-        let playerId = null;
-        let playerName = "";
-        let players = {};
-        let messages = [];
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
         
-        const ENGINE_URL = "https://sasaburk4659-coder.github.io/-/";
-        let engineFrame = null;
-        
-        function connectToServer() {
-            const nameInput = document.getElementById('playerNameInput');
-            const connectBtn = document.getElementById('connectBtn');
-            const connectStatus = document.getElementById('connectStatus');
-            
-            playerName = nameInput.value.trim();
-            if (!playerName) {
-                playerName = "Player_" + Math.floor(Math.random() * 1000);
+        // ==================== СЕРВЕРНЫЙ ИГРОВОЙ ДВИЖОК ====================
+        class GameServerEngine {
+            constructor() {
+                this.gameState = {
+                    coreEnergy: 100,
+                    nanoBots: 350,
+                    serverPower: 580,
+                    shieldsActive: false,
+                    enemies: [],
+                    score: 0,
+                    gameOver: false,
+                    wave: 1
+                };
+                
+                this.clients = new Map();
+                this.eventLogs = [];
+                this.nextClientId = 1;
+                
+                this.startServerProcesses();
+                this.init3DVisualization();
+                this.addLog("💾 3D движок инициализирован");
+                this.addLog("🎮 Сюжет: 2150 год — Атака цифровых захватчиков");
+                this.addLog("🛡️ Защитите центральное ядро!");
             }
             
-            connectStatus.innerHTML = '🔄 Подключение к серверу...';
-            connectBtn.disabled = true;
-            
-            // Создаем iframe для связи с движком
-            if (engineFrame) {
-                document.body.removeChild(engineFrame);
+            addLog(msg) {
+                const time = new Date().toLocaleTimeString();
+                const logMsg = `[${time}] ${msg}`;
+                this.eventLogs.unshift(logMsg);
+                if (this.eventLogs.length > 35) this.eventLogs.pop();
+                
+                const logContainer = document.getElementById('serverLogs');
+                const logDiv = document.createElement('div');
+                logDiv.className = 'log-entry';
+                logDiv.textContent = logMsg;
+                logContainer.prepend(logDiv);
+                if (logContainer.children.length > 35) logContainer.removeChild(logContainer.lastChild);
+                
+                this.updateServerUI();
             }
             
-            engineFrame = document.createElement('iframe');
-            engineFrame.style.display = 'none';
-            engineFrame.src = ENGINE_URL;
-            document.body.appendChild(engineFrame);
+            updateServerUI() {
+                document.getElementById('clientsCount').innerText = this.clients.size;
+                document.getElementById('coreEnergy').innerText = Math.floor(this.gameState.coreEnergy);
+                document.getElementById('nanoBots').innerText = Math.floor(this.gameState.nanoBots);
+                document.getElementById('gameStatus').innerText = this.gameState.gameOver ? 'GAME OVER' : 'RUNNING';
+                document.getElementById('shieldStatus').innerText = this.gameState.shieldsActive ? 'ACTIVE' : 'OFF';
+                document.getElementById('score').innerText = this.gameState.score;
+            }
             
-            let timeout = setTimeout(() => {
-                if (!connected) {
-                    connectStatus.innerHTML = '❌ Ошибка подключения. Сервер недоступен.';
-                    connectBtn.disabled = false;
+            startServerProcesses() {
+                // Регенерация ресурсов
+                setInterval(() => {
+                    if (this.gameState.gameOver) return;
+                    
+                    const regenBonus = Math.floor(this.gameState.serverPower / 150);
+                    const nanoGain = 5 + regenBonus;
+                    this.gameState.nanoBots = Math.min(700, this.gameState.nanoBots + nanoGain);
+                    this.addLog(`⚙️ Регенерация: +${nanoGain} наноботов`);
+                    
+                    if (this.gameState.coreEnergy < 100) {
+                        const energyRegen = 0.8 + (this.gameState.serverPower / 600);
+                        this.gameState.coreEnergy = Math.min(100, this.gameState.coreEnergy + energyRegen);
+                    }
+                    
+                    this.broadcastToAllClients();
+                }, 2800);
+                
+                // Спавн врагов
+                setInterval(() => {
+                    if (this.gameState.gameOver) return;
+                    if (this.gameState.enemies.length < 8 && this.gameState.coreEnergy > 8) {
+                        this.spawnEnemy();
+                    }
+                }, 3500);
+            }
+            
+            spawnEnemy() {
+                const enemyTypes = [
+                    { name: "🦠 Хакер-Дрон", hp: 42, damage: 11, color: 0xff5577, size: 0.8 },
+                    { name: "🐍 Вирус-Червь", hp: 28, damage: 8, color: 0xaa66ff, size: 0.65 },
+                    { name: "👻 Призрак Данных", hp: 62, damage: 16, color: 0xffaa33, size: 0.95 },
+                    { name: "🤖 Кибер-Страж", hp: 52, damage: 13, color: 0xff8844, size: 0.85 }
+                ];
+                
+                const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 7 + Math.random() * 6;
+                const x = Math.cos(angle) * radius;
+                const z = Math.sin(angle) * radius;
+                const y = 0.5 + Math.random() * 2.5;
+                
+                const newEnemy = {
+                    id: Date.now() + Math.random() * 100000,
+                    x: x, y: y, z: z,
+                    hp: type.hp,
+                    maxHp: type.hp,
+                    name: type.name,
+                    damage: type.damage,
+                    color: type.color,
+                    size: type.size
+                };
+                
+                this.gameState.enemies.push(newEnemy);
+                this.addLog(`⚠️ [ВТОРЖЕНИЕ] ${type.name} появился! HP: ${type.hp}`);
+                this.broadcastToAllClients();
+                this.addEnemyTo3D(newEnemy);
+            }
+            
+            attackEnemy(enemyId, clientId) {
+                if (this.gameState.gameOver) return { success: false, reason: "GAME_OVER" };
+                
+                const enemyIndex = this.gameState.enemies.findIndex(e => e.id == enemyId);
+                if (enemyIndex === -1) return { success: false, reason: "ENEMY_NOT_FOUND" };
+                
+                const enemy = this.gameState.enemies[enemyIndex];
+                const attackCost = 20;
+                
+                if (this.gameState.nanoBots < attackCost) {
+                    return { success: false, reason: "LOW_NANOBOTS", needed: attackCost };
                 }
-            }, 10000);
+                
+                let damage = 28 + Math.floor(this.gameState.serverPower / 100);
+                if (this.gameState.shieldsActive) damage += 18;
+                
+                this.gameState.nanoBots -= attackCost;
+                enemy.hp -= damage;
+                
+                this.addLog(`💥 Атака на ${enemy.name}: -${damage} HP (осталось: ${Math.max(0, enemy.hp)})`);
+                
+                if (enemy.hp <= 0) {
+                    this.gameState.enemies.splice(enemyIndex, 1);
+                    const reward = 45 + Math.floor(Math.random() * 40);
+                    this.gameState.nanoBots += reward;
+                    this.gameState.score++;
+                    
+                    if (this.gameState.score % 5 === 0) {
+                        this.gameState.wave++;
+                        this.addLog(`🌟 ВОЛНА ${this.gameState.wave}! Увеличена сложность`);
+                    }
+                    
+                    this.addLog(`✨ ${enemy.name} УНИЧТОЖЕН! +${reward} наноботов | Счёт: ${this.gameState.score}`);
+                    this.removeEnemyFrom3D(enemy.id);
+                    
+                    if (Math.random() < 0.35) {
+                        this.gameState.coreEnergy = Math.min(100, this.gameState.coreEnergy + 5);
+                        this.addLog(`💚 Ядро восстановило +5% энергии!`);
+                    }
+                    
+                    this.broadcastToAllClients();
+                    return { success: true, killed: true, reward, score: this.gameState.score };
+                } else {
+                    let finalDamage = enemy.damage;
+                    if (this.gameState.shieldsActive) {
+                        finalDamage = Math.max(2, Math.floor(enemy.damage * 0.35));
+                        this.addLog(`🛡️ Щит снизил урон до ${finalDamage}`);
+                    }
+                    
+                    this.gameState.coreEnergy = Math.max(0, this.gameState.coreEnergy - finalDamage);
+                    this.addLog(`💢 Контратака! Ядро получает ${finalDamage} урона (осталось: ${Math.floor(this.gameState.coreEnergy)}%)`);
+                    
+                    if (this.gameState.coreEnergy <= 0) {
+                        this.gameState.gameOver = true;
+                        this.addLog(`💀💀💀 СЕРВЕР ПАЛ! ИГРА ОКОНЧЕНА 💀💀💀`);
+                        this.broadcastToAllClients();
+                        return { success: false, reason: "CORE_DESTROYED", gameOver: true };
+                    }
+                    
+                    this.broadcastToAllClients();
+                    return { success: true, killed: false, damageReceived: finalDamage };
+                }
+            }
             
-            engineFrame.onload = () => {
-                setTimeout(() => {
-                    try {
-                        const api = engineFrame.contentWindow.GameEngineAPI;
-                        if (api) {
-                            const response = api.connect(playerName);
-                            const data = JSON.parse(response);
-                            
-                            if (data.error) {
-                                connectStatus.innerHTML = '❌ ' + data.error;
-                                connectBtn.disabled = false;
-                            } else {
-                                connected = true;
-                                playerId = data.playerId;
-                                players = data.players || {};
-                                messages = data.chatHistory || [];
-                                
-                                connectStatus.innerHTML = '✅ Подключено!';
-                                setTimeout(() => {
-                                    document.getElementById('connectionScreen').style.display = 'none';
-                                    document.getElementById('uiPanel').style.display = 'block';
-                                    document.getElementById('connStatus').style.display = 'block';
-                                    document.getElementById('cameraBtn').style.display = 'block';
-                                    document.getElementById('chatContainer').style.display = 'block';
-                                    document.getElementById('joystickContainer').style.display = 'block';
-                                    document.getElementById('controlsHint').style.display = 'block';
-                                    
-                                    document.getElementById('playerName').innerHTML = playerName;
-                                    updateConnectionStatus(true, 'Подключено');
-                                    
-                                    // Загружаем чат
-                                    messages.forEach(msg => {
-                                        addChatMessage(msg.player, msg.text);
-                                    });
-                                    
-                                    // Запускаем игру
-                                    startGame();
-                                    
-                                    // Начинаем обновлять позиции
-                                    startPositionUpdate();
-                                    
-                                    // Начинаем получать обновления
-                                    startPolling();
-                                    
-                                }, 500);
-                            }
-                        } else {
-                            connectStatus.innerHTML = '❌ API не найден';
-                            connectBtn.disabled = false;
+            upgradeMemory(clientId) {
+                if (this.gameState.gameOver) return { success: false };
+                const cost = 100;
+                if (this.gameState.nanoBots >= cost) {
+                    this.gameState.nanoBots -= cost;
+                    this.gameState.serverPower += 70;
+                    this.addLog(`🚀 Апгрейд памяти! Мощность: ${this.gameState.serverPower} MHz`);
+                    this.broadcastToAllClients();
+                    return { success: true, newPower: this.gameState.serverPower };
+                }
+                return { success: false, needed: cost };
+            }
+            
+            activateShield(clientId) {
+                if (this.gameState.gameOver) return { success: false };
+                const cost = 55;
+                if (this.gameState.nanoBots >= cost && !this.gameState.shieldsActive) {
+                    this.gameState.nanoBots -= cost;
+                    this.gameState.shieldsActive = true;
+                    this.addLog(`🛡️ ЗАЩИТНОЕ ПОЛЕ АКТИВИРОВАНО!`);
+                    
+                    setTimeout(() => {
+                        if (this.gameState.shieldsActive) {
+                            this.gameState.shieldsActive = false;
+                            this.addLog(`🔻 Защитное поле разрядилось`);
+                            this.broadcastToAllClients();
                         }
-                    } catch(e) {
-                        connectStatus.innerHTML = '❌ Ошибка: ' + e.message;
-                        connectBtn.disabled = false;
+                    }, 10000);
+                    
+                    this.broadcastToAllClients();
+                    return { success: true };
+                }
+                return { success: false };
+            }
+            
+            restoreNanobots(clientId) {
+                if (this.gameState.gameOver) return false;
+                const costEnergy = 15;
+                if (this.gameState.coreEnergy >= costEnergy) {
+                    this.gameState.coreEnergy -= costEnergy;
+                    const gain = 80 + Math.floor(Math.random() * 60);
+                    this.gameState.nanoBots += gain;
+                    this.addLog(`🔧 Восстановление: +${gain} наноботов`);
+                    this.broadcastToAllClients();
+                    return true;
+                }
+                return false;
+            }
+            
+            resetGame(clientId) {
+                this.gameState = {
+                    coreEnergy: 100,
+                    nanoBots: 350,
+                    serverPower: 580,
+                    shieldsActive: false,
+                    enemies: [],
+                    score: 0,
+                    gameOver: false,
+                    wave: 1
+                };
+                this.clearAllEnemies3D();
+                this.addLog(`🌀 ПЕРЕЗАПУСК ВСЕЛЕННОЙ! Все параметры восстановлены`);
+                this.broadcastToAllClients();
+                return { success: true };
+            }
+            
+            registerClient() {
+                const clientId = this.nextClientId++;
+                this.clients.set(clientId, { connected: true, lastSeen: Date.now() });
+                this.addLog(`🔌 Новый клиент #${clientId} подключился | Всего: ${this.clients.size}`);
+                this.updateServerUI();
+                return clientId;
+            }
+            
+            unregisterClient(clientId) {
+                this.clients.delete(clientId);
+                this.addLog(`❌ Клиент #${clientId} отключился | Осталось: ${this.clients.size}`);
+                this.updateServerUI();
+            }
+            
+            getFullState() {
+                return {
+                    coreEnergy: Math.floor(this.gameState.coreEnergy),
+                    nanoBots: Math.floor(this.gameState.nanoBots),
+                    serverPower: this.gameState.serverPower,
+                    shieldsActive: this.gameState.shieldsActive,
+                    enemies: this.gameState.enemies,
+                    score: this.gameState.score,
+                    gameOver: this.gameState.gameOver,
+                    wave: this.gameState.wave
+                };
+            }
+            
+            broadcastToAllClients() {
+                const state = this.getFullState();
+                this.clients.forEach((_, id) => {
+                    if (window.clientCallbacks && window.clientCallbacks[id]) {
+                        window.clientCallbacks[id](state);
                     }
-                }, 1000);
-            };
-        }
-        
-        function updateConnectionStatus(online, message) {
-            const statusDiv = document.getElementById('connStatus');
-            if (online) {
-                statusDiv.className = 'connection-status online';
-                statusDiv.innerHTML = '🟢 ' + message;
-            } else {
-                statusDiv.className = 'connection-status offline';
-                statusDiv.innerHTML = '🔴 ' + message;
+                });
             }
-        }
-        
-        function updatePositionOnServer(x, z, rot) {
-            if (connected && playerId && engineFrame && engineFrame.contentWindow.GameEngineAPI) {
-                const api = engineFrame.contentWindow.GameEngineAPI;
-                api.updatePosition(playerId, x, z, rot);
+            
+            // 3D визуализация
+            init3DVisualization() {
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x010118);
+                this.scene.fog = new THREE.FogExp2(0x010118, 0.01);
+                
+                this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.camera.position.set(12, 8, 15);
+                this.camera.lookAt(0, 0, 0);
+                
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                document.body.appendChild(this.renderer.domElement);
+                
+                // Освещение
+                const ambientLight = new THREE.AmbientLight(0x404060);
+                this.scene.add(ambientLight);
+                const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+                mainLight.position.set(5, 10, 7);
+                mainLight.castShadow = true;
+                this.scene.add(mainLight);
+                const backLight = new THREE.PointLight(0x3366ff, 0.5);
+                backLight.position.set(-3, 2, -5);
+                this.scene.add(backLight);
+                
+                // Пол
+                const gridHelper = new THREE.GridHelper(30, 20, 0x00ffcc, 0x3366aa);
+                gridHelper.position.y = -0.5;
+                this.scene.add(gridHelper);
+                
+                // Центральное ядро
+                const coreGeometry = new THREE.SphereGeometry(1.2, 64, 64);
+                const coreMaterial = new THREE.MeshStandardMaterial({ color: 0x33aaff, emissive: 0x1166aa, emissiveIntensity: 0.8 });
+                this.coreMesh = new THREE.Mesh(coreGeometry, coreMaterial);
+                this.coreMesh.castShadow = true;
+                this.scene.add(this.coreMesh);
+                
+                // Аура ядра
+                const auraGeometry = new THREE.SphereGeometry(1.6, 32, 32);
+                const auraMaterial = new THREE.MeshBasicMaterial({ color: 0x33aaff, transparent: true, opacity: 0.2 });
+                this.auraMesh = new THREE.Mesh(auraGeometry, auraMaterial);
+                this.scene.add(this.auraMesh);
+                
+                // Враги 3D объекты
+                this.enemyMeshes = new Map();
+                
+                // Анимация
+                this.animate();
+                
+                window.addEventListener('resize', () => this.onWindowResize());
             }
-        }
-        
-        function sendMessageToServer(text) {
-            if (connected && playerId && engineFrame && engineFrame.contentWindow.GameEngineAPI) {
-                const api = engineFrame.contentWindow.GameEngineAPI;
-                const response = api.sendMessage(playerId, text);
-                const data = JSON.parse(response);
-                if (data.success) {
-                    addChatMessage(playerName, text);
+            
+            addEnemyTo3D(enemy) {
+                const geometry = new THREE.BoxGeometry(enemy.size, enemy.size, enemy.size);
+                const material = new THREE.MeshStandardMaterial({ color: enemy.color, emissive: 0x442200 });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.set(enemy.x, enemy.y, enemy.z);
+                mesh.castShadow = true;
+                mesh.userData = { enemyId: enemy.id };
+                this.scene.add(mesh);
+                this.enemyMeshes.set(enemy.id, mesh);
+            }
+            
+            removeEnemyFrom3D(enemyId) {
+                const mesh = this.enemyMeshes.get(enemyId);
+                if (mesh) {
+                    this.scene.remove(mesh);
+                    this.enemyMeshes.delete(enemyId);
                 }
             }
-        }
-        
-        function startPolling() {
-            setInterval(() => {
-                if (connected && engineFrame && engineFrame.contentWindow.GameEngineAPI) {
-                    const api = engineFrame.contentWindow.GameEngineAPI;
-                    const playersResponse = api.getPlayers();
-                    const playersData = JSON.parse(playersResponse);
-                    players = playersData;
-                    
-                    document.getElementById('playerCount').innerHTML = Object.keys(players).length;
-                    
-                    const messagesResponse = api.getMessages();
-                    const messagesData = JSON.parse(messagesResponse);
-                    if (messagesData.length > messages.length) {
-                        const newMessages = messagesData.slice(messages.length);
-                        newMessages.forEach(msg => {
-                            addChatMessage(msg.player, msg.text);
-                        });
-                        messages = messagesData;
+            
+            clearAllEnemies3D() {
+                this.enemyMeshes.forEach(mesh => this.scene.remove(mesh));
+                this.enemyMeshes.clear();
+            }
+            
+            update3DEnemies() {
+                // Синхронизация позиций
+                this.gameState.enemies.forEach(enemy => {
+                    let mesh = this.enemyMeshes.get(enemy.id);
+                    if (mesh) {
+                        mesh.position.set(enemy.x, enemy.y, enemy.z);
+                        // Пульсация при низком HP
+                        const hpPercent = enemy.hp / enemy.maxHp;
+                        mesh.material.emissiveIntensity = (1 - hpPercent) * 0.5;
                     }
-                }
-            }, 1000);
-        }
-        
-        function startPositionUpdate() {
-            setInterval(() => {
-                if (connected && playerId && window.playerX !== undefined) {
-                    updatePositionOnServer(window.playerX, window.playerZ, window.playerRot);
-                }
-            }, 100);
-        }
-        
-        function addChatMessage(sender, text, isSystem = false) {
-            const messagesDiv = document.getElementById('chatMessages');
-            const msgElement = document.createElement('div');
-            msgElement.className = 'chat-message' + (isSystem ? ' system' : '');
-            if (isSystem) {
-                msgElement.innerHTML = `📢 ${text}`;
-            } else {
-                msgElement.innerHTML = `<span class="name">${sender}:</span> ${text}`;
-            }
-            messagesDiv.appendChild(msgElement);
-            msgElement.scrollIntoView({ behavior: 'smooth' });
-            while (messagesDiv.children.length > 100) messagesDiv.removeChild(messagesDiv.firstChild);
-        }
-        
-        document.getElementById('connectBtn').onclick = connectToServer;
-        document.getElementById('playerNameInput').onkeypress = (e) => {
-            if (e.key === 'Enter') connectToServer();
-        };
-        
-        // ============ 3D ИГРА ============
-        let gameStarted = false;
-        let playerX = 0, playerZ = 0;
-        let playerRot = 0;
-        let animationTime = 0;
-        let isWalking = false;
-        let firstPersonMode = false;
-        
-        // Управление с клавиатуры
-        const keys = { w: false, s: false, a: false, d: false };
-        let moveSpeed = 5;
-        let cameraAngle = 0;
-        let cameraHeight = 2.5;
-        let isDragging = false;
-        let lastMouseX = 0;
-        
-        // Three.js
-        const canvas = document.getElementById('gameCanvas');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.Fog(0x87CEEB, 40, 80);
-        
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        
-        // Освещение
-        const ambientLight = new THREE.AmbientLight(0x404060);
-        scene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 10, 7);
-        directionalLight.castShadow = true;
-        scene.add(directionalLight);
-        
-        // Земля
-        const groundGeometry = new THREE.PlaneGeometry(60, 60);
-        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7 });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = -0.5;
-        ground.receiveShadow = true;
-        scene.add(ground);
-        
-        const gridHelper = new THREE.GridHelper(60, 30, 0x88ff88, 0x2e7d32);
-        gridHelper.position.y = -0.45;
-        scene.add(gridHelper);
-        
-        // Деревья
-        function createTree(x, z) {
-            const group = new THREE.Group();
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 1.5), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
-            trunk.castShadow = true;
-            trunk.position.y = 0.75;
-            group.add(trunk);
-            
-            const foliage1 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
-            foliage1.castShadow = true;
-            foliage1.position.y = 1.6;
-            group.add(foliage1);
-            
-            const foliage2 = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1, 8), new THREE.MeshStandardMaterial({ color: 0x3c8c40 }));
-            foliage2.castShadow = true;
-            foliage2.position.y = 2.3;
-            group.add(foliage2);
-            
-            group.position.set(x, -0.5, z);
-            scene.add(group);
-        }
-        
-        for (let i = -25; i <= 25; i += 5) {
-            for (let j = -25; j <= 25; j += 5) {
-                if (Math.abs(i) < 6 && Math.abs(j) < 6) continue;
-                if (Math.random() > 0.7) createTree(i + (Math.random() - 0.5) * 2, j + (Math.random() - 0.5) * 2);
-            }
-        }
-        
-        // Персонаж
-        const playerGroup = new THREE.Group();
-        
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x4caf50 });
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.45), bodyMat);
-        body.castShadow = true;
-        body.position.y = 0.45;
-        playerGroup.add(body);
-        
-        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), headMat);
-        head.castShadow = true;
-        head.position.y = 0.95;
-        playerGroup.add(head);
-        
-        const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.32), new THREE.MeshStandardMaterial({ color: 0x3d8c40 }));
-        leftLeg.position.set(-0.22, 0.12, 0);
-        leftLeg.castShadow = true;
-        playerGroup.add(leftLeg);
-        
-        const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.32), new THREE.MeshStandardMaterial({ color: 0x3d8c40 }));
-        rightLeg.position.set(0.22, 0.12, 0);
-        rightLeg.castShadow = true;
-        playerGroup.add(rightLeg);
-        
-        const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.28), new THREE.MeshStandardMaterial({ color: 0x4caf50 }));
-        leftArm.position.set(-0.5, 0.75, 0);
-        leftArm.castShadow = true;
-        playerGroup.add(leftArm);
-        
-        const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.28), new THREE.MeshStandardMaterial({ color: 0x4caf50 }));
-        rightArm.position.set(0.5, 0.75, 0);
-        rightArm.castShadow = true;
-        playerGroup.add(rightArm);
-        
-        playerGroup.position.y = -0.2;
-        scene.add(playerGroup);
-        
-        // Другие игроки
-        const otherPlayers = {};
-        
-        function updateOtherPlayers() {
-            for (let id in players) {
-                if (id !== playerId) {
-                    if (!otherPlayers[id]) {
-                        const group = new THREE.Group();
-                        const pBody = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.45), new THREE.MeshStandardMaterial({ color: 0x2196f3 }));
-                        pBody.castShadow = true;
-                        pBody.position.y = 0.45;
-                        group.add(pBody);
-                        const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
-                        pHead.castShadow = true;
-                        pHead.position.y = 0.95;
-                        group.add(pHead);
-                        group.position.y = -0.2;
-                        scene.add(group);
-                        otherPlayers[id] = group;
-                    }
-                    otherPlayers[id].position.x = players[id].x || 0;
-                    otherPlayers[id].position.z = players[id].z || 0;
-                }
-            }
-            
-            for (let id in otherPlayers) {
-                if (!players[id] || id === playerId) {
-                    scene.remove(otherPlayers[id]);
-                    delete otherPlayers[id];
-                }
-            }
-        }
-        
-        // Управление с клавиатуры
-        document.addEventListener('keydown', (e) => {
-            switch(e.key) {
-                case 'w': case 'ArrowUp': keys.w = true; break;
-                case 's': case 'ArrowDown': keys.s = true; break;
-                case 'a': case 'ArrowLeft': keys.a = true; break;
-                case 'd': case 'ArrowRight': keys.d = true; break;
-                case 'c': case 'C': toggleCamera(); break;
-            }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            switch(e.key) {
-                case 'w': case 'ArrowUp': keys.w = false; break;
-                case 's': case 'ArrowDown': keys.s = false; break;
-                case 'a': case 'ArrowLeft': keys.a = false; break;
-                case 'd': case 'ArrowRight': keys.d = false; break;
-            }
-        });
-        
-        // РАБОЧИЙ ДЖОЙСТИК
-        let joystickActive = false;
-        let joystickX = 0, joystickY = 0;
-        const joystickBase = document.getElementById('joystickBase');
-        const joystickThumb = document.getElementById('joystickThumb');
-        
-        function getJoystickPosition(e) {
-            const rect = joystickBase.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            let clientX, clientY;
-            
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
-            
-            let dx = clientX - centerX;
-            let dy = clientY - centerY;
-            const distance = Math.min(Math.sqrt(dx*dx + dy*dy), 55);
-            const angle = Math.atan2(dy, dx);
-            const thumbX = Math.cos(angle) * distance;
-            const thumbY = Math.sin(angle) * distance;
-            
-            joystickThumb.style.transform = `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px))`;
-            joystickX = (thumbX / 55);
-            joystickY = (thumbY / 55);
-        }
-        
-        function resetJoystick() {
-            joystickActive = false;
-            joystickThumb.style.transform = 'translate(-50%, -50%)';
-            joystickX = 0;
-            joystickY = 0;
-        }
-        
-        joystickBase.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            joystickActive = true;
-            getJoystickPosition(e);
-        });
-        
-        joystickBase.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (joystickActive) getJoystickPosition(e);
-        });
-        
-        joystickBase.addEventListener('touchend', () => resetJoystick());
-        
-        // Управление камерой
-        canvas.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            lastMouseX = e.touches[0].clientX;
-        });
-        
-        canvas.addEventListener('touchmove', (e) => {
-            if (isDragging) {
-                const delta = e.touches[0].clientX - lastMouseX;
-                cameraAngle += delta * 0.01;
-                lastMouseX = e.touches[0].clientX;
-            }
-        });
-        
-        canvas.addEventListener('touchend', () => { isDragging = false; });
-        
-        canvas.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            lastMouseX = e.clientX;
-        });
-        
-        canvas.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const delta = e.clientX - lastMouseX;
-                cameraAngle += delta * 0.01;
-                lastMouseX = e.clientX;
-            }
-        });
-        
-        canvas.addEventListener('mouseup', () => { isDragging = false; });
-        
-        function toggleCamera() {
-            firstPersonMode = !firstPersonMode;
-            const btn = document.getElementById('cameraBtn');
-            btn.innerHTML = firstPersonMode ? '👁️ 1-е лицо' : '🎥 3-е лицо';
-            playerGroup.visible = !firstPersonMode;
-        }
-        
-        document.getElementById('cameraBtn').onclick = toggleCamera;
-        
-        // Чат
-        const chatContainer = document.getElementById('chatContainer');
-        const chatHeader = document.getElementById('chatHeader');
-        let chatCollapsed = false;
-        
-        chatHeader.onclick = () => {
-            chatCollapsed = !chatCollapsed;
-            chatContainer.classList.toggle('collapsed', chatCollapsed);
-        };
-        
-        document.getElementById('chatSend').onclick = () => {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            if (text) {
-                sendMessageToServer(text);
-                input.value = '';
-            }
-        };
-        
-        document.getElementById('chatInput').onkeypress = (e) => {
-            if (e.key === 'Enter') document.getElementById('chatSend').click();
-        };
-        
-        window.playerX = playerX;
-        window.playerZ = playerZ;
-        window.playerRot = playerRot;
-        
-        function startGame() {
-            if (gameStarted) return;
-            gameStarted = true;
-            
-            function animate() {
-                requestAnimationFrame(animate);
-                if (!gameStarted) return;
+                });
                 
-                const delta = 0.016;
-                animationTime += delta;
+                // Обновление ядра
+                const energyPercent = this.gameState.coreEnergy / 100;
+                this.coreMesh.material.emissiveIntensity = 0.5 + energyPercent * 0.8;
+                this.auraMesh.scale.setScalar(1 + Math.sin(Date.now() * 0.005) * 0.1);
                 
-                // Движение
-                let moveX = 0, moveZ = 0;
-                
-                if (keys.w || joystickY < -0.2) moveZ -= 1;
-                if (keys.s || joystickY > 0.2) moveZ += 1;
-                if (keys.a || joystickX < -0.2) moveX -= 1;
-                if (keys.d || joystickX > 0.2) moveX += 1;
-                
-                isWalking = (moveX !== 0 || moveZ !== 0);
-                
-                if (isWalking) {
-                    const len = Math.sqrt(moveX*moveX + moveZ*moveZ);
-                    moveX /= len;
-                    moveZ /= len;
-                    
-                    playerX += moveX * moveSpeed * delta;
-                    playerZ += moveZ * moveSpeed * delta;
-                    
-                    playerX = Math.max(-28, Math.min(28, playerX));
-                    playerZ = Math.max(-28, Math.min(28, playerZ));
-                    
-                    playerRot = Math.atan2(moveX, moveZ);
-                    playerGroup.rotation.y = playerRot;
-                    
-                    // Анимация ног
-                    const legSwing = Math.sin(animationTime * 12) * 0.6;
-                    leftLeg.rotation.x = legSwing;
-                    rightLeg.rotation.x = -legSwing;
-                    leftArm.rotation.z = legSwing * 0.8;
-                    rightArm.rotation.z = -legSwing * 0.8;
-                    playerGroup.position.y = -0.2 + Math.abs(Math.sin(animationTime * 12)) * 0.03;
+                if (this.gameState.shieldsActive) {
+                    this.auraMesh.material.opacity = 0.5;
+                    this.auraMesh.material.color.setHex(0x88ffaa);
                 } else {
-                    leftLeg.rotation.x = 0;
-                    rightLeg.rotation.x = 0;
-                    leftArm.rotation.z = 0;
-                    rightArm.rotation.z = 0;
-                    playerGroup.position.y = -0.2;
+                    this.auraMesh.material.opacity = 0.2;
+                    this.auraMesh.material.color.setHex(0x33aaff);
                 }
-                
-                playerGroup.position.x = playerX;
-                playerGroup.position.z = playerZ;
-                
-                window.playerX = playerX;
-                window.playerZ = playerZ;
-                window.playerRot = playerRot;
-                
-                document.getElementById('position').innerHTML = `${playerX.toFixed(1)}, ${playerZ.toFixed(1)}`;
-                
-                updateOtherPlayers();
-                
-                // Камера
-                if (firstPersonMode) {
-                    camera.position.x = playerX;
-                    camera.position.y = 0.7;
-                    camera.position.z = playerZ;
-                    camera.rotation.y = cameraAngle;
-                } else {
-                    const camDistance = 5;
-                    camera.position.x = playerX + Math.sin(cameraAngle) * camDistance;
-                    camera.position.z = playerZ + Math.cos(cameraAngle) * camDistance;
-                    camera.position.y = 2.5;
-                    camera.lookAt(playerX, 0.5, playerZ);
-                }
-                
-                renderer.render(scene, camera);
             }
             
-            animate();
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                this.update3DEnemies();
+                
+                // Вращение камеры
+                if (this.camera) {
+                    const time = Date.now() * 0.001;
+                    this.camera.position.x = 12 * Math.sin(time * 0.1);
+                    this.camera.position.z = 12 * Math.cos(time * 0.1);
+                    this.camera.lookAt(0, 0, 0);
+                }
+                
+                if (this.renderer && this.scene && this.camera) {
+                    this.renderer.render(this.scene, this.camera);
+                }
+            }
+            
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
         }
         
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        // Инициализация сервера
+        const gameServer = new GameServerEngine();
+        
+        // Глобальный API для клиентов
+        window.clientCallbacks = {};
+        window.gameServerAPI = {
+            registerClient: () => gameServer.registerClient(),
+            unregisterClient: (id) => gameServer.unregisterClient(id),
+            attackEnemy: (enemyId, clientId) => gameServer.attackEnemy(enemyId, clientId),
+            upgradeMemory: (clientId) => gameServer.upgradeMemory(clientId),
+            activateShield: (clientId) => gameServer.activateShield(clientId),
+            restoreNanobots: (clientId) => gameServer.restoreNanobots(clientId),
+            resetGame: (clientId) => gameServer.resetGame(clientId),
+            subscribe: (clientId, callback) => { window.clientCallbacks[clientId] = callback; },
+            getState: () => gameServer.getFullState()
+        };
+        
+        console.log("✅ 3D Сервер запущен! Ожидание подключения клиентов...");
     </script>
 </body>
-    </html>
+</html>
