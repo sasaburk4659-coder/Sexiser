@@ -3,435 +3,995 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Террариум | 2D Игра</title>
+    <title>3D Adventure - Online Game</title>
     <style>
         * {
-            user-select: none;
-            touch-action: manipulation;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
+        
         body {
-            background: radial-gradient(circle at 20% 30%, #1b3b2b, #0a1f1a);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Courier New', monospace;
-            padding: 10px;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0a2a;
         }
-        .game-container {
-            background: #1f2a1b;
-            border-radius: 48px;
-            padding: 15px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
-        }
+        
         canvas {
             display: block;
-            border-radius: 24px;
-            box-shadow: 0 0 0 3px #aa8e54;
-            width: 100%;
-            height: auto;
+            width: 100vw;
+            height: 100vh;
         }
-        .info-panel {
-            margin-top: 15px;
-            background: #0f1f12d9;
-            border-radius: 28px;
-            padding: 10px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 8px;
-            color: #f9e2a1;
-        }
-        .stat {
-            background: #241f12;
-            padding: 5px 12px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-        button {
-            background: #6b4c2c;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .dpad {
-            display: grid;
-            grid-template-columns: repeat(3, 55px);
-            grid-template-rows: repeat(3, 55px);
-            gap: 5px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 70px;
-            padding: 10px;
-        }
-        .dpad-btn {
-            background: #3a2a1f;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #1a1208;
-        }
-        .dpad-btn:active { transform: translateY(2px); }
-        .action-btn {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            background: #5f4a2e;
-            font-size: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #2f2a1a;
-        }
-        .joystick-area { display: flex; justify-content: space-between; margin-top: 15px; flex-wrap: wrap; gap: 15px; }
-        .server-status {
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            background: #1f3a2a;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .loading-overlay {
+        
+        /* ЭКРАН ПОДКЛЮЧЕНИЯ */
+        .connection-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
         }
-        .loading-box {
-            background: #2a2a1c;
-            border-radius: 48px;
+        
+        .connection-card {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
             padding: 40px;
             text-align: center;
-            width: 300px;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid #4caf50;
+            box-shadow: 0 0 50px rgba(76,175,80,0.3);
         }
-        .error-msg { color: #ff8888; font-size: 0.9rem; margin-top: 15px; }
+        
+        .connection-card h1 {
+            color: #4caf50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(76,175,80,0.3);
+            border-top-color: #4caf50;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-text {
+            color: #fff;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .error-text {
+            color: #f44336;
+            margin: 10px 0;
+        }
+        
         .retry-btn {
-            margin-top: 20px;
-            background: #6b4c2c;
+            background: #4caf50;
+            border: none;
             padding: 10px 20px;
-            border-radius: 40px;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        
+        /* UI Панель */
+        .ui-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 10px 15px;
+            color: white;
+            font-size: 12px;
+            z-index: 100;
+            font-family: monospace;
+            pointer-events: none;
+        }
+        
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 8px 15px;
+            color: white;
+            font-size: 12px;
+            z-index: 100;
+            font-family: monospace;
+        }
+        
+        .connection-status.online { border-left: 3px solid #4caf50; }
+        .connection-status.offline { border-left: 3px solid #f44336; }
+        
+        /* Кнопка переключения камеры */
+        .camera-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid #4caf50;
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .camera-btn:hover {
+            background: #4caf50;
+            transform: scale(1.05);
+        }
+        
+        /* ЧАТ */
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 300px;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 200;
+            transition: all 0.3s;
+        }
+        
+        .chat-header {
+            padding: 10px 15px;
+            background: rgba(0,0,0,0.9);
+            border-radius: 15px 15px 0 0;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .chat-messages {
+            height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .chat-message {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #fff;
+        }
+        
+        .chat-message .name {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .chat-message.system {
+            background: rgba(255,152,0,0.2);
+            color: #ff9800;
+            text-align: center;
+        }
+        
+        .chat-input-container {
+            padding: 10px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 20px;
+            padding: 8px 12px;
+            color: white;
+            outline: none;
+        }
+        
+        .chat-send {
+            background: #4caf50;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
             color: white;
             cursor: pointer;
         }
-        .hidden { display: none; }
-        @media (max-width: 700px) {
-            .dpad { transform: scale(0.7); margin: -10px; }
-            .stat { font-size: 0.65rem; }
-            .action-btn { width: 55px; height: 55px; font-size: 24px; }
+        
+        .chat-container.collapsed .chat-messages,
+        .chat-container.collapsed .chat-input-container {
+            display: none;
+        }
+        
+        /* Джойстик для телефона */
+        .joystick-container {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            z-index: 150;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .joystick-container { display: block; }
+            .chat-container { width: 260px; }
+        }
+        
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            position: relative;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .joystick-thumb {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+        }
+        
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 150px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 5px 10px;
+            color: white;
+            font-size: 10px;
+            z-index: 100;
+        }
+        
+        @media (max-width: 768px) {
+            .controls-hint { left: 150px; bottom: 220px; }
         }
     </style>
 </head>
 <body>
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-box">
-        <h2>🌍 ТЕРРАРИУМ</h2>
-        <div id="loadingStatus" style="margin: 20px 0;">🔄 Подключение к движку...</div>
-        <div id="errorMessage" class="error-msg hidden"></div>
-        <div id="retryButton" class="retry-btn hidden" onclick="retryConnect()">🔄 ПОВТОРИТЬ</div>
-    </div>
-</div>
-
-<div id="gameUI" class="hidden">
-    <div class="game-container">
-        <canvas id="gameCanvas" width="900" height="550"></canvas>
-        <div class="info-panel">
-            <div class="stat">🧙 <span id="playerName">---</span></div>
-            <div class="stat">💰 <span id="goldAmount">0</span></div>
-            <div class="stat">🪨 <span id="oreAmount">0</span></div>
-            <div class="stat">🌱 <span id="seedAmount">0</span></div>
-            <div class="stat">💎 <span id="crystalAmount">0</span></div>
-            <button id="mineBtn">⛏️ Копать</button>
+    <canvas id="gameCanvas"></canvas>
+    
+    <!-- ЭКРАН ПОДКЛЮЧЕНИЯ -->
+    <div class="connection-screen" id="connectionScreen">
+        <div class="connection-card">
+            <h1>🎮 3D ADVENTURE</h1>
+            <div class="spinner"></div>
+            <div class="status-text" id="connectionStatusText">Подключение к серверу...</div>
+            <div id="errorMessage" class="error-text"></div>
+            <button class="retry-btn" id="retryBtn" style="display:none;">Повторить</button>
         </div>
-        <div class="joystick-area">
-            <div class="dpad">
-                <div></div><div class="dpad-btn" data-dir="up">▲</div><div></div>
-                <div class="dpad-btn" data-dir="left">◀</div><div></div><div class="dpad-btn" data-dir="right">▶</div>
-                <div></div><div class="dpad-btn" data-dir="down">▼</div><div></div>
-            </div>
-            <div class="action-btn" id="interactBtn">🤝</div>
-        </div>
-        <div class="server-status" id="serverStatus">🟢 Игра активна</div>
     </div>
-</div>
-
-<script>
-    // ========== ПОДКЛЮЧЕНИЕ К ДВИЖКУ ==========
-    const ENGINE_URL = "https://sasaburk4659-coder.github.io/-/";
-    const PLAYER_NAME = "Искатель_" + Math.floor(Math.random() * 1000);
     
-    let sessionId = null;
-    let playerData = null;
-    let playerX = 450, playerY = 300;
-    let targetX = 450, targetY = 300;
-    let otherPlayers = [];
-    let reconnectTimer = null;
+    <div class="ui-panel">
+        <div>👤 <span id="playerName">Игрок</span></div>
+        <div>👥 Онлайн: <span id="playerCount">0</span></div>
+        <div>📍 <span id="position">0, 0, 0</span></div>
+    </div>
     
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    <div class="connection-status online" id="connStatus">
+        🔄 Подключение...
+    </div>
     
-    // Загрузка движка в iframe (для доступа к localStorage API)
-    let engineFrame = null;
+    <button class="camera-btn" id="cameraBtn">🎥 3-е лицо</button>
     
-    function initEngine() {
-        return new Promise((resolve, reject) => {
-            engineFrame = document.createElement('iframe');
-            engineFrame.src = ENGINE_URL;
-            engineFrame.style.display = 'none';
-            document.body.appendChild(engineFrame);
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header" id="chatHeader">
+            <span>💬 Чат</span>
+            <span>▼</span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Сообщение..." maxlength="200">
+            <button class="chat-send" id="chatSend">➤</button>
+        </div>
+    </div>
+    
+    <div class="joystick-container">
+        <div class="joystick-base" id="joystickBase">
+            <div class="joystick-thumb" id="joystickThumb"></div>
+        </div>
+    </div>
+    
+    <div class="controls-hint">
+        🎮 WASD / Стрелки | 🖱️ Мышь/свайп | 🔄 C - смена камеры
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ============ ПОДКЛЮЧЕНИЕ К ДВИЖКУ ============
+        const ENGINE_URL = "https://sasaburk4659-coder.github.io/-/";
+        let engineAPI = null;
+        let connected = false;
+        let playerId = localStorage.getItem('game_player_id');
+        let playerName = "Player_" + Math.floor(Math.random() * 10000);
+        let players = {};
+        let reconnectAttempts = 0;
+        let connectionFailed = false;
+        
+        if (!playerId) {
+            playerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem('game_player_id', playerId);
+        }
+        
+        document.getElementById('playerName').innerHTML = playerName;
+        
+        // Создаем iframe для подключения
+        const engineFrame = document.createElement('iframe');
+        engineFrame.style.display = 'none';
+        engineFrame.src = ENGINE_URL;
+        document.body.appendChild(engineFrame);
+        
+        let connectionReady = false;
+        
+        function updateConnectionScreen(status, error = null) {
+            const statusText = document.getElementById('connectionStatusText');
+            const errorDiv = document.getElementById('errorMessage');
+            const retryBtn = document.getElementById('retryBtn');
             
-            engineFrame.onload = () => {
+            if (status === 'connecting') {
+                statusText.innerHTML = '🔄 Подключение к серверу...';
+                statusText.style.color = '#fff';
+                errorDiv.innerHTML = '';
+                retryBtn.style.display = 'none';
+            } else if (status === 'success') {
+                document.getElementById('connectionScreen').style.opacity = '0';
                 setTimeout(() => {
-                    try {
-                        const engineAPI = engineFrame.contentWindow.TerraEngine;
-                        if (engineAPI) {
-                            resolve(engineAPI);
-                        } else {
-                            reject(new Error("Engine API not found"));
-                        }
-                    } catch(e) {
-                        reject(e);
-                    }
+                    document.getElementById('connectionScreen').style.display = 'none';
                 }, 500);
-            };
-            
-            setTimeout(() => reject(new Error("Timeout")), 5000);
-        });
-    }
-    
-    let engineAPI = null;
-    
-    async function startGame() {
-        const loadingStatus = document.getElementById('loadingStatus');
-        const errorMessage = document.getElementById('errorMessage');
-        const retryBtn = document.getElementById('retryButton');
-        
-        loadingStatus.innerHTML = "🔄 Подключение к движку...";
-        
-        try {
-            if (!engineAPI) {
-                engineAPI = await initEngine();
+            } else if (status === 'error') {
+                statusText.innerHTML = '❌ Ошибка подключения';
+                statusText.style.color = '#f44336';
+                errorDiv.innerHTML = error || 'Не удалось подключиться к серверу. Проверьте соединение.';
+                retryBtn.style.display = 'block';
+                connectionFailed = true;
             }
-            
-            const status = engineAPI.getStatus();
-            
-            if (!status.running) {
-                loadingStatus.innerHTML = "⛔ ДВИЖОК ОСТАНОВЛЕН!";
-                errorMessage.innerHTML = "Игровой движок остановлен администратором.<br>Игра временно недоступна.";
-                errorMessage.classList.remove('hidden');
-                retryBtn.classList.remove('hidden');
+        }
+        
+        function updateConnectionStatus(online, message) {
+            const statusDiv = document.getElementById('connStatus');
+            if (online) {
+                statusDiv.className = 'connection-status online';
+                statusDiv.innerHTML = '🟢 ' + message;
+            } else {
+                statusDiv.className = 'connection-status offline';
+                statusDiv.innerHTML = '🔴 ' + message;
+            }
+        }
+        
+        function connectToEngine() {
+            if (!connectionReady || !engineAPI) {
+                setTimeout(connectToEngine, 1000);
                 return;
             }
             
-            loadingStatus.innerHTML = "🔌 Вход в игровой мир...";
+            updateConnectionScreen('connecting');
             
-            const joinResult = engineAPI.join(PLAYER_NAME);
-            
-            if (joinResult.success) {
-                sessionId = joinResult.sessionId;
-                playerData = joinResult.playerData;
-                playerX = playerData.x;
-                playerY = playerData.y;
-                targetX = playerX;
-                targetY = playerY;
-                
-                updateUI();
-                
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                document.getElementById('gameUI').classList.remove('hidden');
-                
-                // Запускаем игровые циклы
-                setInterval(() => updatePosition(), 50);
-                setInterval(() => fetchOtherPlayers(), 200);
-                setInterval(() => syncPlayerData(), 3000);
-                
-                drawGame();
-            } else {
-                loadingStatus.innerHTML = "❌ Ошибка подключения!";
-                errorMessage.innerHTML = "Не удалось подключиться к движку.";
-                errorMessage.classList.remove('hidden');
-                retryBtn.classList.remove('hidden');
+            // Проверяем доступность сервера
+            const pingResult = engineAPI.ping();
+            if (!pingResult || pingResult.status !== 'online') {
+                updateConnectionScreen('error', 'Сервер недоступен. Движок не отвечает.');
+                return;
             }
-        } catch(e) {
-            console.error("Connection error:", e);
-            loadingStatus.innerHTML = "❌ Не удалось подключиться к движку!";
-            errorMessage.innerHTML = "Движок недоступен. Проверьте URL и интернет.";
-            errorMessage.classList.remove('hidden');
-            retryBtn.classList.remove('hidden');
+            
+            const result = engineAPI.connect({
+                id: playerId,
+                name: playerName,
+                position: { x: 0, y: 0, z: 0 },
+                rotation: { y: 0 }
+            });
+            
+            if (!result.success) {
+                updateConnectionScreen('error', result.message || 'Ошибка подключения к серверу');
+                return;
+            }
+            
+            connected = true;
+            playerId = result.playerId;
+            players = {};
+            result.players.forEach(p => { players[p.id] = p; });
+            
+            if (result.chatHistory) {
+                result.chatHistory.forEach(msg => addChatMessage(msg.playerName, msg.text, msg.playerId === 'system'));
+            }
+            
+            updateConnectionScreen('success');
+            updateConnectionStatus(true, 'Подключено к серверу');
+            updateUI();
+            
+            // Подписка на события
+            engineAPI.on('player_joined', (player) => {
+                players[player.id] = player;
+                updateUI();
+                addChatMessage('system', `🎉 ${player.name} присоединился`, true);
+            });
+            
+            engineAPI.on('player_left', (player) => {
+                delete players[player.id];
+                updateUI();
+                addChatMessage('system', `👋 ${player.name} покинул игру`, true);
+            });
+            
+            engineAPI.on('position_update', (data) => {
+                if (players[data.playerId]) {
+                    players[data.playerId].position = data.position;
+                    if (data.animationState && data.playerId !== playerId) {
+                        // Анимация для других игроков
+                    }
+                }
+            });
+            
+            engineAPI.on('new_message', (message) => {
+                addChatMessage(message.playerName, message.text);
+            });
+            
+            engineAPI.on('server_stopped', (data) => {
+                connected = false;
+                updateConnectionStatus(false, 'Сервер остановлен');
+                addChatMessage('system', `⚠️ ${data.message}`, true);
+            });
+            
+            engineAPI.on('server_started', (data) => {
+                connected = true;
+                updateConnectionStatus(true, 'Подключено');
+                addChatMessage('system', `✅ ${data.message}`, true);
+                setTimeout(() => connectToEngine(), 1000);
+            });
+            
+            addChatMessage('system', '✅ Вы подключены к серверу!', true);
+            startGame(); // Запускаем игру только после успешного подключения
         }
-    }
-    
-    function syncPlayerData() {
-        if (!sessionId || !playerData || !engineAPI) return;
-        const result = engineAPI.sync(sessionId, playerData);
-        if (result.success) playerData = result.playerData;
-        updateUI();
-    }
-    
-    function updatePosition() {
-        if (!sessionId || !engineAPI) return;
-        playerX += (targetX - playerX) * 0.3;
-        playerY += (targetY - playerY) * 0.3;
-        engineAPI.move(sessionId, playerX, playerY);
-    }
-    
-    function fetchOtherPlayers() {
-        if (!sessionId || !engineAPI) return;
-        const result = engineAPI.getPlayers();
-        if (result && !result.error) {
-            otherPlayers = result.filter(p => p.id !== sessionId);
+        
+        engineFrame.onload = () => {
+            setTimeout(() => {
+                try {
+                    engineAPI = engineFrame.contentWindow.GameEngine;
+                    if (engineAPI && engineAPI.ping()) {
+                        connectionReady = true;
+                        connectToEngine();
+                    } else {
+                        updateConnectionScreen('error', 'API движка не найден');
+                    }
+                } catch(e) {
+                    updateConnectionScreen('error', 'Ошибка доступа к движку');
+                }
+            }, 1000);
+        };
+        
+        document.getElementById('retryBtn').onclick = () => {
+            connectionFailed = false;
+            connectionReady = false;
+            updateConnectionScreen('connecting');
+            engineFrame.src = ENGINE_URL;
+            setTimeout(() => {
+                if (engineFrame.contentWindow.GameEngine) {
+                    connectionReady = true;
+                    connectToEngine();
+                }
+            }, 1000);
+        };
+        
+        function updateUI() {
+            document.getElementById('playerCount').innerHTML = Object.keys(players).length;
         }
-    }
-    
-    function updateUI() {
-        if (playerData) {
-            document.getElementById('playerName').innerText = playerData.name;
-            document.getElementById('goldAmount').innerText = playerData.gold;
-            document.getElementById('oreAmount').innerText = playerData.ore;
-            document.getElementById('seedAmount').innerText = playerData.seeds;
-            document.getElementById('crystalAmount').innerText = playerData.crystals || 12;
+        
+        function addChatMessage(playerName, text, isSystem = false) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const msgElement = document.createElement('div');
+            msgElement.className = 'chat-message' + (isSystem ? ' system' : '');
+            if (isSystem) {
+                msgElement.innerHTML = `📢 ${text}`;
+            } else {
+                msgElement.innerHTML = `<span class="name">${playerName}:</span> ${text}`;
+            }
+            messagesDiv.appendChild(msgElement);
+            msgElement.scrollIntoView({ behavior: 'smooth' });
+            while (messagesDiv.children.length > 100) messagesDiv.removeChild(messagesDiv.firstChild);
         }
-    }
-    
-    function mineResources() {
-        if (!playerData) return;
-        const goldGain = Math.floor(Math.random() * 40) + 15;
-        const oreGain = Math.floor(Math.random() * 20) + 8;
-        playerData.gold += goldGain;
-        playerData.ore += oreGain;
-        updateUI();
-        syncPlayerData();
         
-        const msg = document.createElement('div');
-        msg.style.position = 'fixed';
-        msg.style.bottom = '100px';
-        msg.style.left = '50%';
-        msg.style.transform = 'translateX(-50%)';
-        msg.style.background = '#ffaa44';
-        msg.style.color = '#2a2a1a';
-        msg.style.padding = '8px 16px';
-        msg.style.borderRadius = '40px';
-        msg.innerHTML = `+${goldGain}💰 +${oreGain}🪨`;
-        document.body.appendChild(msg);
-        setTimeout(() => msg.remove(), 1500);
-    }
-    
-    function drawGame() {
-        if (!ctx) return;
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (text && connected && engineAPI) {
+                engineAPI.sendMessage(playerId, text);
+                input.value = '';
+            }
+        }
         
-        const grad = ctx.createLinearGradient(0, 0, 0, 400);
-        grad.addColorStop(0, "#527a3b");
-        grad.addColorStop(1, "#3a5a2a");
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // ============ 3D ИГРА С АНИМАЦИЕЙ НОГ ============
+        let gameStarted = false;
+        let playerX = 0, playerZ = 0;
+        let playerRotation = 0;
+        let animationTime = 0;
+        let legSwing = 0;
+        let isWalking = false;
         
-        ctx.fillStyle = "#735e3a";
-        ctx.fillRect(0, 380, canvas.width, 170);
+        // Камера: true = 1 лицо, false = 3 лицо
+        let firstPersonMode = false;
         
-        ctx.fillStyle = "#5d8c48";
-        for(let i = 0; i < 30; i++) ctx.fillRect(i * 35, 370, 8, 15);
+        // Управление
+        const keys = { w: false, s: false, a: false, d: false };
+        let moveSpeed = 4;
+        let cameraAngleX = 0;
+        let cameraAngleY = 0.5;
+        let isDragging = false;
+        let lastMouseX = 0, lastMouseY = 0;
         
-        otherPlayers.forEach(p => {
-            ctx.fillStyle = "#88aaff";
-            ctx.beginPath();
-            ctx.arc(p.x, p.y - 18, 14, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "white";
-            ctx.font = "bold 10px monospace";
-            ctx.fillText(p.name, p.x - 20, p.y - 28);
+        // Three.js
+        const canvas = document.getElementById('gameCanvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 40, 80);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        const renderer = new THREE.WebGLRenderer({ canvas });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        
+        // Освещение
+        const ambientLight = new THREE.AmbientLight(0x404060);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(5, 10, 7);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+        
+        const fillLight = new THREE.PointLight(0x4466cc, 0.3);
+        fillLight.position.set(-2, 3, -4);
+        scene.add(fillLight);
+        
+        // Земля
+        const groundGeometry = new THREE.PlaneGeometry(60, 60);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.7 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.5;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        const gridHelper = new THREE.GridHelper(60, 30, 0x88ff88, 0x2e7d32);
+        gridHelper.position.y = -0.45;
+        scene.add(gridHelper);
+        
+        // Деревья
+        function createTree(x, z) {
+            const group = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 1.5), new THREE.MeshStandardMaterial({ color: 0x8B5A2B }));
+            trunk.castShadow = true;
+            trunk.position.y = 0.75;
+            group.add(trunk);
+            
+            const foliage1 = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x2e7d32 }));
+            foliage1.castShadow = true;
+            foliage1.position.y = 1.6;
+            group.add(foliage1);
+            
+            const foliage2 = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1, 8), new THREE.MeshStandardMaterial({ color: 0x3c8c40 }));
+            foliage2.castShadow = true;
+            foliage2.position.y = 2.3;
+            group.add(foliage2);
+            
+            group.position.set(x, -0.5, z);
+            scene.add(group);
+        }
+        
+        for (let i = -25; i <= 25; i += 5) {
+            for (let j = -25; j <= 25; j += 5) {
+                if (Math.abs(i) < 5 && Math.abs(j) < 5) continue;
+                if (Math.random() > 0.65) createTree(i + (Math.random() - 0.5) * 2, j + (Math.random() - 0.5) * 2);
+            }
+        }
+        
+        // Цветы
+        for (let i = 0; i < 300; i++) {
+            const flower = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6), new THREE.MeshStandardMaterial({ color: 0xff69b4 }));
+            const x = (Math.random() - 0.5) * 50;
+            const z = (Math.random() - 0.5) * 50;
+            if (Math.abs(x) < 6 && Math.abs(z) < 6) continue;
+            flower.position.set(x, -0.45, z);
+            scene.add(flower);
+        }
+        
+        // СОЗДАНИЕ ПЕРСОНАЖА С АНИМАЦИЕЙ НОГ
+        const playerGroup = new THREE.Group();
+        
+        // Тело
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x4caf50 });
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.45), bodyMat);
+        body.castShadow = true;
+        body.position.y = 0.45;
+        playerGroup.add(body);
+        
+        // Голова
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xffccaa });
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), headMat);
+        head.castShadow = true;
+        head.position.y = 0.95;
+        playerGroup.add(head);
+        
+        // Глаза
+        const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+        const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16), eyeMat);
+        leftEye.position.set(-0.15, 1.05, 0.38);
+        playerGroup.add(leftEye);
+        
+        const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16), eyeMat);
+        rightEye.position.set(0.15, 1.05, 0.38);
+        playerGroup.add(rightEye);
+        
+        const pupilMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        const leftPupil = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16), pupilMat);
+        leftPupil.position.set(-0.15, 1.03, 0.48);
+        playerGroup.add(leftPupil);
+        
+        const rightPupil = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16), pupilMat);
+        rightPupil.position.set(0.15, 1.03, 0.48);
+        playerGroup.add(rightPupil);
+        
+        // Шляпа
+        const hatMat = new THREE.MeshStandardMaterial({ color: 0xcd7f32 });
+        const hatBase = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.15, 8), hatMat);
+        hatBase.position.y = 1.2;
+        playerGroup.add(hatBase);
+        
+        const hatTop = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.35, 0.25, 8), hatMat);
+        hatTop.position.y = 1.35;
+        playerGroup.add(hatTop);
+        
+        // РУКИ (с анимацией)
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x4caf50 });
+        const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.28), armMat);
+        leftArm.position.set(-0.5, 0.75, 0);
+        leftArm.castShadow = true;
+        playerGroup.add(leftArm);
+        
+        const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.28), armMat);
+        rightArm.position.set(0.5, 0.75, 0);
+        rightArm.castShadow = true;
+        playerGroup.add(rightArm);
+        
+        // НОГИ (с анимацией - отдельные объекты для анимации)
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x3d8c40 });
+        const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.32), legMat);
+        leftLeg.position.set(-0.22, 0.12, 0);
+        leftLeg.castShadow = true;
+        playerGroup.add(leftLeg);
+        
+        const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.65, 0.32), legMat);
+        rightLeg.position.set(0.22, 0.12, 0);
+        rightLeg.castShadow = true;
+        playerGroup.add(rightLeg);
+        
+        playerGroup.position.y = -0.2;
+        scene.add(playerGroup);
+        
+        // Другие игроки
+        const otherPlayers = {};
+        
+        function createOtherPlayer(id, name, color) {
+            const group = new THREE.Group();
+            
+            const pBody = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.85, 0.45), new THREE.MeshStandardMaterial({ color: color || '#2196f3' }));
+            pBody.castShadow = true;
+            pBody.position.y = 0.45;
+            group.add(pBody);
+            
+            const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
+            pHead.castShadow = true;
+            pHead.position.y = 0.95;
+            group.add(pHead);
+            
+            group.position.y = -0.2;
+            scene.add(group);
+            return group;
+        }
+        
+        // Управление
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'w': case 'ArrowUp': keys.w = true; break;
+                case 's': case 'ArrowDown': keys.s = true; break;
+                case 'a': case 'ArrowLeft': keys.a = true; break;
+                case 'd': case 'ArrowRight': keys.d = true; break;
+                case 'c': case 'C': toggleCamera(); break;
+            }
         });
         
-        ctx.fillStyle = "#ffaa66";
-        ctx.beginPath();
-        ctx.arc(playerX, playerY - 18, 16, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "#3a2a1a";
-        ctx.fillRect(playerX - 6, playerY - 15, 12, 10);
-        ctx.fillStyle = "white";
-        ctx.font = "bold 12px monospace";
-        ctx.fillText(playerData?.name || "Вы", playerX - 20, playerY - 32);
-        
-        ctx.fillStyle = "#aa8866";
-        ctx.fillRect(playerX + 12, playerY - 22, 18, 5);
-        
-        requestAnimationFrame(drawGame);
-    }
-    
-    window.retryConnect = function() {
-        const errorMessage = document.getElementById('errorMessage');
-        const retryBtn = document.getElementById('retryButton');
-        document.getElementById('loadingStatus').innerHTML = "🔄 Повторное подключение...";
-        errorMessage.classList.add('hidden');
-        retryBtn.classList.add('hidden');
-        
-        if (engineFrame) {
-            engineFrame.remove();
-            engineFrame = null;
-            engineAPI = null;
-        }
-        startGame();
-    };
-    
-    document.querySelectorAll('.dpad-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const dir = btn.dataset.dir;
-            const speed = 18;
-            if(dir === 'up') targetY = Math.max(70, targetY - speed);
-            if(dir === 'down') targetY = Math.min(530, targetY + speed);
-            if(dir === 'left') targetX = Math.max(70, targetX - speed);
-            if(dir === 'right') targetX = Math.min(830, targetX + speed);
+        document.addEventListener('keyup', (e) => {
+            switch(e.key) {
+                case 'w': case 'ArrowUp': keys.w = false; break;
+                case 's': case 'ArrowDown': keys.s = false; break;
+                case 'a': case 'ArrowLeft': keys.a = false; break;
+                case 'd': case 'ArrowRight': keys.d = false; break;
+            }
         });
-        btn.addEventListener('touchstart', (e) => {
+        
+        // Джойстик
+        let joystickActive = false;
+        let joystickVector = { x: 0, y: 0 };
+        const joystickBase = document.getElementById('joystickBase');
+        const joystickThumb = document.getElementById('joystickThumb');
+        
+        function handleJoystickStart(e) {
+            joystickActive = true;
+            handleJoystickMove(e);
+        }
+        
+        function handleJoystickMove(e) {
+            if (!joystickActive) return;
             e.preventDefault();
-            const dir = btn.dataset.dir;
-            const speed = 18;
-            if(dir === 'up') targetY = Math.max(70, targetY - speed);
-            if(dir === 'down') targetY = Math.min(530, targetY + speed);
-            if(dir === 'left') targetX = Math.max(70, targetX - speed);
-            if(dir === 'right') targetX = Math.min(830, targetX + speed);
+            const rect = joystickBase.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            let x = (e.touches ? e.touches[0].clientX : e.clientX) - centerX;
+            let y = (e.touches ? e.touches[0].clientY : e.clientY) - centerY;
+            const distance = Math.min(Math.sqrt(x*x + y*y), 50);
+            const angle = Math.atan2(y, x);
+            const thumbX = Math.cos(angle) * distance;
+            const thumbY = Math.sin(angle) * distance;
+            joystickThumb.style.transform = `translate(calc(-50% + ${thumbX}px), calc(-50% + ${thumbY}px))`;
+            joystickVector.x = (thumbX / 50) * 2;
+            joystickVector.y = (thumbY / 50) * 2;
+        }
+        
+        function handleJoystickEnd() {
+            joystickActive = false;
+            joystickThumb.style.transform = 'translate(-50%, -50%)';
+            joystickVector = { x: 0, y: 0 };
+        }
+        
+        joystickBase.addEventListener('touchstart', handleJoystickStart);
+        joystickBase.addEventListener('touchmove', handleJoystickMove);
+        joystickBase.addEventListener('touchend', handleJoystickEnd);
+        
+        // Управление камерой мышью
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
         });
-    });
-    
-    document.getElementById('mineBtn').onclick = () => mineResources();
-    document.getElementById('interactBtn').onclick = () => {
-        syncPlayerData();
-        const msg = document.createElement('div');
-        msg.style.position = 'fixed';
-        msg.style.bottom = '100px';
-        msg.style.left = '50%';
-        msg.style.transform = 'translateX(-50%)';
-        msg.style.background = '#44aaff';
-        msg.style.color = 'white';
-        msg.style.padding = '8px 16px';
-        msg.style.borderRadius = '40px';
-        msg.innerHTML = "🤝 Синхронизация...";
-        document.body.appendChild(msg);
-        setTimeout(() => msg.remove(), 1000);
-    };
-    
-    window.addEventListener('beforeunload', () => {
-        if (sessionId && engineAPI) engineAPI.leave(sessionId);
-    });
-    
-    startGame();
-</script>
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - lastMouseX;
+                const deltaY = e.clientY - lastMouseY;
+                cameraAngleX += deltaX * 0.008;
+                cameraAngleY += deltaY * 0.008;
+                cameraAngleY = Math.max(0.1, Math.min(1.2, cameraAngleY));
+                lastMouseX = e.clientX;
+                lastMouseY = e.clientY;
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+        
+        canvas.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            lastMouseX = e.touches[0].clientX;
+            lastMouseY = e.touches[0].clientY;
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                const deltaX = e.touches[0].clientX - lastMouseX;
+                const deltaY = e.touches[0].clientY - lastMouseY;
+                cameraAngleX += deltaX * 0.008;
+                cameraAngleY += deltaY * 0.008;
+                cameraAngleY = Math.max(0.1, Math.min(1.2, cameraAngleY));
+                lastMouseX = e.touches[0].clientX;
+                lastMouseY = e.touches[0].clientY;
+            }
+        });
+        
+        canvas.addEventListener('touchend', () => { isDragging = false; });
+        
+        // Переключение камеры
+        function toggleCamera() {
+            firstPersonMode = !firstPersonMode;
+            const btn = document.getElementById('cameraBtn');
+            btn.innerHTML = firstPersonMode ? '👁️ 1-е лицо' : '🎥 3-е лицо';
+            
+            if (firstPersonMode) {
+                // В 1-м лице скрываем модель игрока
+                playerGroup.visible = false;
+            } else {
+                playerGroup.visible = true;
+            }
+        }
+        
+        document.getElementById('cameraBtn').onclick = toggleCamera;
+        
+        let lastUpdateTime = 0;
+        
+        function updatePositionServer() {
+            if (connected && engineAPI) {
+                engineAPI.updatePosition(playerId, { x: playerX, y: 0, z: playerZ }, { y: playerRotation }, { walking: isWalking, legSwing: legSwing });
+                document.getElementById('position').innerHTML = `${playerX.toFixed(1)}, 0, ${playerZ.toFixed(1)}`;
+            }
+        }
+        
+        let lastPosUpdate = 0;
+        
+        // АНИМАЦИЯ И ДВИЖЕНИЕ
+        function startGame() {
+            if (gameStarted) return;
+            gameStarted = true;
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                if (!gameStarted) return;
+                
+                const deltaTime = 0.016;
+                animationTime += deltaTime;
+                
+                // Движение
+                let moveX = 0, moveZ = 0;
+                
+                if (keys.w || joystickVector.y < -0.2) moveZ -= 1;
+                if (keys.s || joystickVector.y > 0.2) moveZ += 1;
+                if (keys.a || joystickVector.x < -0.2) moveX -= 1;
+                if (keys.d || joystickVector.x > 0.2) moveX += 1;
+                
+                isWalking = (moveX !== 0 || moveZ !== 0);
+                
+                if (isWalking) {
+                    const len = Math.sqrt(moveX*moveX + moveZ*moveZ);
+                    moveX /= len;
+                    moveZ /= len;
+                    
+                    playerX += moveX * moveSpeed * deltaTime;
+                    playerZ += moveZ * moveSpeed * deltaTime;
+                    
+                    playerX = Math.max(-28, Math.min(28, playerX));
+                    playerZ = Math.max(-28, Math.min(28, playerZ));
+                    
+                    playerRotation = Math.atan2(moveX, moveZ);
+                    playerGroup.rotation.y = playerRotation;
+                    
+                    // АНИМАЦИЯ НОГ И РУК
+                    legSwing = Math.sin(animationTime * 12) * 0.6;
+                    leftLeg.rotation.x = legSwing;
+                    rightLeg.rotation.x = -legSwing;
+                    leftArm.rotation.z = legSwing * 0.8;
+                    rightArm.rotation.z = -legSwing * 0.8;
+                    
+                    // Подпрыгивание при ходьбе
+                    playerGroup.position.y = -0.2 + Math.abs(Math.sin(animationTime * 12)) * 0.03;
+                } else {
+                    // Возврат в исходное положение
+                    leftLeg.rotation.x = 0;
+                    rightLeg.rotation.x = 0;
+                    leftArm.rotation.z = 0;
+                    rightArm.rotation.z = 0;
+                    playerGroup.position.y = -0.2;
+                    legSwing = 0;
+                }
+                
+                playerGroup.position.x = playerX;
+                playerGroup.position.z = playerZ;
+                
+                // Обновление позиции на сервере
+                if (Date.now() - lastPosUpdate > 50) {
+                    updatePositionServer();
+                    lastPosUpdate = Date.now();
+                }
+                
+                // Обновление других игроков
+                Object.keys(players).forEach(id => {
+                    if (id !== playerId && players[id]) {
+                        if (!otherPlayers[id]) {
+                            otherPlayers[id] = createOtherPlayer(id, players[id].name, players[id].color);
+                        }
+                        const pos = players[id].position;
+                        if (pos) {
+                            otherPlayers[id].position.x = pos.x;
+                            otherPlayers[id].position.z = pos.z;
+                        }
+                    }
+                });
+                
+                // Удаление отключившихся игроков
+                Object.keys(otherPlayers).forEach(id => {
+                    if (!players[id]) {
+                        scene.remove(otherPlayers[id]);
+                        delete otherPlayers[id];
+                    }
+                });
+                
+                // КАМЕРА
+                if (firstPersonMode) {
+                    // 1-е лицо: камера на уровне глаз персонажа
+                    camera.position.x = playerX;
+                    camera.position.y = 0.7;
+                    camera.position.z = playerZ;
+                    camera.rotation.order = 'YXZ';
+                    camera.rotation.y = cameraAngleX;
+                    camera.rotation.x = cameraAngleY - 0.3;
+                } else {
+                    // 3-е лицо: камера сзади
+                    const camDistance = 5;
+                    const camHeight = 2.5;
+                    const targetX = playerX + Math.sin(cameraAngleX) * camDistance;
+                    const targetZ = playerZ + Math.cos(cameraAngleX) * camDistance;
+                    camera.position.x = targetX;
+                    camera.position.y = camHeight + cameraAngleY * 1.5;
+                    camera.position.z = targetZ;
+                    camera.lookAt(playerX, 0.5, playerZ);
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+        }
+        
+        // Чат UI
+        const chatContainer = document.getElementById('chatContainer');
+        const chatHeader = document.getElementById('chatHeader');
+        let chatCollapsed = false;
+        
+        chatHeader.onclick = () => {
+            chatCollapsed = !chatCollapsed;
+            chatContainer.classList.toggle('collapsed', chatCollapsed);
+        };
+        
+        document.getElementById('chatSend').onclick = sendChatMessage;
+        document.getElementById('chatInput').onkeypress = (e) => { if (e.key === 'Enter') sendChatMessage(); };
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Таймаут подключения
+        setTimeout(() => {
+            if (!connected && !connectionFailed) {
+                updateConnectionScreen('error', 'Превышено время ожидания подключения');
+            }
+        }, 15000);
+    </script>
 </body>
-</html>
+    </html>
