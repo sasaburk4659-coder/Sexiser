@@ -3,19 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>YouTube Stream Manager - Загрузка видео</title>
+    <title>YouTube Stream Manager Pro - API Ready</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
             background: var(--tg-theme-bg-color, #0f0c29);
@@ -23,19 +18,13 @@
             min-height: 100vh;
             padding: 16px;
         }
-
         :root {
             --tg-bg: var(--tg-theme-bg-color, #0f0c29);
             --tg-text: var(--tg-theme-text-color, #ffffff);
             --tg-hint: var(--tg-theme-hint-color, #aaaaaa);
             --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1f1f2f);
         }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
+        .container { max-width: 600px; margin: 0 auto; }
         .header {
             text-align: center;
             margin-bottom: 20px;
@@ -44,15 +33,7 @@
             border-radius: 20px;
             color: white;
         }
-
-        .header h1 {
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
+        .header h1 { font-size: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .card {
             background: var(--tg-secondary-bg, rgba(255,255,255,0.1));
             backdrop-filter: blur(10px);
@@ -61,7 +42,6 @@
             margin-bottom: 16px;
             border: 1px solid rgba(255,255,255,0.1);
         }
-
         .card-title {
             font-size: 1.1rem;
             font-weight: 600;
@@ -72,22 +52,14 @@
             border-bottom: 2px solid rgba(255,255,255,0.1);
             padding-bottom: 10px;
         }
-
-        .card-title i {
-            color: #ff0000;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
+        .card-title i { color: #ff0000; }
+        .input-group { margin-bottom: 16px; }
         .input-group label {
             display: block;
             font-size: 0.8rem;
             margin-bottom: 6px;
             color: var(--tg-hint);
         }
-
         .input-group input, .input-group textarea {
             width: 100%;
             padding: 12px;
@@ -97,12 +69,7 @@
             color: var(--tg-text, white);
             font-size: 0.9rem;
         }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #ff0000;
-        }
-
+        .input-group input:focus { outline: none; border-color: #ff0000; }
         .btn {
             padding: 12px 20px;
             border: none;
@@ -118,34 +85,11 @@
             width: 100%;
             margin-bottom: 8px;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #ff0000, #ff6b6b);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #00c853, #69f0ae);
-            color: #1a1a2e;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #d50000, #ff1744);
-            color: white;
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
+        .btn-primary { background: linear-gradient(135deg, #ff0000, #ff6b6b); color: white; }
+        .btn-success { background: linear-gradient(135deg, #00c853, #69f0ae); color: #1a1a2e; }
+        .btn-danger { background: linear-gradient(135deg, #d50000, #ff1744); color: white; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -155,18 +99,8 @@
             font-size: 0.7rem;
             margin-left: auto;
         }
-
-        .status-badge.live {
-            background: rgba(255,0,0,0.2);
-            color: #ff6b6b;
-            border: 1px solid #ff0000;
-        }
-
-        .status-badge.offline {
-            background: rgba(128,128,128,0.2);
-            color: #888;
-        }
-
+        .status-badge.live { background: rgba(255,0,0,0.2); color: #ff6b6b; border: 1px solid #ff0000; }
+        .status-badge.offline { background: rgba(128,128,128,0.2); color: #888; }
         .file-upload {
             border: 2px dashed rgba(255,255,255,0.3);
             border-radius: 12px;
@@ -175,22 +109,9 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
-        .file-upload:hover {
-            border-color: #ff0000;
-            background: rgba(255,0,0,0.1);
-        }
-
-        .file-upload input {
-            display: none;
-        }
-
-        .video-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 12px;
-        }
-
+        .file-upload:hover { border-color: #ff0000; background: rgba(255,0,0,0.1); }
+        .file-upload input { display: none; }
+        .video-list { max-height: 300px; overflow-y: auto; margin-top: 12px; }
         .video-item {
             display: flex;
             justify-content: space-between;
@@ -201,51 +122,13 @@
             margin-bottom: 8px;
             animation: slideIn 0.3s ease;
         }
-
-        .video-item button {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            margin-left: 5px;
-        }
-
-        .btn-pin {
-            background: #ff0000;
-            color: white;
-        }
-
-        .btn-delete {
-            background: #666;
-            color: white;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 12px;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 10px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-        }
-
-        .stat-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #ff0000;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            opacity: 0.7;
-        }
-
+        .video-item button { padding: 6px 12px; border: none; border-radius: 8px; cursor: pointer; margin-left: 5px; }
+        .btn-pin { background: #ff0000; color: white; }
+        .btn-delete { background: #666; color: white; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+        .stat-card { text-align: center; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; }
+        .stat-value { font-size: 1.3rem; font-weight: 700; color: #ff0000; }
+        .stat-label { font-size: 0.7rem; opacity: 0.7; }
         .logs-area {
             background: rgba(0,0,0,0.3);
             border-radius: 12px;
@@ -255,16 +138,11 @@
             font-family: monospace;
             font-size: 0.7rem;
         }
-
-        .log-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
+        .log-entry { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .log-entry.info { color: #6ab2f2; }
         .log-entry.success { color: #69f0ae; }
         .log-entry.error { color: #ff6b6b; }
-
+        .log-entry.warning { color: #ff9e40; }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -278,42 +156,34 @@
             z-index: 1000;
             animation: slideUp 0.3s ease;
         }
-
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes slideUp {
-            from {
-                transform: translateX(-50%) translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
-
-        .video-preview {
-            margin-top: 12px;
-            display: none;
+        .api-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-family: monospace;
+            z-index: 1000;
         }
-
-        .video-preview video {
-            width: 100%;
-            border-radius: 12px;
-            max-height: 200px;
-        }
+        .api-status.active { background: #00c853; color: white; }
+        .api-status.waiting { background: #ff9800; color: white; }
     </style>
 </head>
 <body>
+    <div class="api-status waiting" id="api-status">
+        <i class="fas fa-plug"></i> API: Ожидание
+    </div>
+    
     <div class="container">
         <div class="header">
             <h1><i class="fab fa-youtube"></i> Stream Manager Pro</h1>
@@ -377,8 +247,8 @@
                 <p style="font-size: 0.7rem; opacity: 0.6;">Поддерживаются: MP4, AVI, MOV, MKV</p>
                 <input type="file" id="video-file" accept="video/*" onchange="uploadVideo(this)">
             </div>
-            <div class="video-preview" id="video-preview">
-                <video id="preview-video" controls></video>
+            <div class="video-preview" id="video-preview" style="display: none;">
+                <video id="preview-video" controls style="width: 100%; border-radius: 12px; max-height: 200px;"></video>
             </div>
         </div>
 
@@ -436,16 +306,181 @@
     </div>
 
     <script>
+        // ==================== Telegram WebApp ====================
         let tg = window.Telegram.WebApp;
         tg.expand();
         
-        // Get user info
         const user = tg.initDataUnsafe?.user;
         
-        // Video storage
+        // ==================== API для внешнего управления ====================
+        // Хранилище команд от внешнего скрипта
+        let externalCommandQueue = [];
+        let lastCommandResponse = null;
+        let apiPollingInterval = null;
+        
+        // Функция для получения текущего состояния (API)
+        function getAPIState() {
+            return {
+                status: document.getElementById('live-status').classList.contains('live') ? 'live' : 'offline',
+                stream_time: document.getElementById('stream-time').innerText,
+                viewers: parseInt(document.getElementById('viewers').innerText) || 0,
+                videos_count: videos.length,
+                videos_list: videos.map(v => ({ name: v.name, size: v.size, id: v.id })),
+                stream_title: document.getElementById('stream-title').value,
+                stream_key_set: document.getElementById('stream-key').value.length > 0,
+                last_command: lastCommandResponse
+            };
+        }
+        
+        // Функция для выполнения команд из API
+        function executeCommand(command, params = {}) {
+            addLog('info', `📨 API команда: ${command}`);
+            
+            let result = { success: false, message: 'Unknown command' };
+            
+            switch(command) {
+                case 'start':
+                    if (videos.length > 0) {
+                        startStream();
+                        result = { success: true, message: 'Stream started' };
+                    } else {
+                        result = { success: false, message: 'No videos uploaded' };
+                    }
+                    break;
+                    
+                case 'stop':
+                    stopStream();
+                    result = { success: true, message: 'Stream stopped' };
+                    break;
+                    
+                case 'status':
+                    result = { success: true, message: 'Status retrieved', data: getAPIState() };
+                    break;
+                    
+                case 'upload_video':
+                    // Для загрузки видео через API нужно передавать base64
+                    if (params.video_data && params.video_name) {
+                        addVideoFromBase64(params.video_name, params.video_data);
+                        result = { success: true, message: `Video ${params.video_name} uploaded` };
+                    } else {
+                        result = { success: false, message: 'No video data provided' };
+                    }
+                    break;
+                    
+                case 'notify':
+                    sendNotification();
+                    result = { success: true, message: 'Notification sent' };
+                    break;
+                    
+                case 'set_stream_key':
+                    if (params.key) {
+                        document.getElementById('stream-key').value = params.key;
+                        localStorage.setItem('stream_key', params.key);
+                        result = { success: true, message: 'Stream key updated' };
+                    }
+                    break;
+                    
+                case 'set_stream_title':
+                    if (params.title) {
+                        document.getElementById('stream-title').value = params.title;
+                        localStorage.setItem('stream_title', params.title);
+                        result = { success: true, message: 'Stream title updated' };
+                    }
+                    break;
+                    
+                case 'delete_video':
+                    if (params.video_id) {
+                        const videoToDelete = videos.find(v => v.id == params.video_id);
+                        if (videoToDelete) {
+                            deleteVideoById(params.video_id);
+                            result = { success: true, message: `Video ${videoToDelete.name} deleted` };
+                        } else {
+                            result = { success: false, message: 'Video not found' };
+                        }
+                    }
+                    break;
+                    
+                case 'clear_videos':
+                    videos = [];
+                    saveVideos();
+                    renderVideoList();
+                    result = { success: true, message: 'All videos cleared' };
+                    break;
+                    
+                default:
+                    result = { success: false, message: `Unknown command: ${command}` };
+            }
+            
+            lastCommandResponse = { command, result, timestamp: new Date().toISOString() };
+            addLog('success', `✅ Команда "${command}" выполнена: ${result.message}`);
+            
+            return result;
+        }
+        
+        // Функция для получения команд из URL (GET параметры)
+        function checkURLCommands() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const command = urlParams.get('command');
+            
+            if (command) {
+                const params = {};
+                for (let [key, value] of urlParams.entries()) {
+                    if (key !== 'command') {
+                        params[key] = value;
+                    }
+                }
+                const result = executeCommand(command, params);
+                
+                // Обновляем URL, убирая параметры
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Возвращаем результат в ответе для внешнего скрипта
+                return result;
+            }
+            return null;
+        }
+        
+        // Функция для получения команд через localStorage (для внешнего скрипта)
+        function checkLocalStorageCommands() {
+            const commandKey = 'stream_manager_command';
+            const commandData = localStorage.getItem(commandKey);
+            
+            if (commandData) {
+                try {
+                    const { command, params, requestId } = JSON.parse(commandData);
+                    const result = executeCommand(command, params || {});
+                    
+                    // Сохраняем результат
+                    localStorage.setItem(`stream_manager_response_${requestId}`, JSON.stringify(result));
+                    
+                    // Удаляем команду
+                    localStorage.removeItem(commandKey);
+                    
+                    // Обновляем статус API
+                    document.getElementById('api-status').className = 'api-status active';
+                    document.getElementById('api-status').innerHTML = '<i class="fas fa-check"></i> API: OK';
+                    setTimeout(() => {
+                        document.getElementById('api-status').className = 'api-status waiting';
+                        document.getElementById('api-status').innerHTML = '<i class="fas fa-plug"></i> API: Ожидание';
+                    }, 2000);
+                    
+                } catch(e) {
+                    console.error('Command error:', e);
+                }
+            }
+        }
+        
+        // Периодическая проверка команд
+        setInterval(() => {
+            checkLocalStorageCommands();
+        }, 1000);
+        
+        // Также проверяем URL при загрузке
+        checkURLCommands();
+        
+        // ==================== Видео менеджер ====================
         let videos = [];
         
-        // Load saved videos
         function loadVideos() {
             const saved = localStorage.getItem('stream_videos');
             if (saved) {
@@ -456,25 +491,21 @@
             }
         }
         
-        // Save videos
         function saveVideos() {
             localStorage.setItem('stream_videos', JSON.stringify(videos));
             updateVideoCount();
             updateStorageInfo();
         }
         
-        // Upload video
         function uploadVideo(input) {
             const file = input.files[0];
             if (!file) return;
             
-            // Check file type
             if (!file.type.startsWith('video/')) {
                 showToast('❌ Пожалуйста, выберите видео файл');
                 return;
             }
             
-            // Check file size (max 100MB)
             if (file.size > 100 * 1024 * 1024) {
                 showToast('❌ Файл слишком большой! Максимум 100MB');
                 return;
@@ -491,8 +522,7 @@
                     data: e.target.result,
                     size: file.size,
                     type: file.type,
-                    uploaded: new Date().toISOString(),
-                    duration: 0
+                    uploaded: new Date().toISOString()
                 };
                 
                 videos.unshift(videoData);
@@ -502,19 +532,31 @@
                 showToast(`✅ Видео "${file.name}" загружено!`);
                 addLog('success', `Видео загружено: ${file.name}`);
                 
-                // Preview video
                 const preview = document.getElementById('video-preview');
                 const previewVideo = document.getElementById('preview-video');
                 preview.style.display = 'block';
                 previewVideo.src = videoData.data;
                 
-                // Clear input
                 input.value = '';
             };
             reader.readAsDataURL(file);
         }
         
-        // Render video list
+        function addVideoFromBase64(name, base64Data) {
+            const videoData = {
+                id: Date.now(),
+                name: name,
+                data: base64Data,
+                size: Math.round(base64Data.length * 0.75),
+                type: 'video/mp4',
+                uploaded: new Date().toISOString()
+            };
+            videos.unshift(videoData);
+            saveVideos();
+            renderVideoList();
+            addLog('success', `Видео загружено через API: ${name}`);
+        }
+        
         function renderVideoList() {
             const container = document.getElementById('video-list');
             
@@ -523,7 +565,7 @@
                     <div style="text-align: center; padding: 30px; opacity: 0.5;">
                         <i class="fas fa-film" style="font-size: 2rem;"></i>
                         <p style="margin-top: 10px;">Нет загруженных видео</p>
-                        <p style="font-size: 0.7rem;">Нажмите на область выше, чтобы загрузить</p>
+                        <p style="font-size: 0.7rem;">Нажмите выше, чтобы загрузить</p>
                     </div>
                 `;
                 return;
@@ -555,7 +597,6 @@
             `).join('');
         }
         
-        // Play video
         function playVideo(videoId) {
             const video = videos.find(v => v.id === videoId);
             if (video) {
@@ -565,28 +606,20 @@
                 previewVideo.src = video.data;
                 previewVideo.play();
                 addLog('info', `Воспроизведение: ${video.name}`);
-                showToast(`🎬 Воспроизведение: ${video.name}`);
             }
         }
         
-        // Pin video (send to Telegram)
         function pinVideo(videoId) {
             const video = videos.find(v => v.id === videoId);
             if (video) {
                 addLog('success', `Видео "${video.name}" закреплено в чате`);
                 showToast(`📌 "${video.name}" закреплено!`);
-                
-                // Send to Telegram
                 if (tg && tg.sendData) {
-                    tg.sendData(JSON.stringify({
-                        action: 'pin_video',
-                        video: video.name
-                    }));
+                    tg.sendData(JSON.stringify({ action: 'pin_video', video: video.name }));
                 }
             }
         }
         
-        // Delete video
         function deleteVideo(videoId) {
             if (confirm('Удалить это видео?')) {
                 const video = videos.find(v => v.id === videoId);
@@ -595,8 +628,6 @@
                 renderVideoList();
                 addLog('warning', `Видео удалено: ${video.name}`);
                 showToast(`🗑️ Видео удалено`);
-                
-                // Clear preview if it was playing
                 const preview = document.getElementById('video-preview');
                 if (preview.style.display === 'block') {
                     preview.style.display = 'none';
@@ -605,12 +636,16 @@
             }
         }
         
-        // Update video count in stats
+        function deleteVideoById(videoId) {
+            videos = videos.filter(v => v.id != videoId);
+            saveVideos();
+            renderVideoList();
+        }
+        
         function updateVideoCount() {
             document.getElementById('videos-count').textContent = videos.length;
         }
         
-        // Update storage info
         function updateStorageInfo() {
             const totalSize = videos.reduce((sum, v) => sum + v.size, 0);
             const storageInfo = document.getElementById('storage-info');
@@ -619,7 +654,10 @@
             }
         }
         
-        // Start stream
+        // ==================== Управление стримом ====================
+        let streamTimer = null;
+        let streamSeconds = 0;
+        
         function startStream() {
             const streamKey = document.getElementById('stream-key').value;
             const streamTitle = document.getElementById('stream-title').value;
@@ -627,13 +665,13 @@
             if (!streamKey) {
                 showToast('❌ Введите Stream Key!');
                 addLog('error', 'Stream Key не введен');
-                return;
+                return false;
             }
             
             if (videos.length === 0) {
                 showToast('❌ Загрузите хотя бы одно видео!');
                 addLog('error', 'Нет видео для стрима');
-                return;
+                return false;
             }
             
             document.getElementById('live-status').className = 'status-badge live';
@@ -642,15 +680,19 @@
             addLog('success', `🚀 Стрим запущен! Название: ${streamTitle || 'Без названия'}`);
             showToast('🎬 Стрим запущен!');
             
-            // Save settings
             localStorage.setItem('stream_key', streamKey);
             localStorage.setItem('stream_title', streamTitle);
             
-            // Start timer
             startStreamTimer();
+            
+            // Оповещаем внешний скрипт
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({ action: 'stream_started', title: streamTitle }));
+            }
+            
+            return true;
         }
         
-        // Stop stream
         function stopStream() {
             document.getElementById('live-status').className = 'status-badge offline';
             document.getElementById('live-status').innerHTML = '<i class="fas fa-circle"></i> OFFLINE';
@@ -659,11 +701,13 @@
             showToast('⏹️ Стрим остановлен');
             
             stopStreamTimer();
+            
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({ action: 'stream_stopped' }));
+            }
+            
+            return true;
         }
-        
-        // Stream timer
-        let streamTimer = null;
-        let streamSeconds = 0;
         
         function startStreamTimer() {
             streamSeconds = 0;
@@ -685,20 +729,14 @@
             }
         }
         
-        // Send notification
         function sendNotification() {
             addLog('info', '🔔 Уведомление отправлено зрителям');
             showToast('🔔 Уведомление отправлено!');
-            
             if (tg && tg.sendData) {
-                tg.sendData(JSON.stringify({
-                    action: 'notification',
-                    message: 'Стрим начался! Присоединяйтесь!'
-                }));
+                tg.sendData(JSON.stringify({ action: 'notification', message: 'Стрим начался! Присоединяйтесь!' }));
             }
         }
         
-        // Open YouTube
         function openYouTube() {
             const url = document.getElementById('stream-url').value;
             if (url) {
@@ -708,7 +746,7 @@
             }
         }
         
-        // Add log
+        // ==================== Логи и уведомления ====================
         function addLog(level, message) {
             const logsArea = document.getElementById('logs-area');
             const timestamp = new Date().toLocaleTimeString();
@@ -718,13 +756,11 @@
             logsArea.appendChild(logEntry);
             logsArea.scrollTop = logsArea.scrollHeight;
             
-            // Keep last 50 logs
             while (logsArea.children.length > 50) {
                 logsArea.removeChild(logsArea.firstChild);
             }
         }
         
-        // Show toast
         function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -733,7 +769,7 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        // Load saved stream key
+        // ==================== Загрузка сохраненных данных ====================
         function loadSavedSettings() {
             const savedKey = localStorage.getItem('stream_key');
             const savedTitle = localStorage.getItem('stream_title');
@@ -744,12 +780,11 @@
             if (savedUrl) document.getElementById('stream-url').value = savedUrl;
         }
         
-        // Save settings on change
         document.getElementById('stream-key').onchange = () => localStorage.setItem('stream_key', document.getElementById('stream-key').value);
         document.getElementById('stream-title').onchange = () => localStorage.setItem('stream_title', document.getElementById('stream-title').value);
         document.getElementById('stream-url').onchange = () => localStorage.setItem('stream_url', document.getElementById('stream-url').value);
         
-        // Simulate viewers count
+        // ==================== Имитация зрителей ====================
         let viewersInterval = null;
         function startViewersSimulation() {
             let viewers = 0;
@@ -763,17 +798,21 @@
             }, 5000);
         }
         
-        // Initialize
+        // ==================== Инициализация ====================
         loadVideos();
         loadSavedSettings();
         startViewersSimulation();
         
-        // Welcome message
         if (user) {
             addLog('info', `👋 Привет, ${user.first_name}! Добро пожаловать в Stream Manager`);
         }
         
         addLog('info', '💡 Совет: Загрузите видео и нажмите "Старт стрима"');
+        addLog('info', '🔌 API готов: внешний скрипт может управлять через localStorage');
+        
+        // Экспортируем функции для внешнего доступа
+        window.getAPIState = getAPIState;
+        window.executeCommand = executeCommand;
     </script>
 </body>
 </html>
