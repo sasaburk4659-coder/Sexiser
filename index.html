@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Packet Monitor - WebSocket Counter</title>
+    <title>Чат с Python управлением</title>
     <style>
         * {
             margin: 0;
@@ -13,28 +13,158 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
         
         .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .chat-card {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 800px;
-            width: 100%;
-            animation: fadeIn 0.5s ease-in;
+            overflow: hidden;
+            margin-bottom: 20px;
         }
         
-        @keyframes fadeIn {
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .api-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .api-key-box {
+            background: #2d3748;
+            color: #68d391;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        
+        .api-url-box {
+            background: #2d3748;
+            color: #63b3ed;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+        
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #38a169;
+        }
+        
+        .messages-area {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f7fafc;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message-content {
+            display: inline-block;
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .sender {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: block;
+            color: #667eea;
+        }
+        
+        .timestamp {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-left: 10px;
+        }
+        
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .input-area input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .input-area input:focus {
+            border-color: #667eea;
+        }
+        
+        .input-area button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .status {
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -42,386 +172,262 @@
             }
         }
         
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2em;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #667eea;
-            display: inline-block;
-            padding-bottom: 5px;
-        }
-        
-        .status-card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-left: 4px solid #dc3545;
-        }
-        
-        .status-card.connected {
-            border-left-color: #28a745;
-        }
-        
-        .status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #dc3545;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .status-indicator.connected {
-            background: #28a745;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-        
-        .counter-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
             color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            animation: slideInRight 0.3s ease-out;
+            z-index: 1000;
         }
         
-        .counter-label {
-            font-size: 1.2em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-        
-        .counter-value {
-            font-size: 4em;
-            font-weight: bold;
-            font-family: monospace;
-            animation: countUp 0.3s ease-out;
-        }
-        
-        @keyframes countUp {
+        @keyframes slideInRight {
             from {
-                transform: scale(0.8);
                 opacity: 0;
+                transform: translateX(100px);
             }
             to {
-                transform: scale(1);
                 opacity: 1;
+                transform: translateX(0);
             }
-        }
-        
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        button:active:not(:disabled) {
-            transform: translateY(0);
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-        }
-        
-        .btn-danger:hover:not(:disabled) {
-            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
-        }
-        
-        .btn-success {
-            background: #28a745;
-        }
-        
-        .logs {
-            background: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            color: #d4d4d4;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .logs-title {
-            margin-bottom: 10px;
-            color: #fff;
-            font-weight: bold;
-        }
-        
-        .log-entry {
-            padding: 5px 0;
-            border-bottom: 1px solid #333;
-            font-size: 0.85em;
-        }
-        
-        .log-entry.info {
-            color: #4ec9b0;
-        }
-        
-        .log-entry.packet {
-            color: #ce9178;
-        }
-        
-        .log-entry.error {
-            color: #f48771;
-        }
-        
-        .log-entry.welcome {
-            color: #6a9955;
-        }
-        
-        .timestamp {
-            color: #858585;
-            margin-right: 10px;
-        }
-        
-        .connection-url {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9em;
-            margin-top: 15px;
-            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📦 Packet Monitor</h1>
-        <div class="subtitle">WebSocket Packet Counter</div>
-        
-        <div class="status-card" id="statusCard">
-            <div class="status">
-                <div class="status-indicator" id="statusIndicator"></div>
-                <span id="statusText">Отключено</span>
+        <div class="chat-card">
+            <div class="header">
+                <h1>💬 Чат с Python управлением</h1>
+                <p>Отправляйте сообщения через Python скрипт</p>
             </div>
-            <div class="connection-url">
-                🔌 WebSocket: <span id="wsUrl">ws://localhost:8765</span>
+            
+            <div class="api-info">
+                <strong>🔑 API Ключ (встроен в сайт):</strong>
+                <div class="api-key-box" id="apiKey">
+                    Загрузка...
+                </div>
+                
+                <strong style="margin-top: 10px; display: block;">🔗 API Ссылка для Python скрипта:</strong>
+                <div class="api-url-box" id="apiUrl">
+                    Загрузка...
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('apiUrl')">📋 Копировать ссылку</button>
             </div>
-        </div>
-        
-        <div class="counter-box">
-            <div class="counter-label">📊 Получено пакетов</div>
-            <div class="counter-value" id="packetCount">0</div>
-        </div>
-        
-        <div class="buttons">
-            <button id="connectBtn" class="btn-success">🔌 Подключиться</button>
-            <button id="disconnectBtn" disabled>❌ Отключиться</button>
-            <button id="sendPacketBtn" disabled>📨 Отправить пакет</button>
-            <button id="resetBtn" disabled>🔄 Сбросить счетчик</button>
-        </div>
-        
-        <div class="logs">
-            <div class="logs-title">📝 Логи:</div>
-            <div id="logContent">
-                <div class="log-entry info">
-                    <span class="timestamp">[СИСТЕМА]</span> Готов к работе
+            
+            <div class="messages-area" id="messages">
+                <div class="message">
+                    <div class="message-content">
+                        <span class="sender">📡 Система</span>
+                        Чат активен. Ожидание сообщений от Python...
+                    </div>
                 </div>
-                <div class="log-entry info">
-                    <span class="timestamp">[СИСТЕМА]</span> Нажмите "Подключиться" для соединения с сервером
-                </div>
+            </div>
+            
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Или напишите сообщение здесь..." />
+                <button onclick="sendFromSite()">Отправить</button>
+            </div>
+            
+            <div class="status" id="status">
+                🟢 Онлайн | Ожидание сообщений
             </div>
         </div>
     </div>
-    
+
     <script>
-        let ws = null;
-        let packetCount = 0;
+        // ==============================================
+        // 🔑 СЛОЖНЫЙ КЛЮЧ (УЖЕ ВСТРОЕН В САЙТ)
+        // ==============================================
+        const SECRET_KEY = "1%&2/&)1)(2$+12+11$+1/131";
+        // ==============================================
         
-        // DOM элементы
-        const connectBtn = document.getElementById('connectBtn');
-        const disconnectBtn = document.getElementById('disconnectBtn');
-        const sendPacketBtn = document.getElementById('sendPacketBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const packetCountElement = document.getElementById('packetCount');
-        const statusIndicator = document.getElementById('statusIndicator');
-        const statusText = document.getElementById('statusText');
-        const statusCard = document.getElementById('statusCard');
-        const logContent = document.getElementById('logContent');
+        // Ссылка на сайт
+        const SITE_URL = window.location.href;
         
-        // Функция добавления лога
-        function addLog(message, type = 'info') {
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry ${type}`;
-            const timestamp = new Date().toLocaleTimeString();
-            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
-            logContent.appendChild(logEntry);
-            logEntry.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            
-            // Ограничиваем количество логов (оставляем последние 100)
-            while (logContent.children.length > 100) {
-                logContent.removeChild(logContent.firstChild);
+        // Отображаем ключ на странице
+        document.getElementById('apiKey').textContent = SECRET_KEY;
+        
+        // Формируем API ссылку
+        const API_URL = `${SITE_URL}?key=${encodeURIComponent(SECRET_KEY)}`;
+        document.getElementById('apiUrl').textContent = API_URL;
+        
+        // Хранилище сообщений
+        let messages = [];
+        
+        // Загрузка сообщений из localStorage
+        function loadMessages() {
+            const saved = localStorage.getItem('chat_messages');
+            if (saved) {
+                messages = JSON.parse(saved);
+                displayMessages();
             }
         }
         
-        // Обновление счетчика
-        function updateCounter(count) {
-            packetCount = count;
-            packetCountElement.textContent = packetCount;
-            packetCountElement.style.animation = 'none';
+        // Сохранение сообщений
+        function saveMessages() {
+            localStorage.setItem('chat_messages', JSON.stringify(messages));
+            displayMessages();
+        }
+        
+        // Отображение сообщений
+        function displayMessages() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            
+            if (messages.length === 0) {
+                messagesDiv.innerHTML = '<div class="message"><div class="message-content"><span class="sender">📡 Система</span>Нет сообщений. Отправьте первое сообщение через Python!</div></div>';
+                return;
+            }
+            
+            messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'message';
+                msgDiv.innerHTML = `
+                    <div class="message-content">
+                        <span class="sender">${escapeHtml(msg.sender)}</span>
+                        ${escapeHtml(msg.text)}
+                        <span class="timestamp">${msg.timestamp || ''}</span>
+                    </div>
+                `;
+                messagesDiv.appendChild(msgDiv);
+            });
+            
+            // Скролл вниз
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // Добавление сообщения
+        function addMessage(text, sender) {
+            const newMessage = {
+                text: text,
+                sender: sender,
+                timestamp: new Date().toLocaleTimeString(),
+                date: new Date().toISOString()
+            };
+            
+            messages.push(newMessage);
+            
+            // Оставляем последние 100 сообщений
+            if (messages.length > 100) {
+                messages = messages.slice(-100);
+            }
+            
+            saveMessages();
+            
+            // Показываем уведомление
+            showNotification(`Новое сообщение от ${sender}`);
+            
+            return newMessage;
+        }
+        
+        // Показать уведомление
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
             setTimeout(() => {
-                packetCountElement.style.animation = 'countUp 0.3s ease-out';
-            }, 10);
+                notification.remove();
+            }, 3000);
         }
         
-        // Обновление статуса подключения
-        function updateConnectionStatus(connected) {
-            if (connected) {
-                statusIndicator.classList.add('connected');
-                statusCard.classList.add('connected');
-                statusText.textContent = 'Подключено к серверу';
-                connectBtn.disabled = true;
-                disconnectBtn.disabled = false;
-                sendPacketBtn.disabled = false;
-                resetBtn.disabled = false;
-                addLog('✅ Установлено WebSocket соединение', 'info');
-            } else {
-                statusIndicator.classList.remove('connected');
-                statusCard.classList.remove('connected');
-                statusText.textContent = 'Отключено';
-                connectBtn.disabled = false;
-                disconnectBtn.disabled = true;
-                sendPacketBtn.disabled = true;
-                resetBtn.disabled = true;
-                if (ws) {
-                    ws.close();
-                    ws = null;
+        // Отправка с сайта
+        function sendFromSite() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            addMessage(text, 'Сайт');
+            input.value = '';
+            
+            // Обновляем статус
+            const status = document.getElementById('status');
+            status.innerHTML = '✅ Сообщение отправлено с сайта';
+            status.style.background = '#c6f6d5';
+            setTimeout(() => {
+                status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
+                status.style.background = '#edf2f7';
+            }, 2000);
+        }
+        
+        // ПРОВЕРКА API ЗАПРОСОВ ОТ PYTHON
+        function checkPythonRequest() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const key = urlParams.get('key');
+            const text = urlParams.get('text');
+            const sender = urlParams.get('sender') || 'Python Script';
+            
+            // Проверяем ключ
+            if (key === SECRET_KEY && text) {
+                // Добавляем сообщение в чат
+                addMessage(text, sender);
+                
+                // Обновляем статус
+                const status = document.getElementById('status');
+                status.innerHTML = `✅ Получено сообщение от Python: ${text.substring(0, 50)}`;
+                status.style.background = '#c6f6d5';
+                setTimeout(() => {
+                    status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
+                    status.style.background = '#edf2f7';
+                }, 3000);
+                
+                // Очищаем URL от параметров (чтобы не дублировалось при обновлении)
+                window.history.replaceState({}, document.title, SITE_URL.split('?')[0]);
+                
+                return true;
+            }
+            return false;
+        }
+        
+        // Экранирование HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Копирование в буфер обмена
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✅ Ссылка скопирована!');
+            });
+        }
+        
+        // Очистка всех сообщений (секретная функция)
+        function clearAllMessages() {
+            if (confirm('Очистить все сообщения в чате?')) {
+                messages = [];
+                saveMessages();
+                showNotification('🗑️ Все сообщения удалены');
+            }
+        }
+        
+        // Инициализация
+        loadMessages();
+        checkPythonRequest();
+        
+        // Проверяем новые сообщения каждые 2 секунды (для обновления между вкладками)
+        setInterval(() => {
+            const saved = localStorage.getItem('chat_messages');
+            if (saved) {
+                const newMessages = JSON.parse(saved);
+                if (JSON.stringify(messages) !== JSON.stringify(newMessages)) {
+                    messages = newMessages;
+                    displayMessages();
                 }
-                addLog('🔌 WebSocket соединение закрыто', 'info');
             }
-        }
+        }, 2000);
         
-        // Обработка входящих сообщений
-        function handleMessage(data) {
-            console.log('Получено сообщение:', data);
-            
-            switch(data.type) {
-                case 'welcome':
-                    addLog(`👋 ${data.message}. Текущий счетчик: ${data.count}`, 'welcome');
-                    updateCounter(data.count);
-                    break;
-                    
-                case 'packet':
-                    addLog(`📦 ${data.message} (время: ${new Date(data.timestamp).toLocaleTimeString()})`, 'packet');
-                    updateCounter(data.count);
-                    break;
-                    
-                case 'reset':
-                    addLog(`🔄 ${data.message}`, 'info');
-                    updateCounter(0);
-                    break;
-                    
-                default:
-                    addLog(`ℹ️ Получено неизвестное сообщение: ${JSON.stringify(data)}`, 'info');
-            }
-        }
-        
-        // Подключение к WebSocket
-        function connect() {
-            const wsUrl = 'ws://localhost:8765';
-            
-            try {
-                ws = new WebSocket(wsUrl);
-                
-                ws.onopen = () => {
-                    updateConnectionStatus(true);
-                };
-                
-                ws.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        handleMessage(data);
-                    } catch (e) {
-                        addLog(`⚠️ Ошибка парсинга сообщения: ${event.data}`, 'error');
-                    }
-                };
-                
-                ws.onerror = (error) => {
-                    addLog(`❌ WebSocket ошибка: ${error.message || 'Неизвестная ошибка'}`, 'error');
-                    console.error('WebSocket error:', error);
-                };
-                
-                ws.onclose = () => {
-                    updateConnectionStatus(false);
-                };
-                
-            } catch (error) {
-                addLog(`❌ Ошибка подключения: ${error.message}`, 'error');
-            }
-        }
-        
-        // Отключение
-        function disconnect() {
-            if (ws) {
-                ws.close();
-            }
-        }
-        
-        // Отправка команды на сервер
-        function sendCommand(command) {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                const message = JSON.stringify({ command: command });
-                ws.send(message);
-                addLog(`📤 Отправлена команда: ${command}`, 'info');
-            } else {
-                addLog(`⚠️ Нет соединения с сервером. Команда "${command}" не отправлена`, 'error');
-            }
-        }
-        
-        // Обработчики событий
-        connectBtn.addEventListener('click', connect);
-        disconnectBtn.addEventListener('click', disconnect);
-        sendPacketBtn.addEventListener('click', () => sendCommand('send_packet'));
-        resetBtn.addEventListener('click', () => sendCommand('reset'));
-        
-        // Автоматическое обновление статуса при загрузке
-        addLog('💡 Для работы требуется запустить Python сервер (websocket_server.py)', 'info');
-        addLog('💡 Сервер должен быть доступен по адресу ws://localhost:8765', 'info');
+        // Добавляем кнопку очистки (опционально)
+        console.log('💬 Чат готов к работе!');
+        console.log('🔑 Ключ:', SECRET_KEY);
+        console.log('🔗 API URL:', API_URL);
+        console.log('📝 Используйте Python скрипт для отправки сообщений');
     </script>
 </body>
 </html>
