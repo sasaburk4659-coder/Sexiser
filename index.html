@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>YouTube Stream Manager Pro - API Ready</title>
+    <title>YouTube Stream Manager Pro - WebSocket Ready</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,7 +33,6 @@
             border-radius: 20px;
             color: white;
         }
-        .header h1 { font-size: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .card {
             background: var(--tg-secondary-bg, rgba(255,255,255,0.1));
             backdrop-filter: blur(10px);
@@ -69,7 +68,6 @@
             color: var(--tg-text, white);
             font-size: 0.9rem;
         }
-        .input-group input:focus { outline: none; border-color: #ff0000; }
         .btn {
             padding: 12px 20px;
             border: none;
@@ -101,6 +99,8 @@
         }
         .status-badge.live { background: rgba(255,0,0,0.2); color: #ff6b6b; border: 1px solid #ff0000; }
         .status-badge.offline { background: rgba(128,128,128,0.2); color: #888; }
+        .status-badge.ws-connected { background: rgba(76,175,80,0.2); color: #4caf50; border: 1px solid #4caf50; }
+        .status-badge.ws-disconnected { background: rgba(255,152,0,0.2); color: #ff9800; border: 1px solid #ff9800; }
         .file-upload {
             border: 2px dashed rgba(255,255,255,0.3);
             border-radius: 12px;
@@ -120,7 +120,6 @@
             background: rgba(0,0,0,0.2);
             border-radius: 10px;
             margin-bottom: 8px;
-            animation: slideIn 0.3s ease;
         }
         .video-item button { padding: 6px 12px; border: none; border-radius: 8px; cursor: pointer; margin-left: 5px; }
         .btn-pin { background: #ff0000; color: white; }
@@ -142,7 +141,6 @@
         .log-entry.info { color: #6ab2f2; }
         .log-entry.success { color: #69f0ae; }
         .log-entry.error { color: #ff6b6b; }
-        .log-entry.warning { color: #ff9e40; }
         .toast {
             position: fixed;
             bottom: 20px;
@@ -156,32 +154,30 @@
             z-index: 1000;
             animation: slideUp 0.3s ease;
         }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         @keyframes slideUp {
             from { transform: translateX(-50%) translateY(100px); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
-        .api-status {
+        .ws-status {
             position: fixed;
             top: 10px;
             right: 10px;
             background: rgba(0,0,0,0.7);
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 11px;
             font-family: monospace;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .api-status.active { background: #00c853; color: white; }
-        .api-status.waiting { background: #ff9800; color: white; }
     </style>
 </head>
 <body>
-    <div class="api-status waiting" id="api-status">
-        <i class="fas fa-plug"></i> API: Ожидание
+    <div class="ws-status" id="ws-status">
+        <i class="fas fa-plug"></i>
+        <span id="ws-status-text">WebSocket: Подключение...</span>
     </div>
     
     <div class="container">
@@ -263,7 +259,6 @@
                 <div style="text-align: center; padding: 30px; opacity: 0.5;">
                     <i class="fas fa-film" style="font-size: 2rem;"></i>
                     <p style="margin-top: 10px;">Нет загруженных видео</p>
-                    <p style="font-size: 0.7rem;">Нажмите выше, чтобы загрузить</p>
                 </div>
             </div>
         </div>
@@ -300,183 +295,166 @@
             </div>
             <div class="logs-area" id="logs-area">
                 <div class="log-entry info">[SYSTEM] Stream Manager запущен</div>
-                <div class="log-entry info">[SYSTEM] Готов к загрузке видео</div>
             </div>
         </div>
     </div>
 
     <script>
-        // ==================== Telegram WebApp ====================
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        // ==================== WebSocket соединение с Python сервером ====================
+        let ws = null;
+        let wsReconnectAttempts = 0;
+        const WS_SERVER = "ws://localhost:8765";  // Адрес WebSocket сервера
         
-        const user = tg.initDataUnsafe?.user;
-        
-        // ==================== API для внешнего управления ====================
-        // Хранилище команд от внешнего скрипта
-        let externalCommandQueue = [];
-        let lastCommandResponse = null;
-        let apiPollingInterval = null;
-        
-        // Функция для получения текущего состояния (API)
-        function getAPIState() {
-            return {
-                status: document.getElementById('live-status').classList.contains('live') ? 'live' : 'offline',
-                stream_time: document.getElementById('stream-time').innerText,
-                viewers: parseInt(document.getElementById('viewers').innerText) || 0,
-                videos_count: videos.length,
-                videos_list: videos.map(v => ({ name: v.name, size: v.size, id: v.id })),
-                stream_title: document.getElementById('stream-title').value,
-                stream_key_set: document.getElementById('stream-key').value.length > 0,
-                last_command: lastCommandResponse
-            };
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket(WS_SERVER);
+                
+                ws.onopen = () => {
+                    console.log("✅ WebSocket подключен");
+                    updateWSStatus(true);
+                    wsReconnectAttempts = 0;
+                    addLog('success', '🔌 WebSocket: подключен к серверу');
+                    
+                    // Отправляем приветственное сообщение
+                    ws.send(JSON.stringify({
+                        type: 'register',
+                        client: 'website',
+                        timestamp: new Date().toISOString()
+                    }));
+                };
+                
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleServerMessage(data);
+                    } catch(e) {
+                        console.error("Ошибка парсинга сообщения:", e);
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    console.error("WebSocket ошибка:", error);
+                    addLog('error', '🔌 WebSocket: ошибка соединения');
+                };
+                
+                ws.onclose = () => {
+                    console.log("WebSocket закрыт");
+                    updateWSStatus(false);
+                    addLog('warning', '🔌 WebSocket: соединение потеряно, переподключение...');
+                    
+                    // Переподключение с задержкой
+                    setTimeout(() => {
+                        connectWebSocket();
+                    }, 3000);
+                };
+                
+            } catch(e) {
+                console.error("Ошибка создания WebSocket:", e);
+                setTimeout(() => connectWebSocket(), 5000);
+            }
         }
         
-        // Функция для выполнения команд из API
-        function executeCommand(command, params = {}) {
-            addLog('info', `📨 API команда: ${command}`);
+        function updateWSStatus(connected) {
+            const statusDiv = document.getElementById('ws-status');
+            const statusText = document.getElementById('ws-status-text');
+            if (connected) {
+                statusDiv.style.background = 'rgba(76,175,80,0.9)';
+                statusText.innerHTML = 'WebSocket: ✅ Подключен';
+            } else {
+                statusDiv.style.background = 'rgba(255,152,0,0.9)';
+                statusText.innerHTML = 'WebSocket: ⚠️ Отключен';
+            }
+        }
+        
+        function handleServerMessage(data) {
+            addLog('info', `📨 Получено от сервера: ${data.type}`);
             
-            let result = { success: false, message: 'Unknown command' };
-            
-            switch(command) {
-                case 'start':
-                    if (videos.length > 0) {
-                        startStream();
-                        result = { success: true, message: 'Stream started' };
-                    } else {
-                        result = { success: false, message: 'No videos uploaded' };
-                    }
+            switch(data.type) {
+                case 'command':
+                    executeCommand(data.command, data.params);
                     break;
                     
-                case 'stop':
-                    stopStream();
-                    result = { success: true, message: 'Stream stopped' };
-                    break;
-                    
-                case 'status':
-                    result = { success: true, message: 'Status retrieved', data: getAPIState() };
+                case 'status_request':
+                    sendStatusToServer();
                     break;
                     
                 case 'upload_video':
-                    // Для загрузки видео через API нужно передавать base64
-                    if (params.video_data && params.video_name) {
-                        addVideoFromBase64(params.video_name, params.video_data);
-                        result = { success: true, message: `Video ${params.video_name} uploaded` };
-                    } else {
-                        result = { success: false, message: 'No video data provided' };
+                    if (data.video_data && data.video_name) {
+                        addVideoFromBase64(data.video_name, data.video_data);
                     }
                     break;
                     
-                case 'notify':
-                    sendNotification();
-                    result = { success: true, message: 'Notification sent' };
+                case 'notification':
+                    showToast(data.message || 'Уведомление от сервера');
+                    addLog('info', `🔔 ${data.message || 'Уведомление'}`);
                     break;
                     
+                default:
+                    console.log("Неизвестный тип сообщения:", data.type);
+            }
+        }
+        
+        function executeCommand(command, params = {}) {
+            addLog('info', `🎮 Выполнение команды: ${command}`);
+            
+            switch(command) {
+                case 'start':
+                    startStream();
+                    break;
+                case 'stop':
+                    stopStream();
+                    break;
+                case 'notify':
+                    sendNotification();
+                    break;
+                case 'status':
+                    sendStatusToServer();
+                    break;
                 case 'set_stream_key':
                     if (params.key) {
                         document.getElementById('stream-key').value = params.key;
                         localStorage.setItem('stream_key', params.key);
-                        result = { success: true, message: 'Stream key updated' };
+                        addLog('success', 'Stream Key обновлен через сервер');
                     }
                     break;
-                    
-                case 'set_stream_title':
-                    if (params.title) {
-                        document.getElementById('stream-title').value = params.title;
-                        localStorage.setItem('stream_title', params.title);
-                        result = { success: true, message: 'Stream title updated' };
-                    }
-                    break;
-                    
-                case 'delete_video':
-                    if (params.video_id) {
-                        const videoToDelete = videos.find(v => v.id == params.video_id);
-                        if (videoToDelete) {
-                            deleteVideoById(params.video_id);
-                            result = { success: true, message: `Video ${videoToDelete.name} deleted` };
-                        } else {
-                            result = { success: false, message: 'Video not found' };
-                        }
-                    }
-                    break;
-                    
-                case 'clear_videos':
-                    videos = [];
-                    saveVideos();
-                    renderVideoList();
-                    result = { success: true, message: 'All videos cleared' };
-                    break;
-                    
                 default:
-                    result = { success: false, message: `Unknown command: ${command}` };
-            }
-            
-            lastCommandResponse = { command, result, timestamp: new Date().toISOString() };
-            addLog('success', `✅ Команда "${command}" выполнена: ${result.message}`);
-            
-            return result;
-        }
-        
-        // Функция для получения команд из URL (GET параметры)
-        function checkURLCommands() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const command = urlParams.get('command');
-            
-            if (command) {
-                const params = {};
-                for (let [key, value] of urlParams.entries()) {
-                    if (key !== 'command') {
-                        params[key] = value;
-                    }
-                }
-                const result = executeCommand(command, params);
-                
-                // Обновляем URL, убирая параметры
-                window.history.replaceState({}, document.title, window.location.pathname);
-                
-                // Возвращаем результат в ответе для внешнего скрипта
-                return result;
-            }
-            return null;
-        }
-        
-        // Функция для получения команд через localStorage (для внешнего скрипта)
-        function checkLocalStorageCommands() {
-            const commandKey = 'stream_manager_command';
-            const commandData = localStorage.getItem(commandKey);
-            
-            if (commandData) {
-                try {
-                    const { command, params, requestId } = JSON.parse(commandData);
-                    const result = executeCommand(command, params || {});
-                    
-                    // Сохраняем результат
-                    localStorage.setItem(`stream_manager_response_${requestId}`, JSON.stringify(result));
-                    
-                    // Удаляем команду
-                    localStorage.removeItem(commandKey);
-                    
-                    // Обновляем статус API
-                    document.getElementById('api-status').className = 'api-status active';
-                    document.getElementById('api-status').innerHTML = '<i class="fas fa-check"></i> API: OK';
-                    setTimeout(() => {
-                        document.getElementById('api-status').className = 'api-status waiting';
-                        document.getElementById('api-status').innerHTML = '<i class="fas fa-plug"></i> API: Ожидание';
-                    }, 2000);
-                    
-                } catch(e) {
-                    console.error('Command error:', e);
-                }
+                    addLog('warning', `Неизвестная команда: ${command}`);
             }
         }
         
-        // Периодическая проверка команд
-        setInterval(() => {
-            checkLocalStorageCommands();
-        }, 1000);
+        function sendStatusToServer() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            const status = {
+                type: 'status_response',
+                is_live: document.getElementById('live-status').classList.contains('live'),
+                stream_time: document.getElementById('stream-time').innerText,
+                viewers: parseInt(document.getElementById('viewers').innerText) || 0,
+                videos_count: videos.length,
+                videos_list: videos.map(v => ({ name: v.name, id: v.id })),
+                stream_title: document.getElementById('stream-title').value,
+                stream_key_set: document.getElementById('stream-key').value.length > 0
+            };
+            
+            ws.send(JSON.stringify(status));
+            addLog('info', '📊 Статус отправлен на сервер');
+        }
         
-        // Также проверяем URL при загрузке
-        checkURLCommands();
+        function sendToServer(type, data = {}) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addLog('warning', '⚠️ WebSocket не подключен, данные не отправлены');
+                return false;
+            }
+            
+            const message = {
+                type: type,
+                ...data,
+                timestamp: new Date().toISOString()
+            };
+            
+            ws.send(JSON.stringify(message));
+            return true;
+        }
         
         // ==================== Видео менеджер ====================
         let videos = [];
@@ -488,6 +466,9 @@
                 renderVideoList();
                 updateVideoCount();
                 updateStorageInfo();
+                
+                // Отправляем список видео на сервер
+                sendToServer('videos_list', { videos: videos.map(v => ({ name: v.name, size: v.size, id: v.id })) });
             }
         }
         
@@ -495,6 +476,8 @@
             localStorage.setItem('stream_videos', JSON.stringify(videos));
             updateVideoCount();
             updateStorageInfo();
+            
+            sendToServer('videos_list', { videos: videos.map(v => ({ name: v.name, size: v.size, id: v.id })) });
         }
         
         function uploadVideo(input) {
@@ -532,6 +515,9 @@
                 showToast(`✅ Видео "${file.name}" загружено!`);
                 addLog('success', `Видео загружено: ${file.name}`);
                 
+                // Отправляем уведомление серверу
+                sendToServer('video_uploaded', { video_name: file.name, video_size: file.size });
+                
                 const preview = document.getElementById('video-preview');
                 const previewVideo = document.getElementById('preview-video');
                 preview.style.display = 'block';
@@ -554,7 +540,8 @@
             videos.unshift(videoData);
             saveVideos();
             renderVideoList();
-            addLog('success', `Видео загружено через API: ${name}`);
+            addLog('success', `Видео загружено через сервер: ${name}`);
+            showToast(`📹 Видео "${name}" получено от сервера`);
         }
         
         function renderVideoList() {
@@ -565,7 +552,6 @@
                     <div style="text-align: center; padding: 30px; opacity: 0.5;">
                         <i class="fas fa-film" style="font-size: 2rem;"></i>
                         <p style="margin-top: 10px;">Нет загруженных видео</p>
-                        <p style="font-size: 0.7rem;">Нажмите выше, чтобы загрузить</p>
                     </div>
                 `;
                 return;
@@ -576,20 +562,17 @@
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-file-video" style="color: #ff0000;"></i>
-                            <span style="font-weight: 500;">${video.name.length > 35 ? video.name.substring(0, 32) + '...' : video.name}</span>
+                            <span>${video.name.length > 35 ? video.name.substring(0, 32) + '...' : video.name}</span>
                         </div>
-                        <div style="font-size: 0.65rem; opacity: 0.6; margin-top: 4px;">
-                            ${(video.size / 1024 / 1024).toFixed(2)} MB • ${new Date(video.uploaded).toLocaleDateString()}
+                        <div style="font-size: 0.65rem; opacity: 0.6;">
+                            ${(video.size / 1024 / 1024).toFixed(2)} MB
                         </div>
                     </div>
                     <div>
-                        <button class="btn-pin" onclick="playVideo(${video.id})" title="Воспроизвести">
-                            <i class="fas fa-play"></i>
-                        </button>
-                        <button class="btn-pin" onclick="pinVideo(${video.id})" title="Закрепить в чате">
+                        <button class="btn-pin" onclick="pinVideo(${video.id})">
                             <i class="fas fa-thumbtack"></i>
                         </button>
-                        <button class="btn-delete" onclick="deleteVideo(${video.id})" title="Удалить">
+                        <button class="btn-delete" onclick="deleteVideo(${video.id})">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -597,49 +580,32 @@
             `).join('');
         }
         
-        function playVideo(videoId) {
-            const video = videos.find(v => v.id === videoId);
-            if (video) {
-                const preview = document.getElementById('video-preview');
-                const previewVideo = document.getElementById('preview-video');
-                preview.style.display = 'block';
-                previewVideo.src = video.data;
-                previewVideo.play();
-                addLog('info', `Воспроизведение: ${video.name}`);
-            }
-        }
-        
         function pinVideo(videoId) {
             const video = videos.find(v => v.id === videoId);
             if (video) {
-                addLog('success', `Видео "${video.name}" закреплено в чате`);
+                addLog('success', `Видео "${video.name}" закреплено`);
                 showToast(`📌 "${video.name}" закреплено!`);
-                if (tg && tg.sendData) {
-                    tg.sendData(JSON.stringify({ action: 'pin_video', video: video.name }));
-                }
+                sendToServer('video_pinned', { video_name: video.name });
             }
         }
         
         function deleteVideo(videoId) {
+            const video = videos.find(v => v.id === videoId);
             if (confirm('Удалить это видео?')) {
-                const video = videos.find(v => v.id === videoId);
                 videos = videos.filter(v => v.id !== videoId);
                 saveVideos();
                 renderVideoList();
                 addLog('warning', `Видео удалено: ${video.name}`);
                 showToast(`🗑️ Видео удалено`);
+                
+                sendToServer('video_deleted', { video_name: video.name });
+                
                 const preview = document.getElementById('video-preview');
                 if (preview.style.display === 'block') {
                     preview.style.display = 'none';
                     document.getElementById('preview-video').pause();
                 }
             }
-        }
-        
-        function deleteVideoById(videoId) {
-            videos = videos.filter(v => v.id != videoId);
-            saveVideos();
-            renderVideoList();
         }
         
         function updateVideoCount() {
@@ -650,7 +616,7 @@
             const totalSize = videos.reduce((sum, v) => sum + v.size, 0);
             const storageInfo = document.getElementById('storage-info');
             if (storageInfo) {
-                storageInfo.textContent = `${(totalSize / 1024 / 1024).toFixed(1)} MB / 100 MB`;
+                storageInfo.textContent = `${(totalSize / 1024 / 1024).toFixed(1)} MB`;
             }
         }
         
@@ -685,10 +651,8 @@
             
             startStreamTimer();
             
-            // Оповещаем внешний скрипт
-            if (tg && tg.sendData) {
-                tg.sendData(JSON.stringify({ action: 'stream_started', title: streamTitle }));
-            }
+            // Уведомляем сервер
+            sendToServer('stream_started', { title: streamTitle });
             
             return true;
         }
@@ -702,9 +666,7 @@
             
             stopStreamTimer();
             
-            if (tg && tg.sendData) {
-                tg.sendData(JSON.stringify({ action: 'stream_stopped' }));
-            }
+            sendToServer('stream_stopped', {});
             
             return true;
         }
@@ -719,6 +681,11 @@
                 const seconds = streamSeconds % 60;
                 document.getElementById('stream-time').textContent = 
                     `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Отправляем обновление времени на сервер
+                if (streamSeconds % 10 === 0) {
+                    sendToServer('stream_time_update', { time: document.getElementById('stream-time').textContent });
+                }
             }, 1000);
         }
         
@@ -732,15 +699,14 @@
         function sendNotification() {
             addLog('info', '🔔 Уведомление отправлено зрителям');
             showToast('🔔 Уведомление отправлено!');
-            if (tg && tg.sendData) {
-                tg.sendData(JSON.stringify({ action: 'notification', message: 'Стрим начался! Присоединяйтесь!' }));
-            }
+            sendToServer('notification_sent', {});
         }
         
         function openYouTube() {
             const url = document.getElementById('stream-url').value;
             if (url) {
-                tg.openLink(url);
+                if (tg) tg.openLink(url);
+                else window.open(url);
             } else {
                 showToast('❌ Введите ссылку на стрим');
             }
@@ -759,6 +725,9 @@
             while (logsArea.children.length > 50) {
                 logsArea.removeChild(logsArea.firstChild);
             }
+            
+            // Отправляем лог на сервер
+            sendToServer('log', { level: level, message: message });
         }
         
         function showToast(message) {
@@ -769,7 +738,15 @@
             setTimeout(() => toast.remove(), 3000);
         }
         
-        // ==================== Загрузка сохраненных данных ====================
+        // ==================== Инициализация ====================
+        let tg = null;
+        try {
+            tg = window.Telegram.WebApp;
+            tg.expand();
+        } catch(e) {
+            console.log("Не в Telegram");
+        }
+        
         function loadSavedSettings() {
             const savedKey = localStorage.getItem('stream_key');
             const savedTitle = localStorage.getItem('stream_title');
@@ -784,7 +761,7 @@
         document.getElementById('stream-title').onchange = () => localStorage.setItem('stream_title', document.getElementById('stream-title').value);
         document.getElementById('stream-url').onchange = () => localStorage.setItem('stream_url', document.getElementById('stream-url').value);
         
-        // ==================== Имитация зрителей ====================
+        // Имитация зрителей
         let viewersInterval = null;
         function startViewersSimulation() {
             let viewers = 0;
@@ -792,27 +769,20 @@
                 if (document.getElementById('live-status').classList.contains('live')) {
                     viewers = Math.floor(Math.random() * 50) + 10;
                     document.getElementById('viewers').textContent = viewers;
+                    sendToServer('viewers_update', { viewers: viewers });
                 } else {
                     document.getElementById('viewers').textContent = 0;
                 }
             }, 5000);
         }
         
-        // ==================== Инициализация ====================
+        // Запуск
         loadVideos();
         loadSavedSettings();
         startViewersSimulation();
+        connectWebSocket();
         
-        if (user) {
-            addLog('info', `👋 Привет, ${user.first_name}! Добро пожаловать в Stream Manager`);
-        }
-        
-        addLog('info', '💡 Совет: Загрузите видео и нажмите "Старт стрима"');
-        addLog('info', '🔌 API готов: внешний скрипт может управлять через localStorage');
-        
-        // Экспортируем функции для внешнего доступа
-        window.getAPIState = getAPIState;
-        window.executeCommand = executeCommand;
+        addLog('info', '💡 Готов к работе! WebSocket подключится автоматически');
     </script>
 </body>
 </html>
