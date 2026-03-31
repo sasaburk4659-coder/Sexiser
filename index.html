@@ -28,7 +28,6 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-            margin-bottom: 20px;
         }
         
         .header {
@@ -75,16 +74,11 @@
             background: #48bb78;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
             font-size: 12px;
-            margin-left: 10px;
             margin-top: 10px;
-        }
-        
-        .copy-btn:hover {
-            background: #38a169;
         }
         
         .messages-area {
@@ -97,29 +91,26 @@
         .message {
             margin-bottom: 15px;
             animation: slideIn 0.3s ease-out;
-        }
-        
-        .message-content {
-            display: inline-block;
-            max-width: 70%;
-            padding: 10px 15px;
-            border-radius: 15px;
+            padding: 10px;
             background: white;
+            border-radius: 10px;
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         
         .sender {
             font-weight: bold;
-            font-size: 12px;
-            margin-bottom: 5px;
-            display: block;
             color: #667eea;
+            margin-right: 10px;
         }
         
         .timestamp {
-            font-size: 10px;
-            opacity: 0.7;
-            margin-left: 10px;
+            font-size: 11px;
+            color: #999;
+        }
+        
+        .message-text {
+            margin-top: 5px;
+            word-wrap: break-word;
         }
         
         .input-area {
@@ -137,10 +128,6 @@
             border-radius: 25px;
             outline: none;
             font-size: 14px;
-        }
-        
-        .input-area input:focus {
-            border-color: #667eea;
         }
         
         .input-area button {
@@ -164,34 +151,11 @@
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
-            }
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #48bb78;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            animation: slideInRight 0.3s ease-out;
-            z-index: 1000;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
             }
         }
     </style>
@@ -205,30 +169,25 @@
             </div>
             
             <div class="api-info">
-                <strong>🔑 API Ключ (встроен в сайт):</strong>
-                <div class="api-key-box" id="apiKey">
-                    Загрузка...
-                </div>
+                <strong>🔑 API Ключ:</strong>
+                <div class="api-key-box" id="apiKey">Загрузка...</div>
                 
-                <strong style="margin-top: 10px; display: block;">🔗 API Ссылка для Python скрипта:</strong>
-                <div class="api-url-box" id="apiUrl">
-                    Загрузка...
-                </div>
-                <button class="copy-btn" onclick="copyToClipboard('apiUrl')">📋 Копировать ссылку</button>
+                <strong>🔗 API Ссылка:</strong>
+                <div class="api-url-box" id="apiUrl">Загрузка...</div>
+                <button class="copy-btn" onclick="copyApiUrl()">📋 Копировать ссылку</button>
             </div>
             
             <div class="messages-area" id="messages">
                 <div class="message">
-                    <div class="message-content">
-                        <span class="sender">📡 Система</span>
-                        Чат активен. Ожидание сообщений от Python...
-                    </div>
+                    <span class="sender">📡 Система:</span>
+                    <span class="timestamp"></span>
+                    <div class="message-text">Чат активен. Ожидание сообщений...</div>
                 </div>
             </div>
             
             <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Или напишите сообщение здесь..." />
-                <button onclick="sendFromSite()">Отправить</button>
+                <input type="text" id="messageInput" placeholder="Напишите сообщение..." />
+                <button onclick="sendMessage()">Отправить</button>
             </div>
             
             <div class="status" id="status">
@@ -239,37 +198,37 @@
 
     <script>
         // ==============================================
-        // 🔑 СЛОЖНЫЙ КЛЮЧ (УЖЕ ВСТРОЕН В САЙТ)
+        // 🔑 СЕКРЕТНЫЙ КЛЮЧ (ДОЛЖЕН СОВПАДАТЬ С PYTHON СКРИПТОМ)
         // ==============================================
         const SECRET_KEY = "1%&2/&)1)(2$+12+11$+1/131";
-        // ==============================================
-        
-        // Ссылка на сайт
-        const SITE_URL = window.location.href;
-        
-        // Отображаем ключ на странице
-        document.getElementById('apiKey').textContent = SECRET_KEY;
-        
-        // Формируем API ссылку
-        const API_URL = `${SITE_URL}?key=${encodeURIComponent(SECRET_KEY)}`;
-        document.getElementById('apiUrl').textContent = API_URL;
         
         // Хранилище сообщений
-        let messages = [];
+        let messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
         
-        // Загрузка сообщений из localStorage
-        function loadMessages() {
-            const saved = localStorage.getItem('chat_messages');
-            if (saved) {
-                messages = JSON.parse(saved);
-                displayMessages();
+        // Отображение ключа
+        document.getElementById('apiKey').textContent = SECRET_KEY;
+        document.getElementById('apiUrl').textContent = window.location.href;
+        
+        // Функция для добавления сообщения
+        function addMessage(text, sender) {
+            const message = {
+                id: Date.now(),
+                text: text,
+                sender: sender,
+                timestamp: new Date().toLocaleTimeString(),
+                date: new Date().toISOString()
+            };
+            
+            messages.push(message);
+            
+            // Храним последние 100 сообщений
+            if (messages.length > 100) {
+                messages = messages.slice(-100);
             }
-        }
-        
-        // Сохранение сообщений
-        function saveMessages() {
+            
             localStorage.setItem('chat_messages', JSON.stringify(messages));
             displayMessages();
+            return message;
         }
         
         // Отображение сообщений
@@ -278,7 +237,7 @@
             messagesDiv.innerHTML = '';
             
             if (messages.length === 0) {
-                messagesDiv.innerHTML = '<div class="message"><div class="message-content"><span class="sender">📡 Система</span>Нет сообщений. Отправьте первое сообщение через Python!</div></div>';
+                messagesDiv.innerHTML = '<div class="message"><span class="sender">📡 Система:</span><div class="message-text">Нет сообщений. Отправьте первое сообщение через Python!</div></div>';
                 return;
             }
             
@@ -286,57 +245,18 @@
                 const msgDiv = document.createElement('div');
                 msgDiv.className = 'message';
                 msgDiv.innerHTML = `
-                    <div class="message-content">
-                        <span class="sender">${escapeHtml(msg.sender)}</span>
-                        ${escapeHtml(msg.text)}
-                        <span class="timestamp">${msg.timestamp || ''}</span>
-                    </div>
+                    <span class="sender">${escapeHtml(msg.sender)}:</span>
+                    <span class="timestamp">${msg.timestamp}</span>
+                    <div class="message-text">${escapeHtml(msg.text)}</div>
                 `;
                 messagesDiv.appendChild(msgDiv);
             });
             
-            // Скролл вниз
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
         
-        // Добавление сообщения
-        function addMessage(text, sender) {
-            const newMessage = {
-                text: text,
-                sender: sender,
-                timestamp: new Date().toLocaleTimeString(),
-                date: new Date().toISOString()
-            };
-            
-            messages.push(newMessage);
-            
-            // Оставляем последние 100 сообщений
-            if (messages.length > 100) {
-                messages = messages.slice(-100);
-            }
-            
-            saveMessages();
-            
-            // Показываем уведомление
-            showNotification(`Новое сообщение от ${sender}`);
-            
-            return newMessage;
-        }
-        
-        // Показать уведомление
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        // Отправка с сайта
-        function sendFromSite() {
+        // Отправка сообщения с сайта
+        function sendMessage() {
             const input = document.getElementById('messageInput');
             const text = input.value.trim();
             if (!text) return;
@@ -344,74 +264,58 @@
             addMessage(text, 'Сайт');
             input.value = '';
             
-            // Обновляем статус
             const status = document.getElementById('status');
             status.innerHTML = '✅ Сообщение отправлено с сайта';
-            status.style.background = '#c6f6d5';
             setTimeout(() => {
                 status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
-                status.style.background = '#edf2f7';
             }, 2000);
         }
         
-        // ПРОВЕРКА API ЗАПРОСОВ ОТ PYTHON
-        function checkPythonRequest() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const key = urlParams.get('key');
-            const text = urlParams.get('text');
-            const sender = urlParams.get('sender') || 'Python Script';
-            
-            // Проверяем ключ
-            if (key === SECRET_KEY && text) {
-                // Добавляем сообщение в чат
-                addMessage(text, sender);
-                
-                // Обновляем статус
-                const status = document.getElementById('status');
-                status.innerHTML = `✅ Получено сообщение от Python: ${text.substring(0, 50)}`;
-                status.style.background = '#c6f6d5';
-                setTimeout(() => {
-                    status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
-                    status.style.background = '#edf2f7';
-                }, 3000);
-                
-                // Очищаем URL от параметров (чтобы не дублировалось при обновлении)
-                window.history.replaceState({}, document.title, SITE_URL.split('?')[0]);
-                
-                return true;
+        // Получение сообщений от Python (через хэш URL)
+        function checkForPythonMessage() {
+            // Проверяем hash параметры
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                try {
+                    const params = new URLSearchParams(hash);
+                    const key = params.get('key');
+                    const text = params.get('text');
+                    const sender = params.get('sender') || 'Python Script';
+                    
+                    if (key === SECRET_KEY && text) {
+                        addMessage(decodeURIComponent(text), decodeURIComponent(sender));
+                        
+                        const status = document.getElementById('status');
+                        status.innerHTML = `✅ Получено сообщение от Python: ${decodeURIComponent(text).substring(0, 50)}`;
+                        status.style.background = '#c6f6d5';
+                        setTimeout(() => {
+                            status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
+                            status.style.background = '#edf2f7';
+                        }, 3000);
+                        
+                        // Очищаем hash
+                        window.location.hash = '';
+                        return true;
+                    }
+                } catch(e) {
+                    console.error('Ошибка:', e);
+                }
             }
             return false;
         }
         
-        // Экранирование HTML
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
-        // Копирование в буфер обмена
-        function copyToClipboard(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('✅ Ссылка скопирована!');
-            });
+        function copyApiUrl() {
+            navigator.clipboard.writeText(window.location.href);
+            alert('✅ Ссылка скопирована!');
         }
         
-        // Очистка всех сообщений (секретная функция)
-        function clearAllMessages() {
-            if (confirm('Очистить все сообщения в чате?')) {
-                messages = [];
-                saveMessages();
-                showNotification('🗑️ Все сообщения удалены');
-            }
-        }
-        
-        // Инициализация
-        loadMessages();
-        checkPythonRequest();
-        
-        // Проверяем новые сообщения каждые 2 секунды (для обновления между вкладками)
+        // Периодическая проверка новых сообщений (для синхронизации между вкладками)
         setInterval(() => {
             const saved = localStorage.getItem('chat_messages');
             if (saved) {
@@ -421,13 +325,14 @@
                     displayMessages();
                 }
             }
-        }, 2000);
+        }, 1000);
         
-        // Добавляем кнопку очистки (опционально)
-        console.log('💬 Чат готов к работе!');
+        // Проверка сообщения от Python при загрузке
+        checkForPythonMessage();
+        displayMessages();
+        
+        console.log('✅ Чат готов!');
         console.log('🔑 Ключ:', SECRET_KEY);
-        console.log('🔗 API URL:', API_URL);
-        console.log('📝 Используйте Python скрипт для отправки сообщений');
     </script>
 </body>
 </html>
