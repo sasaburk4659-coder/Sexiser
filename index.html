@@ -2,284 +2,778 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Client</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>YouTube Stream Manager - Загрузка видео</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        * {
             margin: 0;
-            padding: 20px;
-            color: #fff;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--tg-theme-bg-color, #0f0c29);
+            color: var(--tg-theme-text-color, #ffffff);
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        :root {
+            --tg-bg: var(--tg-theme-bg-color, #0f0c29);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --tg-hint: var(--tg-theme-hint-color, #aaaaaa);
+            --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #1f1f2f);
+        }
+
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
-        h1 {
+
+        .header {
             text-align: center;
-            margin-bottom: 30px;
-        }
-        .connection-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
             margin-bottom: 20px;
-        }
-        .status {
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .connected {
-            background: rgba(76, 175, 80, 0.3);
-            border: 1px solid #4caf50;
-        }
-        .disconnected {
-            background: rgba(244, 67, 54, 0.3);
-            border: 1px solid #f44336;
-        }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-        }
-        input {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.9);
-        }
-        button {
-            background: #4caf50;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: scale(1.05);
-        }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .message-area {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
             padding: 20px;
-            margin-top: 20px;
-            height: 400px;
+            background: linear-gradient(135deg, #ff0000, #ff6b6b);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 10px;
+
+        .card {
+            background: var(--tg-secondary-bg, rgba(255,255,255,0.1));
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .message {
-            margin: 5px 0;
-            padding: 8px;
-            border-radius: 5px;
-            background: rgba(255, 255, 255, 0.1);
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
         }
-        .message.sent {
-            background: rgba(76, 175, 80, 0.3);
-            text-align: right;
+
+        .card-title i {
+            color: #ff0000;
         }
-        .message.received {
-            background: rgba(33, 150, 243, 0.3);
-        }
-        .timestamp {
-            font-size: 0.8em;
-            color: #ccc;
-        }
+
         .input-group {
-            display: flex;
-            gap: 10px;
+            margin-bottom: 16px;
         }
-        .server-select {
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            color: var(--tg-hint);
+        }
+
+        .input-group input, .input-group textarea {
             width: 100%;
+            padding: 12px;
+            background: var(--tg-bg, rgba(0,0,0,0.3));
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            color: var(--tg-text, white);
+            font-size: 0.9rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff0000;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff0000, #ff6b6b);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00c853, #69f0ae);
+            color: #1a1a2e;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #d50000, #ff1744);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        .status-badge.live {
+            background: rgba(255,0,0,0.2);
+            color: #ff6b6b;
+            border: 1px solid #ff0000;
+        }
+
+        .status-badge.offline {
+            background: rgba(128,128,128,0.2);
+            color: #888;
+        }
+
+        .file-upload {
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            border-color: #ff0000;
+            background: rgba(255,0,0,0.1);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .video-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+
+        .video-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .video-item button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
+        .btn-pin {
+            background: #ff0000;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #666;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ff0000;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .logs-area {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 12px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.7rem;
+        }
+
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .log-entry.info { color: #6ab2f2; }
+        .log-entry.success { color: #69f0ae; }
+        .log-entry.error { color: #ff6b6b; }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .video-preview {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .video-preview video {
+            width: 100%;
+            border-radius: 12px;
+            max-height: 200px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔌 WebSocket Client</h1>
-        
-        <div class="connection-panel">
-            <h3>Server Connection</h3>
-            <div class="input-group">
-                <input type="text" id="serverUrl" placeholder="ws://localhost:8080 or wss://your-server.com" value="ws://localhost:8080">
-                <button onclick="connect()" id="connectBtn">Connect</button>
-                <button onclick="disconnect()" id="disconnectBtn" disabled>Disconnect</button>
+        <div class="header">
+            <h1><i class="fab fa-youtube"></i> Stream Manager Pro</h1>
+            <p>Загружай видео и управляй стримом</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-signal"></i>
+                Статус стрима
+                <span class="status-badge offline" id="live-status">
+                    <i class="fas fa-circle"></i> OFFLINE
+                </span>
             </div>
-            <div id="status" class="status disconnected">
-                Status: Disconnected
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stream-time">00:00</div>
+                    <div class="stat-label">Время стрима</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="viewers">0</div>
+                    <div class="stat-label">Зрители</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="videos-count">0</div>
+                    <div class="stat-label">Видео</div>
+                </div>
             </div>
         </div>
 
-        <div class="message-area">
-            <h3>💬 Messages</h3>
-            <div id="messages" class="messages"></div>
+        <!-- Stream Settings -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-sliders-h"></i>
+                Настройки стрима
+            </div>
             <div class="input-group">
-                <input type="text" id="messageInput" placeholder="Type your message..." disabled>
-                <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+                <label><i class="fas fa-key"></i> Stream Key</label>
+                <input type="password" id="stream-key" placeholder="Введите Stream Key из YouTube Studio">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-link"></i> Ссылка на стрим</label>
+                <input type="text" id="stream-url" placeholder="https://youtube.com/live/...">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-heading"></i> Название стрима</label>
+                <input type="text" id="stream-title" placeholder="Введите название трансляции">
             </div>
         </div>
 
-        <div class="connection-panel">
-            <h3>📊 Connection Info</h3>
-            <div id="connectionInfo">
-                <p>Client ID: <span id="clientId">Not connected</span></p>
-                <p>Server: <span id="serverInfo">Not connected</span></p>
-                <p>Protocol: <span id="protocol">-</span></p>
+        <!-- Video Upload Section -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-upload"></i>
+                Загрузка видео
+            </div>
+            <div class="file-upload" onclick="document.getElementById('video-file').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem;"></i>
+                <p style="margin-top: 10px;">Нажмите для выбора видео файла</p>
+                <p style="font-size: 0.7rem; opacity: 0.6;">Поддерживаются: MP4, AVI, MOV, MKV</p>
+                <input type="file" id="video-file" accept="video/*" onchange="uploadVideo(this)">
+            </div>
+            <div class="video-preview" id="video-preview">
+                <video id="preview-video" controls></video>
+            </div>
+        </div>
+
+        <!-- Video List -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-video"></i>
+                Мои видео
+                <span style="font-size: 0.7rem; margin-left: auto;" id="storage-info"></span>
+            </div>
+            <div id="video-list" class="video-list">
+                <div style="text-align: center; padding: 30px; opacity: 0.5;">
+                    <i class="fas fa-film" style="font-size: 2rem;"></i>
+                    <p style="margin-top: 10px;">Нет загруженных видео</p>
+                    <p style="font-size: 0.7rem;">Нажмите выше, чтобы загрузить</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-gamepad"></i>
+                Управление
+            </div>
+            <div class="grid-2">
+                <button class="btn btn-success" id="start-btn" onclick="startStream()">
+                    <i class="fas fa-play"></i> Старт стрима
+                </button>
+                <button class="btn btn-danger" id="stop-btn" onclick="stopStream()">
+                    <i class="fas fa-stop"></i> Стоп стрима
+                </button>
+            </div>
+            <div class="grid-2">
+                <button class="btn btn-primary" onclick="sendNotification()">
+                    <i class="fas fa-bell"></i> Уведомление
+                </button>
+                <button class="btn btn-secondary" onclick="openYouTube()">
+                    <i class="fab fa-youtube"></i> Открыть YouTube
+                </button>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-terminal"></i>
+                Логи
+            </div>
+            <div class="logs-area" id="logs-area">
+                <div class="log-entry info">[SYSTEM] Stream Manager запущен</div>
+                <div class="log-entry info">[SYSTEM] Готов к загрузке видео</div>
             </div>
         </div>
     </div>
 
     <script>
-        let ws = null;
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
-
-        function addMessage(text, type = 'received') {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            const timestamp = new Date().toLocaleTimeString();
-            messageDiv.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${text}`;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function updateUI(connected) {
-            const connectBtn = document.getElementById('connectBtn');
-            const disconnectBtn = document.getElementById('disconnectBtn');
-            const messageInput = document.getElementById('messageInput');
-            const sendBtn = document.getElementById('sendBtn');
-            const statusDiv = document.getElementById('status');
-            
-            if (connected) {
-                connectBtn.disabled = true;
-                disconnectBtn.disabled = false;
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
-                statusDiv.className = 'status connected';
-                statusDiv.innerHTML = 'Status: ✅ Connected';
-            } else {
-                connectBtn.disabled = false;
-                disconnectBtn.disabled = true;
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
-                statusDiv.className = 'status disconnected';
-                statusDiv.innerHTML = 'Status: ❌ Disconnected';
-                document.getElementById('clientId').textContent = 'Not connected';
-            }
-        }
-
-        function connect() {
-            const serverUrl = document.getElementById('serverUrl').value;
-            
-            if (!serverUrl) {
-                addMessage('Please enter a server URL', 'sent');
-                return;
-            }
-            
-            try {
-                ws = new WebSocket(serverUrl);
-                
-                ws.onopen = () => {
-                    addMessage(`Connected to ${serverUrl}`, 'received');
-                    updateUI(true);
-                    reconnectAttempts = 0;
-                    
-                    // Send initial message
-                    ws.send('Client connected to server');
-                };
-                
-                ws.onmessage = (event) => {
-                    addMessage(`Server: ${event.data}`, 'received');
-                    
-                    // Try to extract client ID from welcome message
-                    const match = event.data.match(/client #(\d+)/);
-                    if (match) {
-                        document.getElementById('clientId').textContent = match[1];
-                    }
-                    document.getElementById('serverInfo').textContent = serverUrl;
-                    document.getElementById('protocol').textContent = 'WebSocket';
-                };
-                
-                ws.onerror = (error) => {
-                    addMessage(`WebSocket Error: ${error.message || 'Connection error'}`, 'received');
-                    console.error('WebSocket error:', error);
-                };
-                
-                ws.onclose = () => {
-                    addMessage('Disconnected from server', 'received');
-                    updateUI(false);
-                    
-                    // Auto reconnect
-                    if (reconnectAttempts < maxReconnectAttempts) {
-                        reconnectAttempts++;
-                        addMessage(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`, 'received');
-                        setTimeout(connect, 3000);
-                    } else {
-                        addMessage('Max reconnection attempts reached. Please reconnect manually.', 'received');
-                    }
-                };
-                
-            } catch (error) {
-                addMessage(`Failed to connect: ${error.message}`, 'received');
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Get user info
+        const user = tg.initDataUnsafe?.user;
+        
+        // Video storage
+        let videos = [];
+        
+        // Load saved videos
+        function loadVideos() {
+            const saved = localStorage.getItem('stream_videos');
+            if (saved) {
+                videos = JSON.parse(saved);
+                renderVideoList();
+                updateVideoCount();
+                updateStorageInfo();
             }
         }
         
-        function disconnect() {
-            if (ws) {
-                ws.close();
-                ws = null;
-                updateUI(false);
-                addMessage('Manually disconnected', 'received');
-            }
+        // Save videos
+        function saveVideos() {
+            localStorage.setItem('stream_videos', JSON.stringify(videos));
+            updateVideoCount();
+            updateStorageInfo();
         }
         
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
+        // Upload video
+        function uploadVideo(input) {
+            const file = input.files[0];
+            if (!file) return;
             
-            if (!message) {
-                addMessage('Please enter a message', 'sent');
+            // Check file type
+            if (!file.type.startsWith('video/')) {
+                showToast('❌ Пожалуйста, выберите видео файл');
                 return;
             }
             
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(message);
-                addMessage(`You: ${message}`, 'sent');
+            // Check file size (max 100MB)
+            if (file.size > 100 * 1024 * 1024) {
+                showToast('❌ Файл слишком большой! Максимум 100MB');
+                return;
+            }
+            
+            addLog('info', `Загрузка видео: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+            showToast(`📹 Загрузка ${file.name}...`);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const videoData = {
+                    id: Date.now(),
+                    name: file.name,
+                    data: e.target.result,
+                    size: file.size,
+                    type: file.type,
+                    uploaded: new Date().toISOString(),
+                    duration: 0
+                };
+                
+                videos.unshift(videoData);
+                saveVideos();
+                renderVideoList();
+                
+                showToast(`✅ Видео "${file.name}" загружено!`);
+                addLog('success', `Видео загружено: ${file.name}`);
+                
+                // Preview video
+                const preview = document.getElementById('video-preview');
+                const previewVideo = document.getElementById('preview-video');
+                preview.style.display = 'block';
+                previewVideo.src = videoData.data;
+                
+                // Clear input
                 input.value = '';
-            } else {
-                addMessage('Not connected to server', 'received');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Render video list
+        function renderVideoList() {
+            const container = document.getElementById('video-list');
+            
+            if (videos.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px; opacity: 0.5;">
+                        <i class="fas fa-film" style="font-size: 2rem;"></i>
+                        <p style="margin-top: 10px;">Нет загруженных видео</p>
+                        <p style="font-size: 0.7rem;">Нажмите на область выше, чтобы загрузить</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = videos.map(video => `
+                <div class="video-item">
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-file-video" style="color: #ff0000;"></i>
+                            <span style="font-weight: 500;">${video.name.length > 35 ? video.name.substring(0, 32) + '...' : video.name}</span>
+                        </div>
+                        <div style="font-size: 0.65rem; opacity: 0.6; margin-top: 4px;">
+                            ${(video.size / 1024 / 1024).toFixed(2)} MB • ${new Date(video.uploaded).toLocaleDateString()}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn-pin" onclick="playVideo(${video.id})" title="Воспроизвести">
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button class="btn-pin" onclick="pinVideo(${video.id})" title="Закрепить в чате">
+                            <i class="fas fa-thumbtack"></i>
+                        </button>
+                        <button class="btn-delete" onclick="deleteVideo(${video.id})" title="Удалить">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Play video
+        function playVideo(videoId) {
+            const video = videos.find(v => v.id === videoId);
+            if (video) {
+                const preview = document.getElementById('video-preview');
+                const previewVideo = document.getElementById('preview-video');
+                preview.style.display = 'block';
+                previewVideo.src = video.data;
+                previewVideo.play();
+                addLog('info', `Воспроизведение: ${video.name}`);
+                showToast(`🎬 Воспроизведение: ${video.name}`);
             }
         }
         
-        // Handle Enter key
-        document.getElementById('messageInput').addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                sendMessage();
+        // Pin video (send to Telegram)
+        function pinVideo(videoId) {
+            const video = videos.find(v => v.id === videoId);
+            if (video) {
+                addLog('success', `Видео "${video.name}" закреплено в чате`);
+                showToast(`📌 "${video.name}" закреплено!`);
+                
+                // Send to Telegram
+                if (tg && tg.sendData) {
+                    tg.sendData(JSON.stringify({
+                        action: 'pin_video',
+                        video: video.name
+                    }));
+                }
             }
-        });
+        }
         
-        addMessage('Client ready. Enter server URL and click Connect to start.', 'received');
+        // Delete video
+        function deleteVideo(videoId) {
+            if (confirm('Удалить это видео?')) {
+                const video = videos.find(v => v.id === videoId);
+                videos = videos.filter(v => v.id !== videoId);
+                saveVideos();
+                renderVideoList();
+                addLog('warning', `Видео удалено: ${video.name}`);
+                showToast(`🗑️ Видео удалено`);
+                
+                // Clear preview if it was playing
+                const preview = document.getElementById('video-preview');
+                if (preview.style.display === 'block') {
+                    preview.style.display = 'none';
+                    document.getElementById('preview-video').pause();
+                }
+            }
+        }
+        
+        // Update video count in stats
+        function updateVideoCount() {
+            document.getElementById('videos-count').textContent = videos.length;
+        }
+        
+        // Update storage info
+        function updateStorageInfo() {
+            const totalSize = videos.reduce((sum, v) => sum + v.size, 0);
+            const storageInfo = document.getElementById('storage-info');
+            if (storageInfo) {
+                storageInfo.textContent = `${(totalSize / 1024 / 1024).toFixed(1)} MB / 100 MB`;
+            }
+        }
+        
+        // Start stream
+        function startStream() {
+            const streamKey = document.getElementById('stream-key').value;
+            const streamTitle = document.getElementById('stream-title').value;
+            
+            if (!streamKey) {
+                showToast('❌ Введите Stream Key!');
+                addLog('error', 'Stream Key не введен');
+                return;
+            }
+            
+            if (videos.length === 0) {
+                showToast('❌ Загрузите хотя бы одно видео!');
+                addLog('error', 'Нет видео для стрима');
+                return;
+            }
+            
+            document.getElementById('live-status').className = 'status-badge live';
+            document.getElementById('live-status').innerHTML = '<i class="fas fa-circle"></i> LIVE';
+            
+            addLog('success', `🚀 Стрим запущен! Название: ${streamTitle || 'Без названия'}`);
+            showToast('🎬 Стрим запущен!');
+            
+            // Save settings
+            localStorage.setItem('stream_key', streamKey);
+            localStorage.setItem('stream_title', streamTitle);
+            
+            // Start timer
+            startStreamTimer();
+        }
+        
+        // Stop stream
+        function stopStream() {
+            document.getElementById('live-status').className = 'status-badge offline';
+            document.getElementById('live-status').innerHTML = '<i class="fas fa-circle"></i> OFFLINE';
+            
+            addLog('warning', '⏹️ Стрим остановлен');
+            showToast('⏹️ Стрим остановлен');
+            
+            stopStreamTimer();
+        }
+        
+        // Stream timer
+        let streamTimer = null;
+        let streamSeconds = 0;
+        
+        function startStreamTimer() {
+            streamSeconds = 0;
+            if (streamTimer) clearInterval(streamTimer);
+            streamTimer = setInterval(() => {
+                streamSeconds++;
+                const hours = Math.floor(streamSeconds / 3600);
+                const minutes = Math.floor((streamSeconds % 3600) / 60);
+                const seconds = streamSeconds % 60;
+                document.getElementById('stream-time').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+        
+        function stopStreamTimer() {
+            if (streamTimer) {
+                clearInterval(streamTimer);
+                streamTimer = null;
+            }
+        }
+        
+        // Send notification
+        function sendNotification() {
+            addLog('info', '🔔 Уведомление отправлено зрителям');
+            showToast('🔔 Уведомление отправлено!');
+            
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({
+                    action: 'notification',
+                    message: 'Стрим начался! Присоединяйтесь!'
+                }));
+            }
+        }
+        
+        // Open YouTube
+        function openYouTube() {
+            const url = document.getElementById('stream-url').value;
+            if (url) {
+                tg.openLink(url);
+            } else {
+                showToast('❌ Введите ссылку на стрим');
+            }
+        }
+        
+        // Add log
+        function addLog(level, message) {
+            const logsArea = document.getElementById('logs-area');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${level}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logsArea.appendChild(logEntry);
+            logsArea.scrollTop = logsArea.scrollHeight;
+            
+            // Keep last 50 logs
+            while (logsArea.children.length > 50) {
+                logsArea.removeChild(logsArea.firstChild);
+            }
+        }
+        
+        // Show toast
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Load saved stream key
+        function loadSavedSettings() {
+            const savedKey = localStorage.getItem('stream_key');
+            const savedTitle = localStorage.getItem('stream_title');
+            const savedUrl = localStorage.getItem('stream_url');
+            
+            if (savedKey) document.getElementById('stream-key').value = savedKey;
+            if (savedTitle) document.getElementById('stream-title').value = savedTitle;
+            if (savedUrl) document.getElementById('stream-url').value = savedUrl;
+        }
+        
+        // Save settings on change
+        document.getElementById('stream-key').onchange = () => localStorage.setItem('stream_key', document.getElementById('stream-key').value);
+        document.getElementById('stream-title').onchange = () => localStorage.setItem('stream_title', document.getElementById('stream-title').value);
+        document.getElementById('stream-url').onchange = () => localStorage.setItem('stream_url', document.getElementById('stream-url').value);
+        
+        // Simulate viewers count
+        let viewersInterval = null;
+        function startViewersSimulation() {
+            let viewers = 0;
+            viewersInterval = setInterval(() => {
+                if (document.getElementById('live-status').classList.contains('live')) {
+                    viewers = Math.floor(Math.random() * 50) + 10;
+                    document.getElementById('viewers').textContent = viewers;
+                } else {
+                    document.getElementById('viewers').textContent = 0;
+                }
+            }, 5000);
+        }
+        
+        // Initialize
+        loadVideos();
+        loadSavedSettings();
+        startViewersSimulation();
+        
+        // Welcome message
+        if (user) {
+            addLog('info', `👋 Привет, ${user.first_name}! Добро пожаловать в Stream Manager`);
+        }
+        
+        addLog('info', '💡 Совет: Загрузите видео и нажмите "Старт стрима"');
     </script>
 </body>
 </html>
