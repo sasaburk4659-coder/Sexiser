@@ -2,205 +2,294 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Магазин тарифов</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Магазин — Проверка ключа</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .tariff-card {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin: 15px 0;
-            border-radius: 8px;
-            background: #fff;
-        }
-        .tariff-card h3 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: monospace;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         button {
-            background: #007bff;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px;
             font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
+
         button:hover {
-            background: #0056b3;
+            transform: translateY(-2px);
         }
+
+        button:active {
+            transform: translateY(0);
+        }
+
         .result {
             margin-top: 20px;
             padding: 15px;
-            border-radius: 5px;
-            display: none;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
         }
-        .success {
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
-        .error {
+
+        .result.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
-        .admin-panel {
-            margin-top: 40px;
-            padding: 20px;
-            border: 2px dashed #007bff;
-            border-radius: 8px;
-        }
-        .key-display {
-            background: #2c3e50;
-            color: white;
+
+        .info {
+            margin-top: 20px;
             padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            font-family: monospace;
-            word-break: break-all;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .info a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🛒 Магазин тарифов</h1>
-
-        <!-- Карточки тарифов -->
-        <div class="tariff-card">
-            <h3>Бесплатный тест (24 ч)</h3>
-            <p>Звёзды: 0</p>
-            <input type="text" id="user-id-test" placeholder="Ваш Telegram ID" required>
-            <button onclick="createKey('basic')">Активировать</button>
+        <div class="header">
+            <h1>🔐 Магазин</h1>
+            <p>Введите ключ для доступа</p>
         </div>
-
-        <div class="tariff-card">
-            <h3>24 часа</h3>
-            <p>Звёзды: 5</p>
-            <input type="text" id="user-id-24h" placeholder="Ваш Telegram ID" required>
-            <button onclick="createKey('normal')">Активировать</button>
-        </div>
-
-        <div class="tariff-card">
-            <h3>7 дней</h3>
-            <p>Звёзды: 20</p>
-            <input type="text" id="user-id-7d" placeholder="Ваш Telegram ID" required>
-            <button onclick="createKey('normal')">Активировать</button>
-        </div>
-
-        <div class="tariff-card">
-            <h3>30 дней</h3>
-            <p>Звёзды: 50</p>
-            <input type="text" id="user-id-30d" placeholder="Ваш Telegram ID" required>
-            <button onclick="createKey('vip')">Активировать</button>
-        </div>
-
-        <!-- Результат -->
-        <div id="result" class="result"></div>
-
-        <!-- Админ‑панель -->
-        <div class="admin-panel">
-            <h2>👑 Админ‑панель</h2>
-            <p>Создайте промокод для бесплатного тарифа:</p>
-            <select id="promo-tariff">
-                <option value="basic">Базовый (24 ч)</option>
-                <option value="normal">Обычный (7 д)</option>
-                <option value="vip">VIP (30 д)</option>
-            </select>
-            <button onclick="createPromo()">Создать промокод</button>
-            <div id="promo-result" class="result"></div>
+        <div class="content">
+            <div class="form-group">
+                <label>Приватный ключ</label>
+                <input type="text" id="keyInput" placeholder="Введите ключ..." autocomplete="off">
+            </div>
+            <button id="checkBtn" onclick="checkKey()">Проверить ключ</button>
+            <div id="result"></div>
+            <div class="info">
+                💡 Нет ключа? Купите его в <a href="https://t.me/ваш_бот" target="_blank">Telegram боте</a>
+            </div>
         </div>
     </div>
 
     <script>
-        // Генерация сложного промокода
-        function generateComplexPromo() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#@#$%^&*';
-            let promo = '';
-            for (let i = 0; i < 32; i++) {
-                promo += chars.charAt(Math.floor(Math.random() * chars.length));
+        // URL для проверки ключа через бота
+        // ВАЖНО: нужно создать вебхук или использовать polling
+        // Простой способ: сохраняем ключи в localStorage (для демо)
+        // Реальный способ: бот должен иметь API endpoint
+        
+        // === ВАРИАНТ 1: Локальное хранение ключей (для теста) ===
+        // Ключи, которые были куплены в боте, нужно добавлять сюда вручную
+        // Или бот может сохранять их в файл, который читает сайт
+        
+        let validKeys = [];
+        
+        // Загружаем ключи из localStorage
+        function loadKeys() {
+            const saved = localStorage.getItem('valid_keys');
+            if (saved) {
+                validKeys = JSON.parse(saved);
             }
-            return promo;
         }
-
-        // Создание ключа активации
-        function createKey(tariff) {
-            const userInput = document.activeElement.id;
-            const userId = document.getElementById(userInput).value.trim();
-
-            if (!userId) {
-                showResult('Введите ваш Telegram ID!', 'error');
+        
+        // Сохраняем ключ
+        function saveKey(key) {
+            if (!validKeys.includes(key)) {
+                validKeys.push(key);
+                localStorage.setItem('valid_keys', JSON.stringify(validKeys));
+            }
+        }
+        
+        // Проверка ключа
+        function checkKey() {
+            const input = document.getElementById('keyInput');
+            const key = input.value.trim();
+            const resultDiv = document.getElementById('result');
+            const btn = document.getElementById('checkBtn');
+            
+            if (!key) {
+                showResult('❌ Введите ключ', 'error');
                 return;
             }
-
-            // Генерация уникального ключа
-            const activationKey = 'ACT-' + Math.random().toString(36).substr(2, 9) +
-                '-' + Date.now().toString(36);
-
-            // Сохранение в локальный файл (в реальном проекте — отправка на сервер)
-            const keyData = {
-                key: activationKey,
-                user_id: userId,
-                tariff: tariff,
-                activated: false,
-                created_at: Date.now()
-            };
-
-            // В реальном проекте здесь будет fetch к API бота
-            console.log('Создан ключ:', keyData);
-
-            showResult(`✅ Ключ создан! Используйте его в боте:\n\n<div class="key-display">${activationKey}</div>`, 'success');
+            
+            // Показываем загрузку
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Проверка...';
+            
+            // Имитация проверки (в реальности будет запрос к боту)
+            setTimeout(() => {
+                loadKeys();
+                
+                if (validKeys.includes(key)) {
+                    showResult('✅ Ключ верный! Доступ разрешён.', 'success');
+                    // Здесь можно перенаправить на защищённую страницу
+                    // window.location.href = '/dashboard.html';
+                } else {
+                    showResult('❌ Неверный ключ. Доступ запрещён.', 'error');
+                }
+                
+                btn.disabled = false;
+                btn.innerHTML = 'Проверить ключ';
+            }, 500);
         }
-
-        // Создание промокода
-        function createPromo() {
-            const tariff = document.getElementById('promo-tariff').value;
-            const promoCode = generateComplexPromo();
-
-            const promoData = {
-                code: promoCode,
-                tariff: tariff,
-                used: false
-            };
-
-            // В реальном проекте — сохранение в базу данных
-            console.log('Создан промокод:', promoData);
-
-            document.getElementById('promo-result').innerHTML =
-                `✅ Промокод создан:\n\n<div class="key-display">${promoCode}</div>\n\nТариф: ${tariff}`;
-            document.getElementById('promo-result').className = 'result success';
-        }
-
-        // Показать результат
+        
         function showResult(message, type) {
             const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = message;
-            resultDiv.className = `result ${type}`;
-            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
         }
+        
+        // Добавить ключ (для админа/бота) - можно вызывать из консоли или через API
+        window.addValidKey = function(key) {
+            saveKey(key);
+            console.log('Ключ добавлен:', key);
+            return true;
+        };
+        
+        // Показать все ключи (для админа)
+        window.showKeys = function() {
+            loadKeys();
+            console.log('Все ключи:', validKeys);
+            return validKeys;
+        };
+        
+        // Загружаем ключи при старте
+        loadKeys();
+        
+        // Нажать Enter для проверки
+        document.getElementById('keyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkKey();
+            }
+        });
+        
+        console.log('Сайт готов! Используйте addValidKey("ключ") для добавления ключей');
+        console.log('Или showKeys() для просмотра всех ключей');
     </script>
 </body>
 </html>
