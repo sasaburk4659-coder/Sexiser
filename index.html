@@ -2,337 +2,205 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чат с Python управлением</title>
+    <title>Магазин тарифов</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .tariff-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .tariff-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             box-sizing: border-box;
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        .chat-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
-        }
-        
-        .api-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        .api-key-box {
-            background: #2d3748;
-            color: #68d391;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 14px;
-            word-break: break-all;
-            margin-top: 10px;
-        }
-        
-        .api-url-box {
-            background: #2d3748;
-            color: #63b3ed;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
-            margin-top: 10px;
-        }
-        
-        .copy-btn {
-            background: #48bb78;
+        button {
+            background: #007bff;
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
-            margin-top: 10px;
+            font-size: 16px;
         }
-        
-        .messages-area {
-            height: 400px;
-            overflow-y: auto;
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .admin-panel {
+            margin-top: 40px;
             padding: 20px;
-            background: #f7fafc;
+            border: 2px dashed #007bff;
+            border-radius: 8px;
         }
-        
-        .message {
-            margin-bottom: 15px;
-            animation: slideIn 0.3s ease-out;
-            padding: 10px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        .sender {
-            font-weight: bold;
-            color: #667eea;
-            margin-right: 10px;
-        }
-        
-        .timestamp {
-            font-size: 11px;
-            color: #999;
-        }
-        
-        .message-text {
-            margin-top: 5px;
-            word-wrap: break-word;
-        }
-        
-        .input-area {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .input-area input {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            outline: none;
-            font-size: 14px;
-        }
-        
-        .input-area button {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .key-display {
+            background: #2c3e50;
             color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .status {
-            padding: 10px;
-            text-align: center;
-            font-size: 12px;
-            background: #edf2f7;
-            color: #4a5568;
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="chat-card">
-            <div class="header">
-                <h1>💬 Чат с Python управлением</h1>
-                <p>Отправляйте сообщения через Python скрипт</p>
-            </div>
-            
-            <div class="api-info">
-                <strong>🔑 API Ключ:</strong>
-                <div class="api-key-box" id="apiKey">Загрузка...</div>
-                
-                <strong>🔗 API Ссылка:</strong>
-                <div class="api-url-box" id="apiUrl">Загрузка...</div>
-                <button class="copy-btn" onclick="copyApiUrl()">📋 Копировать ссылку</button>
-            </div>
-            
-            <div class="messages-area" id="messages">
-                <div class="message">
-                    <span class="sender">📡 Система:</span>
-                    <span class="timestamp"></span>
-                    <div class="message-text">Чат активен. Ожидание сообщений...</div>
-                </div>
-            </div>
-            
-            <div class="input-area">
-                <input type="text" id="messageInput" placeholder="Напишите сообщение..." />
-                <button onclick="sendMessage()">Отправить</button>
-            </div>
-            
-            <div class="status" id="status">
-                🟢 Онлайн | Ожидание сообщений
-            </div>
+        <h1>🛒 Магазин тарифов</h1>
+
+        <!-- Карточки тарифов -->
+        <div class="tariff-card">
+            <h3>Бесплатный тест (24 ч)</h3>
+            <p>Звёзды: 0</p>
+            <input type="text" id="user-id-test" placeholder="Ваш Telegram ID" required>
+            <button onclick="createKey('basic')">Активировать</button>
+        </div>
+
+        <div class="tariff-card">
+            <h3>24 часа</h3>
+            <p>Звёзды: 5</p>
+            <input type="text" id="user-id-24h" placeholder="Ваш Telegram ID" required>
+            <button onclick="createKey('normal')">Активировать</button>
+        </div>
+
+        <div class="tariff-card">
+            <h3>7 дней</h3>
+            <p>Звёзды: 20</p>
+            <input type="text" id="user-id-7d" placeholder="Ваш Telegram ID" required>
+            <button onclick="createKey('normal')">Активировать</button>
+        </div>
+
+        <div class="tariff-card">
+            <h3>30 дней</h3>
+            <p>Звёзды: 50</p>
+            <input type="text" id="user-id-30d" placeholder="Ваш Telegram ID" required>
+            <button onclick="createKey('vip')">Активировать</button>
+        </div>
+
+        <!-- Результат -->
+        <div id="result" class="result"></div>
+
+        <!-- Админ‑панель -->
+        <div class="admin-panel">
+            <h2>👑 Админ‑панель</h2>
+            <p>Создайте промокод для бесплатного тарифа:</p>
+            <select id="promo-tariff">
+                <option value="basic">Базовый (24 ч)</option>
+                <option value="normal">Обычный (7 д)</option>
+                <option value="vip">VIP (30 д)</option>
+            </select>
+            <button onclick="createPromo()">Создать промокод</button>
+            <div id="promo-result" class="result"></div>
         </div>
     </div>
 
     <script>
-        // ==============================================
-        // 🔑 СЕКРЕТНЫЙ КЛЮЧ (ДОЛЖЕН СОВПАДАТЬ С PYTHON СКРИПТОМ)
-        // ==============================================
-        const SECRET_KEY = "1%&2/&)1)(2$+12+11$+1/131";
-        
-        // Хранилище сообщений
-        let messages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
-        
-        // Отображение ключа
-        document.getElementById('apiKey').textContent = SECRET_KEY;
-        document.getElementById('apiUrl').textContent = window.location.href;
-        
-        // Функция для добавления сообщения
-        function addMessage(text, sender) {
-            const message = {
-                id: Date.now(),
-                text: text,
-                sender: sender,
-                timestamp: new Date().toLocaleTimeString(),
-                date: new Date().toISOString()
-            };
-            
-            messages.push(message);
-            
-            // Храним последние 100 сообщений
-            if (messages.length > 100) {
-                messages = messages.slice(-100);
+        // Генерация сложного промокода
+        function generateComplexPromo() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#@#$%^&*';
+            let promo = '';
+            for (let i = 0; i < 32; i++) {
+                promo += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            
-            localStorage.setItem('chat_messages', JSON.stringify(messages));
-            displayMessages();
-            return message;
+            return promo;
         }
-        
-        // Отображение сообщений
-        function displayMessages() {
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML = '';
-            
-            if (messages.length === 0) {
-                messagesDiv.innerHTML = '<div class="message"><span class="sender">📡 Система:</span><div class="message-text">Нет сообщений. Отправьте первое сообщение через Python!</div></div>';
+
+        // Создание ключа активации
+        function createKey(tariff) {
+            const userInput = document.activeElement.id;
+            const userId = document.getElementById(userInput).value.trim();
+
+            if (!userId) {
+                showResult('Введите ваш Telegram ID!', 'error');
                 return;
             }
-            
-            messages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'message';
-                msgDiv.innerHTML = `
-                    <span class="sender">${escapeHtml(msg.sender)}:</span>
-                    <span class="timestamp">${msg.timestamp}</span>
-                    <div class="message-text">${escapeHtml(msg.text)}</div>
-                `;
-                messagesDiv.appendChild(msgDiv);
-            });
-            
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Генерация уникального ключа
+            const activationKey = 'ACT-' + Math.random().toString(36).substr(2, 9) +
+                '-' + Date.now().toString(36);
+
+            // Сохранение в локальный файл (в реальном проекте — отправка на сервер)
+            const keyData = {
+                key: activationKey,
+                user_id: userId,
+                tariff: tariff,
+                activated: false,
+                created_at: Date.now()
+            };
+
+            // В реальном проекте здесь будет fetch к API бота
+            console.log('Создан ключ:', keyData);
+
+            showResult(`✅ Ключ создан! Используйте его в боте:\n\n<div class="key-display">${activationKey}</div>`, 'success');
         }
-        
-        // Отправка сообщения с сайта
-        function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            addMessage(text, 'Сайт');
-            input.value = '';
-            
-            const status = document.getElementById('status');
-            status.innerHTML = '✅ Сообщение отправлено с сайта';
-            setTimeout(() => {
-                status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
-            }, 2000);
+
+        // Создание промокода
+        function createPromo() {
+            const tariff = document.getElementById('promo-tariff').value;
+            const promoCode = generateComplexPromo();
+
+            const promoData = {
+                code: promoCode,
+                tariff: tariff,
+                used: false
+            };
+
+            // В реальном проекте — сохранение в базу данных
+            console.log('Создан промокод:', promoData);
+
+            document.getElementById('promo-result').innerHTML =
+                `✅ Промокод создан:\n\n<div class="key-display">${promoCode}</div>\n\nТариф: ${tariff}`;
+            document.getElementById('promo-result').className = 'result success';
         }
-        
-        // Получение сообщений от Python (через хэш URL)
-        function checkForPythonMessage() {
-            // Проверяем hash параметры
-            const hash = window.location.hash.substring(1);
-            if (hash) {
-                try {
-                    const params = new URLSearchParams(hash);
-                    const key = params.get('key');
-                    const text = params.get('text');
-                    const sender = params.get('sender') || 'Python Script';
-                    
-                    if (key === SECRET_KEY && text) {
-                        addMessage(decodeURIComponent(text), decodeURIComponent(sender));
-                        
-                        const status = document.getElementById('status');
-                        status.innerHTML = `✅ Получено сообщение от Python: ${decodeURIComponent(text).substring(0, 50)}`;
-                        status.style.background = '#c6f6d5';
-                        setTimeout(() => {
-                            status.innerHTML = '🟢 Онлайн | Ожидание сообщений';
-                            status.style.background = '#edf2f7';
-                        }, 3000);
-                        
-                        // Очищаем hash
-                        window.location.hash = '';
-                        return true;
-                    }
-                } catch(e) {
-                    console.error('Ошибка:', e);
-                }
-            }
-            return false;
+
+        // Показать результат
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
         }
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function copyApiUrl() {
-            navigator.clipboard.writeText(window.location.href);
-            alert('✅ Ссылка скопирована!');
-        }
-        
-        // Периодическая проверка новых сообщений (для синхронизации между вкладками)
-        setInterval(() => {
-            const saved = localStorage.getItem('chat_messages');
-            if (saved) {
-                const newMessages = JSON.parse(saved);
-                if (JSON.stringify(messages) !== JSON.stringify(newMessages)) {
-                    messages = newMessages;
-                    displayMessages();
-                }
-            }
-        }, 1000);
-        
-        // Проверка сообщения от Python при загрузке
-        checkForPythonMessage();
-        displayMessages();
-        
-        console.log('✅ Чат готов!');
-        console.log('🔑 Ключ:', SECRET_KEY);
     </script>
 </body>
 </html>
