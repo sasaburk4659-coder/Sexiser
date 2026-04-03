@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Магазин — Проверка ключа</title>
+    <title>SPYT - Защищённый чат</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -20,276 +20,263 @@
             align-items: center;
             padding: 20px;
         }
-
+        
         .container {
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
-            max-width: 500px;
-            width: 100%;
-            animation: fadeIn 0.5s ease;
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
+        
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
         }
-
+        
         .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
-
-        .header p {
-            opacity: 0.9;
+        
+        .status {
             font-size: 14px;
+            opacity: 0.9;
         }
-
-        .content {
-            padding: 30px;
+        
+        .access-denied {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
         }
-
-        .form-group {
+        
+        .access-denied h2 {
+            color: #764ba2;
             margin-bottom: 20px;
         }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
+        
+        .access-denied p {
+            color: #666;
+            margin-bottom: 30px;
         }
-
-        input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            font-family: monospace;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
+        
+        .access-denied button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 25px;
             cursor: pointer;
-            transition: transform 0.2s ease;
+            font-size: 16px;
+            transition: transform 0.2s;
         }
-
-        button:hover {
-            transform: translateY(-2px);
+        
+        .access-denied button:hover {
+            transform: scale(1.05);
         }
-
-        button:active {
-            transform: translateY(0);
+        
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-
-        .result {
-            margin-top: 20px;
-            padding: 15px;
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
             border-radius: 10px;
+            max-width: 70%;
+        }
+        
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.other {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .message.system {
+            background: #fff3cd;
+            color: #856404;
             text-align: center;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .result.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .result.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            text-align: center;
+            max-width: 100%;
             font-size: 12px;
-            color: #666;
         }
-
-        .info a {
-            color: #667eea;
-            text-decoration: none;
+        
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
         }
-
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
+        
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        
+        .input-area button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
         }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
+        
+        .logout-btn {
+            background: #dc3545;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 Магазин</h1>
-            <p>Введите ключ для доступа</p>
+            <h1>🕷️ SPYT Secure Chat</h1>
+            <div class="status" id="status">Проверка доступа...</div>
         </div>
-        <div class="content">
-            <div class="form-group">
-                <label>Приватный ключ</label>
-                <input type="text" id="keyInput" placeholder="Введите ключ..." autocomplete="off">
+        
+        <div id="accessDenied" class="access-denied">
+            <h2>⛔ Доступ запрещён</h2>
+            <p>У вас нет доступа к этому чату. Для получения доступа нужен специальный ключ.</p>
+            <button onclick="checkAccess()">Проверить доступ</button>
+        </div>
+        
+        <div id="chatArea" class="chat-area hidden">
+            <div class="messages" id="messages">
+                <div class="message system">🤖 Добро пожаловать в защищённый чат!</div>
             </div>
-            <button id="checkBtn" onclick="checkKey()">Проверить ключ</button>
-            <div id="result"></div>
-            <div class="info">
-                💡 Нет ключа? Купите его в <a href="https://t.me/ваш_бот" target="_blank">Telegram боте</a>
+            <div class="input-area">
+                <input type="text" id="messageInput" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Отправить</button>
+            </div>
+            <div class="input-area">
+                <button onclick="logout()" class="logout-btn" style="width: 100%;">🚪 Выйти из чата</button>
             </div>
         </div>
     </div>
 
     <script>
-        // URL для проверки ключа через бота
-        // ВАЖНО: нужно создать вебхук или использовать polling
-        // Простой способ: сохраняем ключи в localStorage (для демо)
-        // Реальный способ: бот должен иметь API endpoint
+        // Ключ доступа (проверяется из URL)
+        let currentKey = null;
+        let hasAccess = false;
         
-        // === ВАРИАНТ 1: Локальное хранение ключей (для теста) ===
-        // Ключи, которые были куплены в боте, нужно добавлять сюда вручную
-        // Или бот может сохранять их в файл, который читает сайт
-        
-        let validKeys = [];
-        
-        // Загружаем ключи из localStorage
-        function loadKeys() {
-            const saved = localStorage.getItem('valid_keys');
-            if (saved) {
-                validKeys = JSON.parse(saved);
-            }
+        function getKeyFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('key');
         }
         
-        // Сохраняем ключ
-        function saveKey(key) {
-            if (!validKeys.includes(key)) {
-                validKeys.push(key);
-                localStorage.setItem('valid_keys', JSON.stringify(validKeys));
-            }
-        }
-        
-        // Проверка ключа
-        function checkKey() {
-            const input = document.getElementById('keyInput');
-            const key = input.value.trim();
-            const resultDiv = document.getElementById('result');
-            const btn = document.getElementById('checkBtn');
+        function checkAccess() {
+            currentKey = getKeyFromURL();
             
-            if (!key) {
-                showResult('❌ Введите ключ', 'error');
-                return;
-            }
-            
-            // Показываем загрузку
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Проверка...';
-            
-            // Имитация проверки (в реальности будет запрос к боту)
-            setTimeout(() => {
-                loadKeys();
+            if (currentKey) {
+                // Проверяем ключ в localStorage
+                const validKeys = JSON.parse(localStorage.getItem('spyt_valid_keys') || '[]');
                 
-                if (validKeys.includes(key)) {
-                    showResult('✅ Ключ верный! Доступ разрешён.', 'success');
-                    // Здесь можно перенаправить на защищённую страницу
-                    // window.location.href = '/dashboard.html';
+                if (validKeys.includes(currentKey)) {
+                    hasAccess = true;
+                    showChat();
+                    loadMessages();
                 } else {
-                    showResult('❌ Неверный ключ. Доступ запрещён.', 'error');
+                    showAccessDenied();
                 }
-                
-                btn.disabled = false;
-                btn.innerHTML = 'Проверить ключ';
-            }, 500);
-        }
-        
-        function showResult(message, type) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `<div class="result ${type}">${message}</div>`;
-        }
-        
-        // Добавить ключ (для админа/бота) - можно вызывать из консоли или через API
-        window.addValidKey = function(key) {
-            saveKey(key);
-            console.log('Ключ добавлен:', key);
-            return true;
-        };
-        
-        // Показать все ключи (для админа)
-        window.showKeys = function() {
-            loadKeys();
-            console.log('Все ключи:', validKeys);
-            return validKeys;
-        };
-        
-        // Загружаем ключи при старте
-        loadKeys();
-        
-        // Нажать Enter для проверки
-        document.getElementById('keyInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkKey();
+            } else {
+                showAccessDenied();
             }
-        });
+        }
         
-        console.log('Сайт готов! Используйте addValidKey("ключ") для добавления ключей');
-        console.log('Или showKeys() для просмотра всех ключей');
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('spyt_messages') || '[]');
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = '';
+            
+            if (messages.length === 0) {
+                messagesDiv.innerHTML = '<div class="message system">🤖 Добро пожаловать в защищённый чат!</div>';
+            } else {
+                messages.forEach(msg => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${msg.type}`;
+                    messageDiv.innerHTML = `<strong>${msg.sender}:</strong><br>${msg.text}<br><small>${msg.time}</small>`;
+                    messagesDiv.appendChild(messageDiv);
+                });
+            }
+            
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            
+            if (!text || !hasAccess) return;
+            
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString();
+            
+            const messages = JSON.parse(localStorage.getItem('spyt_messages') || '[]');
+            messages.push({
+                sender: 'Пользователь',
+                text: text,
+                type: 'user',
+                time: timeStr
+            });
+            
+            localStorage.setItem('spyt_messages', JSON.stringify(messages));
+            loadMessages();
+            input.value = '';
+        }
+        
+        function showChat() {
+            document.getElementById('accessDenied').classList.add('hidden');
+            document.getElementById('chatArea').classList.remove('hidden');
+            document.getElementById('status').textContent = '✅ Доступ разрешён';
+        }
+        
+        function showAccessDenied() {
+            document.getElementById('accessDenied').classList.remove('hidden');
+            document.getElementById('chatArea').classList.add('hidden');
+            document.getElementById('status').textContent = '⛔ Доступ запрещён';
+        }
+        
+        function logout() {
+            window.location.href = window.location.pathname;
+        }
+        
+        // Проверяем доступ при загрузке
+        checkAccess();
+        
+        // Обновляем сообщения каждые 2 секунды
+        setInterval(() => {
+            if (hasAccess) loadMessages();
+        }, 2000);
     </script>
 </body>
 </html>
