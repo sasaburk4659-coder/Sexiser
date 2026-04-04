@@ -1,43 +1,188 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Кликер</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: system-ui; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); }
-        #coin { width: 150px; height: 150px; background: gold; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; cursor: pointer; transition: transform 0.1s; box-shadow: 0 4px 8px rgba(0,0,0,0.2); margin-bottom: 20px; }
-        #coin:active { transform: scale(0.95); }
-        #balance { font-size: 2rem; font-weight: bold; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding: 20px;
+            margin: 0;
+        }
+        .error {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .error-icon { font-size: 64px; margin-bottom: 20px; }
+        .error-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .error-text { color: var(--tg-theme-hint-color, #666); margin-bottom: 20px; }
+        .button {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #fff);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            width: 100%;
+            cursor: pointer;
+        }
+        #app {
+            width: 100%;
+            min-height: 400px;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #ccc;
+            border-top-color: #2481cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-    <div id="coin">🪙</div>
-    <div id="balance">0</div>
+    <div id="errorBox" class="error">
+        <div class="error-icon" id="errorIcon">🔍</div>
+        <div class="error-title" id="errorTitle">Загрузка...</div>
+        <div class="error-text" id="errorText">Пожалуйста, подождите</div>
+        <button class="button" onclick="closeApp()">Закрыть</button>
+    </div>
+    <div id="appContainer" style="display:none;">
+        <div id="app"></div>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.ready(); // Сообщаем Telegram, что приложение загружено
-        tg.expand(); // Растягиваем приложение на весь экран
-
-        let balanceSpan = document.getElementById('balance');
-
-        async function sendClick() {
+        
+        function getParam(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+        
+        async function loadApp() {
+            const key = getParam('app');
+            
+            if (!key) {
+                showError('❌', 'Ошибка', 'Отсутствует ключ приложения');
+                return;
+            }
+            
+            // Пытаемся получить код с сервера
+            const API_URL = `https://your-server.com/api/get_app?key=${key}`;
+            
+            // Для демонстрации используем тестовый код
+            // В реальности нужно сделать запрос к вашему API
+            const testCode = `
+                // Ваше приложение
+                const container = document.getElementById('app-root');
+                container.innerHTML = \`
+                    <style>
+                        button { padding: 20px; font-size: 18px; width: 100%; margin: 10px 0; border: none; border-radius: 10px; cursor: pointer; }
+                        .btn-primary { background: #2481cc; color: white; }
+                        .btn-danger { background: #e53935; color: white; }
+                        .counter { font-size: 48px; text-align: center; margin: 20px; }
+                    </style>
+                    <h1>🎮 Мое приложение</h1>
+                    <div class="counter" id="counter">0</div>
+                    <button class="btn-primary" id="clickBtn">Кликнуть</button>
+                    <button class="btn-danger" id="resetBtn">Сбросить</button>
+                \`;
+                
+                let count = 0;
+                const counterEl = document.getElementById('counter');
+                const clickBtn = document.getElementById('clickBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                
+                clickBtn.onclick = () => {
+                    count++;
+                    counterEl.textContent = count;
+                    if (window.TelegramWebApp) {
+                        window.TelegramWebApp.HapticFeedback.impactOccurred('light');
+                    }
+                };
+                
+                resetBtn.onclick = () => {
+                    count = 0;
+                    counterEl.textContent = count;
+                };
+                
+                if (window.TelegramWebApp) {
+                    window.TelegramWebApp.ready();
+                    window.TelegramWebApp.expand();
+                }
+            `;
+            
+            document.getElementById('errorBox').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            
+            const container = document.getElementById('app');
+            container.innerHTML = '<div id="app-root"></div>';
+            
             try {
-                let response = await fetch('/click', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'click' })
-                });
-                let newBalance = await response.text();
-                balanceSpan.innerText = newBalance;
-            } catch (error) {
-                console.error('Ошибка отправки:', error);
+                const iframe = document.createElement('iframe');
+                iframe.style.width = '100%';
+                iframe.style.minHeight = '500px';
+                iframe.style.border = 'none';
+                container.innerHTML = '';
+                container.appendChild(iframe);
+                
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { margin: 0; padding: 20px; font-family: system-ui; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #000); }
+                        </style>
+                    </head>
+                    <body>
+                        <div id="app-root"></div>
+                        <script>
+                            window.TelegramWebApp = window.parent.Telegram.WebApp;
+                            ${testCode}
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                iframeDoc.close();
+                
+                if (tg) {
+                    tg.ready();
+                    tg.expand();
+                }
+            } catch(e) {
+                showError('❌', 'Ошибка выполнения', e.message);
             }
         }
-
-        document.getElementById('coin').addEventListener('click', sendClick);
+        
+        function showError(icon, title, text) {
+            document.getElementById('errorIcon').innerHTML = icon;
+            document.getElementById('errorTitle').innerText = title;
+            document.getElementById('errorText').innerText = text;
+            document.getElementById('errorBox').style.display = 'block';
+            document.getElementById('appContainer').style.display = 'none';
+        }
+        
+        function closeApp() {
+            if (tg) tg.close();
+            else window.close();
+        }
+        
+        loadApp();
     </script>
 </body>
 </html>
